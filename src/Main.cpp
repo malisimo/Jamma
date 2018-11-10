@@ -31,5 +31,5 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
 	}
 	window.destroy();
 
-	return msg.wParam;
+	return (int)msg.wParam;
 }

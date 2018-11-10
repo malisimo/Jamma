@@ -29,9 +29,9 @@ Window::~Window() {
 
 ///////////////////////////////////////////////////////////
 
-void Window::showMessage(LPCSTR message) {
+void Window::showMessage(LPCWSTR message) {
 
-	MessageBox(0, message, "Window::create", MB_ICONERROR);
+	MessageBox(0, message, L"Window::create", MB_ICONERROR);
 }
 
 ///////////////////////////////////////////////////////////
@@ -40,14 +40,14 @@ int Window::create(HINSTANCE hInstance, int nCmdShow) {
 
 	windowClass = MAKEINTATOM(registerClass(hInstance));
 	if (windowClass == 0) {
-		showMessage("registerClass() failed.");
+		showMessage(L"registerClass() failed.");
 		return 1;
 	}
 
 	// create temporary window
 
 	HWND fakeWND = CreateWindow(
-		windowClass, "Fake Window",
+		windowClass, L"Fake Window",
 		style,
 		0, 0,						// position x, y
 		1, 1,						// width, height
@@ -68,24 +68,24 @@ int Window::create(HINSTANCE hInstance, int nCmdShow) {
 
 	const int fakePFDID = ChoosePixelFormat(fakeDC, &fakePFD);
 	if (fakePFDID == 0) {
-		showMessage("ChoosePixelFormat() failed.");
+		showMessage(L"ChoosePixelFormat() failed.");
 		return 1;
 	}
 
 	if (SetPixelFormat(fakeDC, fakePFDID, &fakePFD) == false) {
-		showMessage("SetPixelFormat() failed.");
+		showMessage(L"SetPixelFormat() failed.");
 		return 1;
 	}
 
 	HGLRC fakeRC = wglCreateContext(fakeDC);	// Rendering Contex
 
 	if (fakeRC == 0) {
-		showMessage("wglCreateContext() failed.");
+		showMessage(L"wglCreateContext() failed.");
 		return 1;
 	}
 
 	if (wglMakeCurrent(fakeDC, fakeRC) == false) {
-		showMessage("wglMakeCurrent() failed.");
+		showMessage(L"wglMakeCurrent() failed.");
 		return 1;
 	}
 
@@ -94,14 +94,14 @@ int Window::create(HINSTANCE hInstance, int nCmdShow) {
 	PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB = nullptr;
 	wglChoosePixelFormatARB = reinterpret_cast<PFNWGLCHOOSEPIXELFORMATARBPROC>(wglGetProcAddress("wglChoosePixelFormatARB"));
 	if (wglChoosePixelFormatARB == nullptr) {
-		showMessage("wglGetProcAddress() failed.");
+		showMessage(L"wglGetProcAddress() failed.");
 		return 1;
 	}
 
 	PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = nullptr;
 	wglCreateContextAttribsARB = reinterpret_cast<PFNWGLCREATECONTEXTATTRIBSARBPROC>(wglGetProcAddress("wglCreateContextAttribsARB"));
 	if (wglCreateContextAttribsARB == nullptr) {
-		showMessage("wglGetProcAddress() failed.");
+		showMessage(L"wglGetProcAddress() failed.");
 		return 1;
 	}
 
@@ -113,7 +113,7 @@ int Window::create(HINSTANCE hInstance, int nCmdShow) {
 	// create a new window and context
 								
 	WND = CreateWindow(
-		windowClass, "OpenGL Window",	// class name, window name
+		windowClass, L"OpenGL Window",	// class name, window name
 		style,							// styles
 		config.posX, config.posY,		// posx, posy. If x is set to CW_USEDEFAULT y is ignored
 		config.width, config.height,	// width, height
@@ -141,7 +141,7 @@ int Window::create(HINSTANCE hInstance, int nCmdShow) {
 	const bool status = wglChoosePixelFormatARB(DC, pixelAttribs, NULL, 1, &pixelFormatID, &numFormats);
 
 	if (status == false || numFormats == 0) {
-		showMessage("wglChoosePixelFormatARB() failed.");
+		showMessage(L"wglChoosePixelFormatARB() failed.");
 		return 1;
 	}
 
@@ -160,7 +160,7 @@ int Window::create(HINSTANCE hInstance, int nCmdShow) {
 
 	RC = wglCreateContextAttribsARB(DC, 0, contextAttribs);
 	if (RC == NULL) {
-		showMessage("wglCreateContextAttribsARB() failed.");
+		showMessage(L"wglCreateContextAttribsARB() failed.");
 		return 1;
 	}
 
@@ -171,13 +171,18 @@ int Window::create(HINSTANCE hInstance, int nCmdShow) {
 	ReleaseDC(fakeWND, fakeDC);
 	DestroyWindow(fakeWND);
 	if (!wglMakeCurrent(DC, RC)) {
-		showMessage("wglMakeCurrent() failed.");
+		showMessage(L"wglMakeCurrent() failed.");
 		return 1;
 	}
 
 	// init opengl loader here (extra safe version)
+	const char* glVersion = (const char *)glGetString(GL_VERSION);
+	size_t size = strlen(glVersion) + 1;
+	wchar_t* glVersionStr = new wchar_t[size];
 
-	SetWindowText(WND, reinterpret_cast<LPCSTR>(glGetString(GL_VERSION)));
+	size_t outSize;
+	mbstowcs_s(&outSize, glVersionStr, size, glVersion, size - 1);
+	SetWindowText(WND, glVersionStr);
 	ShowWindow(WND, nCmdShow);
 
 	return 0;
@@ -194,7 +199,7 @@ ATOM Window::registerClass(HINSTANCE hInstance) {
 	wcex.lpfnWndProc = WindowProcedure;
 	wcex.hInstance = hInstance;
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wcex.lpszClassName = "Core";
+	wcex.lpszClassName = TEXT("Core");
 
 	return RegisterClassEx(&wcex);
 }

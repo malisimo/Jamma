@@ -28,7 +28,7 @@ public:
 
 	Window();
 	~Window();
-	void showMessage(LPCSTR message);
+	void showMessage(LPCWSTR message);
 	int create(HINSTANCE hInstance, int nCmdShow);
 	ATOM registerClass(HINSTANCE hInstance);
 	void adjustSize();
