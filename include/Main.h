@@ -1,12 +1,11 @@
 ///////////////////////////////////////////////////////////
 //
-// Copyright(c) 2017-2018 Mariusz Bartosik, mariuszbartosik.com
+// Copyright(c) 2018-2019 Matt Jones
 // Subject to the MIT license, see LICENSE file.
 //
 ///////////////////////////////////////////////////////////
 
-#ifndef _PROJECT247_MAIN_H_
-#define _PROJECT247_MAIN_H_
+#pragma once
 
 // Including SDKDDKVer.h defines the highest available Windows platform.
 // If you wish to build your application for a previous Windows platform, include WinSDKVer.h and
@@ -15,5 +14,3 @@
 #include <SDKDDKVer.h>
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 #include <windows.h>
-
-#endif

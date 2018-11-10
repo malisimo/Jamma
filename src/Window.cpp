@@ -1,19 +1,21 @@
 ///////////////////////////////////////////////////////////
 //
-// Copyright(c) 2017-2018 Mariusz Bartosik, mariuszbartosik.com
+// Copyright(c) 2018-2019 Matt Jones
 // Subject to the MIT license, see LICENSE file.
 //
 ///////////////////////////////////////////////////////////
 
 #include "Window.h"
+#include "Utils.h"
+#include <gl/glew.h>
 #include <gl/gl.h>
 #include "gl/glext.h"
 #include "gl/wglext.h"
 
 ///////////////////////////////////////////////////////////
 
-Window::Window() {
-
+Window::Window()
+{
 	config.width = 1024;
 	config.height = 720;
 	config.posX = CW_USEDEFAULT;
@@ -29,15 +31,15 @@ Window::~Window() {
 
 ///////////////////////////////////////////////////////////
 
-void Window::showMessage(LPCWSTR message) {
-
+void Window::showMessage(LPCWSTR message)
+{
 	MessageBox(0, message, L"Window::create", MB_ICONERROR);
 }
 
 ///////////////////////////////////////////////////////////
 
-int Window::create(HINSTANCE hInstance, int nCmdShow) {
-
+int Window::create(HINSTANCE hInstance, int nCmdShow)
+{
 	windowClass = MAKEINTATOM(registerClass(hInstance));
 	if (windowClass == 0) {
 		showMessage(L"registerClass() failed.");
@@ -93,19 +95,22 @@ int Window::create(HINSTANCE hInstance, int nCmdShow) {
 
 	PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB = nullptr;
 	wglChoosePixelFormatARB = reinterpret_cast<PFNWGLCHOOSEPIXELFORMATARBPROC>(wglGetProcAddress("wglChoosePixelFormatARB"));
-	if (wglChoosePixelFormatARB == nullptr) {
+	if (wglChoosePixelFormatARB == nullptr)
+	{
 		showMessage(L"wglGetProcAddress() failed.");
 		return 1;
 	}
 
 	PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = nullptr;
 	wglCreateContextAttribsARB = reinterpret_cast<PFNWGLCREATECONTEXTATTRIBSARBPROC>(wglGetProcAddress("wglCreateContextAttribsARB"));
-	if (wglCreateContextAttribsARB == nullptr) {
+	if (wglCreateContextAttribsARB == nullptr)
+	{
 		showMessage(L"wglGetProcAddress() failed.");
 		return 1;
 	}
 
-	if (config.windowed == true) {
+	if (config.windowed == true)
+	{
 		adjustSize();
 		center();
 	}
@@ -140,7 +145,8 @@ int Window::create(HINSTANCE hInstance, int nCmdShow) {
 	int pixelFormatID; UINT numFormats;
 	const bool status = wglChoosePixelFormatARB(DC, pixelAttribs, NULL, 1, &pixelFormatID, &numFormats);
 
-	if (status == false || numFormats == 0) {
+	if (status == false || numFormats == 0)
+	{
 		showMessage(L"wglChoosePixelFormatARB() failed.");
 		return 1;
 	}
@@ -150,7 +156,8 @@ int Window::create(HINSTANCE hInstance, int nCmdShow) {
 	SetPixelFormat(DC, pixelFormatID, &PFD);
 
 	const int major_min = 4, minor_min = 0;
-	const int contextAttribs[] = {
+	const int contextAttribs[] =
+	{
 		WGL_CONTEXT_MAJOR_VERSION_ARB, major_min,
 		WGL_CONTEXT_MINOR_VERSION_ARB, minor_min,
 		WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
@@ -170,12 +177,21 @@ int Window::create(HINSTANCE hInstance, int nCmdShow) {
 	wglDeleteContext(fakeRC);
 	ReleaseDC(fakeWND, fakeDC);
 	DestroyWindow(fakeWND);
-	if (!wglMakeCurrent(DC, RC)) {
+	if (!wglMakeCurrent(DC, RC))
+	{
 		showMessage(L"wglMakeCurrent() failed.");
 		return 1;
 	}
 
 	// init opengl loader here (extra safe version)
+	GLenum err = glewInit();
+	if (GLEW_OK != err)
+	{
+		auto errStr = (const char*)glewGetErrorString(err);
+		showMessage(CharsToUnicodeString(errStr));
+		return 1;
+	}
+
 	const char* glVersion = (const char *)glGetString(GL_VERSION);
 	size_t size = strlen(glVersion) + 1;
 	wchar_t* glVersionStr = new wchar_t[size];
@@ -190,8 +206,8 @@ int Window::create(HINSTANCE hInstance, int nCmdShow) {
 
 ///////////////////////////////////////////////////////////
 
-ATOM Window::registerClass(HINSTANCE hInstance) {
-
+ATOM Window::registerClass(HINSTANCE hInstance)
+{
 	WNDCLASSEX wcex;
 	ZeroMemory(&wcex, sizeof(wcex));
 	wcex.cbSize = sizeof(wcex);
@@ -208,8 +224,8 @@ ATOM Window::registerClass(HINSTANCE hInstance) {
 // Adjust window's size for non-client area elements
 // like border and title bar
 
-void Window::adjustSize() {
-
+void Window::adjustSize()
+{
 	RECT rect = { 0, 0, config.width, config.height };
 	AdjustWindowRect(&rect, style, false);
 	config.width = rect.right - rect.left;
@@ -218,8 +234,8 @@ void Window::adjustSize() {
 
 ///////////////////////////////////////////////////////////
 
-void Window::center() {
-
+void Window::center()
+{
 	RECT primaryDisplaySize;
 	SystemParametersInfo(SPI_GETWORKAREA, 0, &primaryDisplaySize, 0);	// system taskbar and application desktop toolbars not included
 	config.posX = (primaryDisplaySize.right - config.width) / 2;
@@ -228,8 +244,8 @@ void Window::center() {
 
 ///////////////////////////////////////////////////////////
 
-void Window::render() {
-
+void Window::render()
+{
 	glClearColor(0.129f, 0.586f, 0.949f, 1.0f);	// rgb(33,150,243)
 	glClear(GL_COLOR_BUFFER_BIT);
 }
@@ -246,26 +262,27 @@ void Window::swapBuffers() {
 void Window::destroy() {
 
 	wglMakeCurrent(NULL, NULL);
-	if (RC) {
+
+	if (RC)
 		wglDeleteContext(RC);
-	}
-	if (DC) {
+
+	if (DC)
 		ReleaseDC(WND, DC);
-	}
-	if (WND) {
+
+	if (WND)
 		DestroyWindow(WND);
-	}
 }
 
 ///////////////////////////////////////////////////////////
 
-LRESULT CALLBACK Window::WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
-
-	switch (message) {
+LRESULT CALLBACK Window::WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	switch (message)
+	{
 		case WM_KEYDOWN:
-			if (wParam == VK_ESCAPE) {
+			if (wParam == VK_ESCAPE)
 				PostQuitMessage(0);
-			}
+
 			break;
 		case WM_CLOSE:
 			PostQuitMessage(0);

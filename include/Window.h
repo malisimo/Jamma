@@ -1,16 +1,16 @@
 ///////////////////////////////////////////////////////////
 //
-// Copyright(c) 2017-2018 Mariusz Bartosik, mariuszbartosik.com
+// Copyright(c) 2018-2019 Matt Jones
 // Subject to the MIT license, see LICENSE file.
 //
 ///////////////////////////////////////////////////////////
 
-#ifndef _PROJECT247_WINDOW_H_
-#define _PROJECT247_WINDOW_H_
+#pragma once
 
 #include <windows.h>
 
-class Window {
+class Window
+{
 public:
 	LPTSTR windowClass;	// Window Class
 	HGLRC RC;			// Rendering Context
@@ -18,7 +18,8 @@ public:
 	HWND WND;			// Window
 	DWORD style;
 
-	struct Config {
+	struct Config
+	{
 		int width;
 		int	height;
 		int posX;
@@ -28,6 +29,7 @@ public:
 
 	Window();
 	~Window();
+
 	void showMessage(LPCWSTR message);
 	int create(HINSTANCE hInstance, int nCmdShow);
 	ATOM registerClass(HINSTANCE hInstance);
@@ -36,8 +38,6 @@ public:
 	void render();
 	void swapBuffers();
 	void destroy();
-	static LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-private:
 
+	static LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 };
-#endif
