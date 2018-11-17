@@ -4,38 +4,10 @@
     <ClCompile Include="src\Main.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\Window.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="Utils.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="dependencies\glew\glew.c">
-      <Filter>dependencies\glew</Filter>
-    </ClCompile>
-    <ClCompile Include="dependencies\rtaudio\RtAudio.cpp">
-      <Filter>dependencies\rtaudio</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Window.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="include\Main.h">
       <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="Utils.h" />
-    <ClInclude Include="include\Utils.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="dependencies\glew\glew.h">
-      <Filter>dependencies\glew</Filter>
-    </ClInclude>
-    <ClInclude Include="dependencies\glew\glxew.h">
-      <Filter>dependencies\glew</Filter>
-    </ClInclude>
-    <ClInclude Include="dependencies\rtaudio\RtAudio.h">
-      <Filter>dependencies\rtaudio</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -54,8 +26,5 @@
     <Filter Include="dependencies\rtaudio">
       <UniqueIdentifier>{df693537-a715-4456-92a5-04373ad81351}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="LICENSE" />
   </ItemGroup>
 </Project>

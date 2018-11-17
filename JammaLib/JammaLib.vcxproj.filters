@@ -1,0 +1,176 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="include">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="src\audio">
+      <UniqueIdentifier>{1b269cbe-9d8c-4410-950b-0f0cd878023f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\base">
+      <UniqueIdentifier>{b54f8506-662d-4ce8-ac55-57f63ec967cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\engine">
+      <UniqueIdentifier>{b2126494-7af7-409b-b8d4-cc037236024a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\graphics">
+      <UniqueIdentifier>{65a7707a-07f7-444a-a4e9-efd7c2493003}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\gui">
+      <UniqueIdentifier>{77e36486-39f7-4fa4-ac5a-8a1b954c1f7c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\io">
+      <UniqueIdentifier>{a49a0725-b49c-4941-b20d-43744206e99b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\utils">
+      <UniqueIdentifier>{c7a3761d-51d9-49e1-ba04-4c5e5605d6ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\vst">
+      <UniqueIdentifier>{cc7f02cd-798b-49e6-8941-c8459b4ea05b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib">
+      <UniqueIdentifier>{146c3606-20f1-47e4-adb5-271e9b102667}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\glew">
+      <UniqueIdentifier>{84da6a9b-a252-4be8-9e69-df8d00c03431}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\rtaudio">
+      <UniqueIdentifier>{19e1c3df-6944-4954-b584-cdaee6ffa175}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\stdafx.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\targetver.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\glew\glew.h">
+      <Filter>lib\glew</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\glew\glxew.h">
+      <Filter>lib\glew</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vst\Vst.h">
+      <Filter>src\vst</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\UndoHistory.h">
+      <Filter>src\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\Trigger.h">
+      <Filter>src\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utils\StringUtils.h">
+      <Filter>src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\Station.h">
+      <Filter>src\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\rtaudio\RtAudio.h">
+      <Filter>lib\rtaudio</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\Loop.h">
+      <Filter>src\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\io\LoopFile.h">
+      <Filter>src\io</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gui\GuiModel.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gui\GuiPanel.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gui\GuiTexture.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\Action.h">
+      <Filter>src\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\ActionReceiver.h">
+      <Filter>src\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\ActionSender.h">
+      <Filter>src\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\Audible.h">
+      <Filter>src\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\Drawable.h">
+      <Filter>src\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\audio\AudioFader.h">
+      <Filter>src\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Window.h">
+      <Filter>include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\stdafx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\audio\AudioFader.cpp">
+      <Filter>src\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="src\base\Audible.cpp">
+      <Filter>src\base</Filter>
+    </ClCompile>
+    <ClCompile Include="src\base\Drawable.cpp">
+      <Filter>src\base</Filter>
+    </ClCompile>
+    <ClCompile Include="src\base\ActionReceiver.cpp">
+      <Filter>src\base</Filter>
+    </ClCompile>
+    <ClCompile Include="src\base\Action.cpp">
+      <Filter>src\base</Filter>
+    </ClCompile>
+    <ClCompile Include="src\base\ActionSender.cpp">
+      <Filter>src\base</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\glew\glew.c">
+      <Filter>lib\glew</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\rtaudio\RtAudio.cpp">
+      <Filter>lib\rtaudio</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vst\Vst.cpp">
+      <Filter>src\vst</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\LoopFile.cpp">
+      <Filter>src\io</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\Station.cpp">
+      <Filter>src\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\Loop.cpp">
+      <Filter>src\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utils\StringUtils.cpp">
+      <Filter>src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\Trigger.cpp">
+      <Filter>src\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\UndoHistory.cpp">
+      <Filter>src\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\Window.cpp">
+      <Filter>src\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\GuiModel.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\GuiPanel.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\GuiTexture.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

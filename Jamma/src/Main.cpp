@@ -12,7 +12,7 @@ Window window;
 
 int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
-	if (window.create(hInstance, nCmdShow) != 0)
+	if (window.Create(hInstance, nCmdShow) != 0)
 		PostQuitMessage(1);
 
 	MSG msg;
@@ -28,10 +28,10 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		window.render();
-		window.swapBuffers();
+		window.Render();
+		window.Swap();
 	}
-	window.destroy();
+	window.Destroy();
 
 	return (int)msg.wParam;
 }

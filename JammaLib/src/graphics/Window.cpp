@@ -6,7 +6,7 @@
 ///////////////////////////////////////////////////////////
 
 #include "Window.h"
-#include "Utils.h"
+#include "StringUtils.h"
 #include <gl/glew.h>
 #include <gl/gl.h>
 #include "gl/glext.h"
@@ -16,41 +16,42 @@
 
 Window::Window()
 {
-	config.width = 1024;
-	config.height = 720;
-	config.posX = CW_USEDEFAULT;
-	config.posY = 0;
-	config.windowed = true;
-	style = WS_CAPTION | WS_SYSMENU | WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
+	_config.Width = 1024;
+	_config.Height = 720;
+	_config.PosX = CW_USEDEFAULT;
+	_config.PosY = 0;
+	_config.Windowed = true;
+	_style = WS_CAPTION | WS_SYSMENU | WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
 }
 
 ///////////////////////////////////////////////////////////
 
-Window::~Window() {
+Window::~Window()
+{
 }
 
 ///////////////////////////////////////////////////////////
 
-void Window::showMessage(LPCWSTR message)
+void Window::ShowMessage(LPCWSTR message)
 {
 	MessageBox(0, message, L"Window::create", MB_ICONERROR);
 }
 
 ///////////////////////////////////////////////////////////
 
-int Window::create(HINSTANCE hInstance, int nCmdShow)
+int Window::Create(HINSTANCE hInstance, int nCmdShow)
 {
-	windowClass = MAKEINTATOM(registerClass(hInstance));
-	if (windowClass == 0) {
-		showMessage(L"registerClass() failed.");
+	_windowClass = MAKEINTATOM(RegisterClass(hInstance));
+	if (_windowClass == 0) {
+		ShowMessage(L"registerClass() failed.");
 		return 1;
 	}
 
 	// create temporary window
 
 	HWND fakeWND = CreateWindow(
-		windowClass, L"Fake Window",
-		style,
+		_windowClass, L"Fake Window",
+		_style,
 		0, 0,						// position x, y
 		1, 1,						// width, height
 		NULL, NULL,					// parent window, menu
@@ -70,24 +71,24 @@ int Window::create(HINSTANCE hInstance, int nCmdShow)
 
 	const int fakePFDID = ChoosePixelFormat(fakeDC, &fakePFD);
 	if (fakePFDID == 0) {
-		showMessage(L"ChoosePixelFormat() failed.");
+		ShowMessage(L"ChoosePixelFormat() failed.");
 		return 1;
 	}
 
 	if (SetPixelFormat(fakeDC, fakePFDID, &fakePFD) == false) {
-		showMessage(L"SetPixelFormat() failed.");
+		ShowMessage(L"SetPixelFormat() failed.");
 		return 1;
 	}
 
 	HGLRC fakeRC = wglCreateContext(fakeDC);	// Rendering Contex
 
 	if (fakeRC == 0) {
-		showMessage(L"wglCreateContext() failed.");
+		ShowMessage(L"wglCreateContext() failed.");
 		return 1;
 	}
 
 	if (wglMakeCurrent(fakeDC, fakeRC) == false) {
-		showMessage(L"wglMakeCurrent() failed.");
+		ShowMessage(L"wglMakeCurrent() failed.");
 		return 1;
 	}
 
@@ -97,7 +98,7 @@ int Window::create(HINSTANCE hInstance, int nCmdShow)
 	wglChoosePixelFormatARB = reinterpret_cast<PFNWGLCHOOSEPIXELFORMATARBPROC>(wglGetProcAddress("wglChoosePixelFormatARB"));
 	if (wglChoosePixelFormatARB == nullptr)
 	{
-		showMessage(L"wglGetProcAddress() failed.");
+		ShowMessage(L"wglGetProcAddress() failed.");
 		return 1;
 	}
 
@@ -105,27 +106,27 @@ int Window::create(HINSTANCE hInstance, int nCmdShow)
 	wglCreateContextAttribsARB = reinterpret_cast<PFNWGLCREATECONTEXTATTRIBSARBPROC>(wglGetProcAddress("wglCreateContextAttribsARB"));
 	if (wglCreateContextAttribsARB == nullptr)
 	{
-		showMessage(L"wglGetProcAddress() failed.");
+		ShowMessage(L"wglGetProcAddress() failed.");
 		return 1;
 	}
 
-	if (config.windowed == true)
+	if (_config.Windowed == true)
 	{
-		adjustSize();
-		center();
+		AdjustSize();
+		Center();
 	}
 
 	// create a new window and context
 								
-	WND = CreateWindow(
-		windowClass, L"OpenGL Window",	// class name, window name
-		style,							// styles
-		config.posX, config.posY,		// posx, posy. If x is set to CW_USEDEFAULT y is ignored
-		config.width, config.height,	// width, height
+	_wnd = CreateWindow(
+		_windowClass, L"OpenGL Window",	// class name, window name
+		_style,							// styles
+		_config.PosX, _config.PosY,		// posx, posy. If x is set to CW_USEDEFAULT y is ignored
+		_config.Width, _config.Height,	// width, height
 		NULL, NULL,						// parent window, menu
 		hInstance, NULL);				// instance, param
 
-	DC = GetDC(WND);
+	_dc = GetDC(_wnd);
 
 	const int pixelAttribs[] = {
 		WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
@@ -143,17 +144,17 @@ int Window::create(HINSTANCE hInstance, int nCmdShow)
 	};
 
 	int pixelFormatID; UINT numFormats;
-	const bool status = wglChoosePixelFormatARB(DC, pixelAttribs, NULL, 1, &pixelFormatID, &numFormats);
+	const bool status = wglChoosePixelFormatARB(_dc, pixelAttribs, NULL, 1, &pixelFormatID, &numFormats);
 
 	if (status == false || numFormats == 0)
 	{
-		showMessage(L"wglChoosePixelFormatARB() failed.");
+		ShowMessage(L"wglChoosePixelFormatARB() failed.");
 		return 1;
 	}
 
 	PIXELFORMATDESCRIPTOR PFD;
-	DescribePixelFormat(DC, pixelFormatID, sizeof(PFD), &PFD);
-	SetPixelFormat(DC, pixelFormatID, &PFD);
+	DescribePixelFormat(_dc, pixelFormatID, sizeof(PFD), &PFD);
+	SetPixelFormat(_dc, pixelFormatID, &PFD);
 
 	const int major_min = 4, minor_min = 0;
 	const int contextAttribs[] =
@@ -165,9 +166,9 @@ int Window::create(HINSTANCE hInstance, int nCmdShow)
 		0
 	};
 
-	RC = wglCreateContextAttribsARB(DC, 0, contextAttribs);
-	if (RC == NULL) {
-		showMessage(L"wglCreateContextAttribsARB() failed.");
+	_rc = wglCreateContextAttribsARB(_dc, 0, contextAttribs);
+	if (_rc == NULL) {
+		ShowMessage(L"wglCreateContextAttribsARB() failed.");
 		return 1;
 	}
 
@@ -177,9 +178,9 @@ int Window::create(HINSTANCE hInstance, int nCmdShow)
 	wglDeleteContext(fakeRC);
 	ReleaseDC(fakeWND, fakeDC);
 	DestroyWindow(fakeWND);
-	if (!wglMakeCurrent(DC, RC))
+	if (!wglMakeCurrent(_dc, _rc))
 	{
-		showMessage(L"wglMakeCurrent() failed.");
+		ShowMessage(L"wglMakeCurrent() failed.");
 		return 1;
 	}
 
@@ -188,7 +189,7 @@ int Window::create(HINSTANCE hInstance, int nCmdShow)
 	if (GLEW_OK != err)
 	{
 		auto errStr = (const char*)glewGetErrorString(err);
-		showMessage(CharsToUnicodeString(errStr));
+		ShowMessage(CharsToUnicodeString(errStr));
 		return 1;
 	}
 
@@ -198,15 +199,15 @@ int Window::create(HINSTANCE hInstance, int nCmdShow)
 
 	size_t outSize;
 	mbstowcs_s(&outSize, glVersionStr, size, glVersion, size - 1);
-	SetWindowText(WND, glVersionStr);
-	ShowWindow(WND, nCmdShow);
+	SetWindowText(_wnd, glVersionStr);
+	ShowWindow(_wnd, nCmdShow);
 
 	return 0;
 }
 
 ///////////////////////////////////////////////////////////
 
-ATOM Window::registerClass(HINSTANCE hInstance)
+ATOM Window::RegisterClass(HINSTANCE hInstance)
 {
 	WNDCLASSEX wcex;
 	ZeroMemory(&wcex, sizeof(wcex));
@@ -224,27 +225,27 @@ ATOM Window::registerClass(HINSTANCE hInstance)
 // Adjust window's size for non-client area elements
 // like border and title bar
 
-void Window::adjustSize()
+void Window::AdjustSize()
 {
-	RECT rect = { 0, 0, config.width, config.height };
-	AdjustWindowRect(&rect, style, false);
-	config.width = rect.right - rect.left;
-	config.height = rect.bottom - rect.top;
+	RECT rect = { 0, 0, _config.Width, _config.Height };
+	AdjustWindowRect(&rect, _style, false);
+	_config.Width = rect.right - rect.left;
+	_config.Height = rect.bottom - rect.top;
 }
 
 ///////////////////////////////////////////////////////////
 
-void Window::center()
+void Window::Center()
 {
 	RECT primaryDisplaySize;
 	SystemParametersInfo(SPI_GETWORKAREA, 0, &primaryDisplaySize, 0);	// system taskbar and application desktop toolbars not included
-	config.posX = (primaryDisplaySize.right - config.width) / 2;
-	config.posY = (primaryDisplaySize.bottom - config.height) / 2;
+	_config.PosX = (primaryDisplaySize.right - _config.Width) / 2;
+	_config.PosY = (primaryDisplaySize.bottom - _config.Height) / 2;
 }
 
 ///////////////////////////////////////////////////////////
 
-void Window::render()
+void Window::Render()
 {
 	glClearColor(0.129f, 0.586f, 0.949f, 1.0f);	// rgb(33,150,243)
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -252,25 +253,30 @@ void Window::render()
 
 ///////////////////////////////////////////////////////////
 
-void Window::swapBuffers() {
-
-	SwapBuffers(DC);
+void Window::Swap()
+{
+	SwapBuffers(_dc);
 }
 
 ///////////////////////////////////////////////////////////
 
-void Window::destroy() {
-
+void Window::Destroy()
+{
 	wglMakeCurrent(NULL, NULL);
 
-	if (RC)
-		wglDeleteContext(RC);
+	if (_rc)
+		wglDeleteContext(_rc);
 
-	if (DC)
-		ReleaseDC(WND, DC);
+	if (_dc)
+		ReleaseDC(_wnd, _dc);
 
-	if (WND)
-		DestroyWindow(WND);
+	if (_wnd)
+		DestroyWindow(_wnd);
+}
+
+Window::Config Window::GetConfig()
+{
+	return _config;
 }
 
 ///////////////////////////////////////////////////////////
