@@ -8,10 +8,12 @@
 #include "Main.h"
 #include "Window.h"
 
-Window window;
 
 int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
+	Scene scene;
+	Window window(scene);
+
 	if (window.Create(hInstance, nCmdShow) != 0)
 		PostQuitMessage(1);
 

@@ -8,6 +8,7 @@
 #pragma once
 
 #include <windows.h>
+#include "Scene.h"
 
 class Window
 {
@@ -21,6 +22,10 @@ public:
 		bool Windowed;
 	};
 
+public:
+	Window(Scene &scene);
+	~Window();
+
 private:
 	LPTSTR _windowClass;	// Window Class
 	HGLRC _rc;			// Rendering Context
@@ -29,10 +34,10 @@ private:
 	DWORD _style;
 	Config _config;
 
-public:
-	Window();
-	~Window();
+	GlDrawContext _drawContext;
+	Scene& _scene;
 
+public:
 	void ShowMessage(LPCWSTR message);
 	int Create(HINSTANCE hInstance, int nCmdShow);
 	ATOM RegisterClass(HINSTANCE hInstance);

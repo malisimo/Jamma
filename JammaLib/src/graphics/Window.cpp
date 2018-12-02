@@ -14,30 +14,25 @@
 
 ///////////////////////////////////////////////////////////
 
-Window::Window()
+Window::Window(Scene &scene) :
+	_scene(scene),
+	_style(WS_CAPTION | WS_SYSMENU | WS_CLIPSIBLINGS | WS_CLIPCHILDREN)
 {
 	_config.Width = 1024;
 	_config.Height = 720;
 	_config.PosX = CW_USEDEFAULT;
 	_config.PosY = 0;
 	_config.Windowed = true;
-	_style = WS_CAPTION | WS_SYSMENU | WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
 }
-
-///////////////////////////////////////////////////////////
 
 Window::~Window()
 {
 }
 
-///////////////////////////////////////////////////////////
-
 void Window::ShowMessage(LPCWSTR message)
 {
 	MessageBox(0, message, L"Window::create", MB_ICONERROR);
 }
-
-///////////////////////////////////////////////////////////
 
 int Window::Create(HINSTANCE hInstance, int nCmdShow)
 {
@@ -93,7 +88,6 @@ int Window::Create(HINSTANCE hInstance, int nCmdShow)
 	}
 
 	// get pointers to functions (or init opengl loader here)
-
 	PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB = nullptr;
 	wglChoosePixelFormatARB = reinterpret_cast<PFNWGLCHOOSEPIXELFORMATARBPROC>(wglGetProcAddress("wglChoosePixelFormatARB"));
 	if (wglChoosePixelFormatARB == nullptr)
@@ -117,7 +111,6 @@ int Window::Create(HINSTANCE hInstance, int nCmdShow)
 	}
 
 	// create a new window and context
-								
 	_wnd = CreateWindow(
 		_windowClass, L"OpenGL Window",	// class name, window name
 		_style,							// styles
@@ -173,7 +166,6 @@ int Window::Create(HINSTANCE hInstance, int nCmdShow)
 	}
 
 	// delete temporary context and window
-
 	wglMakeCurrent(NULL, NULL);
 	wglDeleteContext(fakeRC);
 	ReleaseDC(fakeWND, fakeDC);
@@ -205,8 +197,6 @@ int Window::Create(HINSTANCE hInstance, int nCmdShow)
 	return 0;
 }
 
-///////////////////////////////////////////////////////////
-
 ATOM Window::RegisterClass(HINSTANCE hInstance)
 {
 	WNDCLASSEX wcex;
@@ -221,10 +211,6 @@ ATOM Window::RegisterClass(HINSTANCE hInstance)
 	return RegisterClassEx(&wcex);
 }
 
-///////////////////////////////////////////////////////////
-// Adjust window's size for non-client area elements
-// like border and title bar
-
 void Window::AdjustSize()
 {
 	RECT rect = { 0, 0, _config.Width, _config.Height };
@@ -232,8 +218,6 @@ void Window::AdjustSize()
 	_config.Width = rect.right - rect.left;
 	_config.Height = rect.bottom - rect.top;
 }
-
-///////////////////////////////////////////////////////////
 
 void Window::Center()
 {
@@ -243,22 +227,18 @@ void Window::Center()
 	_config.PosY = (primaryDisplaySize.bottom - _config.Height) / 2;
 }
 
-///////////////////////////////////////////////////////////
-
 void Window::Render()
 {
 	glClearColor(0.129f, 0.586f, 0.949f, 1.0f);	// rgb(33,150,243)
 	glClear(GL_COLOR_BUFFER_BIT);
-}
 
-///////////////////////////////////////////////////////////
+	_scene.Draw(_drawContext);
+}
 
 void Window::Swap()
 {
 	SwapBuffers(_dc);
 }
-
-///////////////////////////////////////////////////////////
 
 void Window::Destroy()
 {

@@ -42,6 +42,12 @@
     <Filter Include="lib\rtaudio">
       <UniqueIdentifier>{19e1c3df-6944-4954-b584-cdaee6ffa175}</UniqueIdentifier>
     </Filter>
+    <Filter Include="lib\opengl">
+      <UniqueIdentifier>{60de6999-a304-4272-8428-9480daf4e1a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\opengl\gl">
+      <UniqueIdentifier>{451837af-5347-4888-8a7d-0557bf1141cd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
@@ -107,7 +113,40 @@
     <ClInclude Include="src\audio\AudioFader.h">
       <Filter>src\audio</Filter>
     </ClInclude>
-    <ClInclude Include="include\Window.h">
+    <ClInclude Include="lib\opengl\gl\eglew.h">
+      <Filter>lib\opengl\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\opengl\gl\glew.h">
+      <Filter>lib\opengl\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\opengl\gl\glext.h">
+      <Filter>lib\opengl\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\opengl\gl\glxew.h">
+      <Filter>lib\opengl\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\opengl\gl\wglew.h">
+      <Filter>lib\opengl\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\opengl\gl\wglext.h">
+      <Filter>lib\opengl\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\Image.h">
+      <Filter>src\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\Shader.h">
+      <Filter>src\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\Scene.h">
+      <Filter>src\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\DrawContext.h">
+      <Filter>src\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\GlDrawContext.h">
+      <Filter>src\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\Window.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
@@ -171,6 +210,21 @@
     </ClCompile>
     <ClCompile Include="src\gui\GuiTexture.cpp">
       <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\Image.cpp">
+      <Filter>src\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\Shader.cpp">
+      <Filter>src\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\Scene.cpp">
+      <Filter>src\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\GlDrawContext.cpp">
+      <Filter>src\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\base\DrawContext.cpp">
+      <Filter>src\base</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
