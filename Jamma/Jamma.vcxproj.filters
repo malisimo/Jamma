@@ -26,5 +26,16 @@
     <Filter Include="dependencies\rtaudio">
       <UniqueIdentifier>{df693537-a715-4456-92a5-04373ad81351}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shaders">
+      <UniqueIdentifier>{89578bc5-6be5-4850-8817-d6a5099ea419}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="shaders\texture.frag">
+        <Filter>shaders</Filter>
+    </Content>
+	<Content Include="shaders\texture.vert">
+      <Filter>shaders</Filter>
+    </Content>
   </ItemGroup>
 </Project>

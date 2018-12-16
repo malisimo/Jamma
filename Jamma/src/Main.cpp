@@ -27,12 +27,15 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
 			{
 				active = false;
 			}
+
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
+
 		window.Render();
 		window.Swap();
 	}
+
 	window.Destroy();
 
 	return (int)msg.wParam;

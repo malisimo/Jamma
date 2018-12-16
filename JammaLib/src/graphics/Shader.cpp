@@ -67,18 +67,20 @@ std::optional<Shader> Shader::FromFile(const std::string& filePath, GLenum shade
 		return std::nullopt;
 	}
 
-	const char* code = buffer.str().c_str();
+	auto shaderStr = buffer.str();
+	const char* code = shaderStr.c_str();
 	glShaderSource(shader, 1, (const GLchar**)&code, NULL);
 	glCompileShader(shader);
 
 	GLint status;
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-	if (status == GL_FALSE) {
+	if (status == GL_FALSE)
+	{
 		std::string msg("Compile failure in shader:\n");
 
 		GLint infoLogLength;
 		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
-		char* strInfoLog = new char[infoLogLength + 1];
+		auto strInfoLog = new char[infoLogLength + 1];
 		glGetShaderInfoLog(shader, infoLogLength, NULL, strInfoLog);
 		msg += strInfoLog;
 		delete[] strInfoLog;

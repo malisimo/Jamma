@@ -7,14 +7,10 @@
 
 #include "Window.h"
 #include "StringUtils.h"
-#include <gl/glew.h>
-#include <gl/gl.h>
-#include "gl/glext.h"
-#include "gl/wglext.h"
 
 ///////////////////////////////////////////////////////////
 
-Window::Window(Scene &scene) :
+Window::Window(Scene& scene) :
 	_scene(scene),
 	_style(WS_CAPTION | WS_SYSMENU | WS_CLIPSIBLINGS | WS_CLIPCHILDREN)
 {
@@ -27,6 +23,11 @@ Window::Window(Scene &scene) :
 
 Window::~Window()
 {
+}
+
+void Window::InitScene()
+{
+	_scene.Init();
 }
 
 void Window::ShowMessage(LPCWSTR message)
@@ -42,12 +43,11 @@ int Window::Create(HINSTANCE hInstance, int nCmdShow)
 		return 1;
 	}
 
-	// create temporary window
-
+	// Temporary window creation to get supported formats
 	HWND fakeWND = CreateWindow(
 		_windowClass, L"Fake Window",
 		_style,
-		0, 0,						// position x, y
+		0, 0,						// Position x, y
 		1, 1,						// width, height
 		NULL, NULL,					// parent window, menu
 		hInstance, NULL);			// instance, param
@@ -165,7 +165,7 @@ int Window::Create(HINSTANCE hInstance, int nCmdShow)
 		return 1;
 	}
 
-	// delete temporary context and window
+	// Delete temporary context and window
 	wglMakeCurrent(NULL, NULL);
 	wglDeleteContext(fakeRC);
 	ReleaseDC(fakeWND, fakeDC);
@@ -176,7 +176,7 @@ int Window::Create(HINSTANCE hInstance, int nCmdShow)
 		return 1;
 	}
 
-	// init opengl loader here (extra safe version)
+	// Init opengl loader here (extra safe version)
 	GLenum err = glewInit();
 	if (GLEW_OK != err)
 	{
@@ -184,6 +184,12 @@ int Window::Create(HINSTANCE hInstance, int nCmdShow)
 		ShowMessage(CharsToUnicodeString(errStr));
 		return 1;
 	}
+
+	// During init, enable debug output
+	glEnable(GL_DEBUG_OUTPUT);
+	glDebugMessageCallback(Window::MessageCallback, 0);
+	
+	InitScene();
 
 	const char* glVersion = (const char *)glGetString(GL_VERSION);
 	size_t size = strlen(glVersion) + 1;
@@ -222,14 +228,14 @@ void Window::AdjustSize()
 void Window::Center()
 {
 	RECT primaryDisplaySize;
-	SystemParametersInfo(SPI_GETWORKAREA, 0, &primaryDisplaySize, 0);	// system taskbar and application desktop toolbars not included
+	SystemParametersInfo(SPI_GETWORKAREA, 0, &primaryDisplaySize, 0);
 	_config.PosX = (primaryDisplaySize.right - _config.Width) / 2;
 	_config.PosY = (primaryDisplaySize.bottom - _config.Height) / 2;
 }
 
 void Window::Render()
 {
-	glClearColor(0.129f, 0.586f, 0.949f, 1.0f);	// rgb(33,150,243)
+	glClearColor(0.129f, 0.586f, 0.949f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	_scene.Draw(_drawContext);
@@ -257,6 +263,19 @@ void Window::Destroy()
 Window::Config Window::GetConfig()
 {
 	return _config;
+}
+
+void APIENTRY Window::MessageCallback(GLenum source,
+	GLenum type,
+	GLuint id,
+	GLenum severity,
+	GLsizei length,
+	const GLchar* message,
+	const void* userParam)
+{
+	fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+		(type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
+		type, severity, message);
 }
 
 ///////////////////////////////////////////////////////////

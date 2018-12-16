@@ -9,5 +9,6 @@ public:
 
 public:
 	virtual void Draw(const DrawContext& ctx);
+	virtual bool Destroy();
 };
 

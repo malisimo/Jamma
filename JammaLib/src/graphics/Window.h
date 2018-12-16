@@ -8,6 +8,11 @@
 #pragma once
 
 #include <windows.h>
+#include <memory>
+#include "glew/glew.h"
+#include "gl/gl.h"
+#include "gl/glext.h"
+#include "gl/wglext.h"
 #include "Scene.h"
 
 class Window
@@ -23,7 +28,7 @@ public:
 	};
 
 public:
-	Window(Scene &scene);
+	Window(Scene& scene);
 	~Window();
 
 private:
@@ -38,6 +43,7 @@ private:
 	Scene& _scene;
 
 public:
+	void InitScene();
 	void ShowMessage(LPCWSTR message);
 	int Create(HINSTANCE hInstance, int nCmdShow);
 	ATOM RegisterClass(HINSTANCE hInstance);
@@ -49,4 +55,7 @@ public:
 	Config GetConfig();
 
 	static LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+
+private:
+	static void APIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar * message, const void * userParam);
 };
