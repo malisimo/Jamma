@@ -13,7 +13,7 @@ class Scene :
 	public ActionReceiver
 {
 public:
-	Scene();
+	Scene(int width, int height);
 	~Scene() { Destroy(); }
 
 	// Delete the copy constructor/assignment
@@ -41,6 +41,9 @@ public:
 	virtual void Init();
 	virtual void Draw(const DrawContext& ctx);
 	virtual bool Destroy();
+
+	int Width() const;
+	int Height() const;
 
 private:
 	glm::mat4 View();

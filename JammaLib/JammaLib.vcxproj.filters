@@ -149,6 +149,9 @@
     <ClInclude Include="src\graphics\Window.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="src\utils\GlUtils.h">
+      <Filter>src\utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\stdafx.cpp">
@@ -225,6 +228,9 @@
     </ClCompile>
     <ClCompile Include="src\base\DrawContext.cpp">
       <Filter>src\base</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utils\GlUtils.cpp">
+      <Filter>src\utils</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

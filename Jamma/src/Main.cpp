@@ -11,7 +11,15 @@
 
 int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
-	Scene scene;
+	AllocConsole();
+	FILE* newStdout = nullptr;
+	FILE* newStderr = nullptr;
+	FILE* newStdin = nullptr;
+	freopen_s(&newStdout, "CONOUT$", "w", stdout);
+	freopen_s(&newStderr, "CONOUT$", "w", stderr);
+	freopen_s(&newStdin, "CONIN$", "r", stdin);
+
+	Scene scene(1024, 768);
 	Window window(scene);
 
 	if (window.Create(hInstance, nCmdShow) != 0)

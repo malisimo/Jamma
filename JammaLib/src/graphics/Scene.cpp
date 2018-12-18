@@ -1,7 +1,9 @@
 #include "Scene.h"
 
-Scene::Scene() :
-	_image(Image())
+Scene::Scene(int width, int height) :
+	_image(Image()),
+	_width(width),
+	_height(height)
 {
 }
 
@@ -17,7 +19,7 @@ void Scene::Init()
 void Scene::Draw(const DrawContext& ctx)
 {
 	auto glCtx = dynamic_cast<const GlDrawContext&>(ctx);
-	glCtx.SetMvp(_mvp);
+	glCtx.SetUniformMat("MVP", _mvp);
 
 	_image.Draw(ctx);
 }
@@ -26,6 +28,16 @@ bool Scene::Destroy()
 {
 	_image.Destroy();
 	return true;
+}
+
+int Scene::Width() const
+{
+	return _width;
+}
+
+int Scene::Height() const
+{
+	return _height;
 }
 
 glm::mat4 Scene::View()

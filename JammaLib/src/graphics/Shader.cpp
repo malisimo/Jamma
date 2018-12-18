@@ -8,35 +8,61 @@ Shader::Shader() :
 }
 
 Shader::Shader(GLuint shader) :
-	_state(READY),
+	_state(COMPILED),
 	_shader(shader)
 {
-	Init();
 }
 
 Shader::~Shader()
 {
 }
 
-bool Shader::Init()
+bool Shader::Init(GLuint program, std::vector<std::string> uniforms)
 {
-	/*GLuint shader = glCreateShader(shaderType);
-	if (shader == 0)
-		throw std::runtime_error("glCreateShader failed");
+	_uniforms.clear();
 
-	const char* code = buffer.str().c_str();
-	glShaderSource(shader, 1, (const GLchar**)&code, NULL);
-	glCompileShader(shader);*/
+	for (auto uniform : uniforms) {
+		auto uniformLoc = glGetUniformLocation(program, uniform.c_str());
+
+		if (uniformLoc >= 0)
+			_uniforms[uniform] = uniformLoc;
+	}
+
+	GlUtils::CheckError("Shader::Init");
+
+	_state = READY;
 
 	return true;
+}
+
+GLuint Shader::Name() const
+{
+	return _shader;
 }
 
 void Shader::Activate(const GlDrawContext& ctx)
 {
 	if (_state == READY)
 	{
-		glUseProgram(_shader);
-		glUniformMatrix4fv(_uniformMvp, 1, GL_FALSE, &ctx.GetMvp()[0][0]);
+		// Find any matching uniforms
+		for (auto uniform : _uniforms)
+		{
+			auto valOpt = ctx.GetUniform(uniform.first);
+
+			if (valOpt.has_value())
+			{
+				std::any val = valOpt.value();
+
+				if (val.type() == typeid(int))
+					glUniform1i(uniform.second, std::any_cast<int&>(val));
+				else if (val.type() == typeid(float))
+					glUniform1f(uniform.second, std::any_cast<float&>(val));
+				else if (val.type() == typeid(glm::mat4))
+					glUniformMatrix4fv(uniform.second, 1, GL_FALSE, glm::value_ptr(std::any_cast<glm::mat4&>(val)));
+			}
+		}
+
+		//GlUtils::CheckError("Shader::Activate");
 	}
 }
 
@@ -89,8 +115,10 @@ std::optional<Shader> Shader::FromFile(const std::string& filePath, GLenum shade
 
 		std::cout << msg << std::endl;
 
-		return std::optional<Shader>();
+		return std::nullopt;
 	}
+
+	GlUtils::CheckError("Shader::FromFile");
 
 	return std::optional<Shader>(Shader(shader));
 }

@@ -175,6 +175,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\utils\GlUtils.h" />
     <ClInclude Include="src\graphics\GlDrawContext.h" />
     <ClInclude Include="src\base\DrawContext.h" />
     <ClInclude Include="lib\opengl\gl\eglew.h" />
@@ -211,6 +212,7 @@
     <ClInclude Include="lib\rtaudio\RtAudio.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\utils\GlUtils.cpp" />
     <ClCompile Include="src\graphics\GlDrawContext.cpp" />
     <ClCompile Include="src\base\DrawContext.cpp" />
     <ClCompile Include="src\graphics\Scene.cpp" />

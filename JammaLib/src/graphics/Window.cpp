@@ -14,8 +14,8 @@ Window::Window(Scene& scene) :
 	_scene(scene),
 	_style(WS_CAPTION | WS_SYSMENU | WS_CLIPSIBLINGS | WS_CLIPCHILDREN)
 {
-	_config.Width = 1024;
-	_config.Height = 720;
+	_config.Width = scene.Width();
+	_config.Height = scene.Height();
 	_config.PosX = CW_USEDEFAULT;
 	_config.PosY = 0;
 	_config.Windowed = true;
@@ -236,7 +236,7 @@ void Window::Center()
 void Window::Render()
 {
 	glClearColor(0.129f, 0.586f, 0.949f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	_scene.Draw(_drawContext);
 }

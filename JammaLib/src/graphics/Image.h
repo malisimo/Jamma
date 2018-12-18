@@ -1,7 +1,6 @@
 #pragma once
 
 #include <array>
-#include <iostream>
 #include <gl/glew.h>
 #include <gl/gl.h>
 #include "gl/glext.h"
@@ -10,6 +9,7 @@
 
 #include "Drawable.h"
 #include "Shader.h"
+#include "GlUtils.h"
 
 class Image :
 	public Drawable
@@ -26,14 +26,15 @@ public:
 		_texture(other._texture),
 		_textureName(other._textureName),
 		_vertexArray(other._vertexArray),
-		_vertexBuffer(other._vertexBuffer),
+		_vertexBuffer{ other._vertexBuffer[0], other._vertexBuffer[1] },
 		_vertShader(other._vertShader),
 		_fragShader(other._fragShader)
 	{
 		other._texture = 0;
 		other._textureName = 0;
 		other._vertexArray = 0;
-		other._vertexBuffer = 0;
+		other._vertexBuffer[0] = 0;
+		other._vertexBuffer[1] = 0;
 		other._vertShader = Shader();
 		other._fragShader = Shader();
 	}
@@ -58,7 +59,7 @@ public:
 	virtual bool Destroy();
 	
 private:
-	const int VertexCount = 4;
+	const int VertexCount = 6;
 
 	int _width;
 	int _height;
@@ -66,7 +67,8 @@ private:
 	GLuint _texture;
 	GLuint _textureName;
 	GLuint _vertexArray;
-	GLuint _vertexBuffer;
+	GLuint _vertexBuffer[2];
+	GLuint _shaderProgram;
 
 	Shader _vertShader;
 	Shader _fragShader;
@@ -77,6 +79,5 @@ private:
 	bool InitVertexArray();
 
 	unsigned char* LoadTexture();
-	bool CheckError(std::string log);
 };
 
