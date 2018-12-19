@@ -27,7 +27,7 @@ public:
 	static std::optional<Shader> FromFile(const std::string& filePath, GLenum shaderType);
 
 	bool Init(GLuint program, std::vector<std::string> uniforms);
-	void Activate(const GlDrawContext& ctx);
+	void Activate(GlDrawContext& ctx);
 	void Destroy();
 	GLuint Name() const;
 

@@ -25,12 +25,12 @@ bool Image::Init()
 	return Validated && GlUtils::CheckError("Image::Init()");
 }
 
-void Image::Draw(const DrawContext& ctx)
+void Image::Draw(DrawContext& ctx)
 {
 	glUseProgram(_shaderProgram);
 
-	//_vertShader.Activate(dynamic_cast<const GlDrawContext&>(ctx));
-	//_fragShader.Activate(dynamic_cast<const GlDrawContext&>(ctx));
+	_vertShader.Activate(dynamic_cast<GlDrawContext&>(ctx));
+	_fragShader.Activate(dynamic_cast<GlDrawContext&>(ctx));
 
 	glBindVertexArray(_vertexArray);
 	//glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer[0]);
@@ -120,13 +120,24 @@ bool Image::InitShader()
 
 bool Image::InitTexture()
 {
+	auto imageLoaded = LoadTga("./textures/grid.tga");
+
+	if (!imageLoaded.has_value())
+		return false;
+
+	auto imageTuple = imageLoaded.value();
+
+	auto pixels = std::get<0>(imageTuple);
+	auto width = std::get<1>(imageTuple);
+	auto height = std::get<2>(imageTuple);
+
 	glGenTextures(1, &_texture);
 	glBindTexture(GL_TEXTURE_2D, _texture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, _width, _height, 0, GL_BGRA, GL_UNSIGNED_BYTE, LoadTexture());
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, _width, _height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pixels.data());
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -176,20 +187,69 @@ bool Image::InitVertexArray()
 	return true;
 }
 
-unsigned char* Image::LoadTexture()
+std::optional<std::tuple<std::vector<unsigned char>, int, int>> Image::LoadTga(const std::string& fileName)
 {
-	auto pixels = new unsigned char[_width * _height * 4];
+	FILE* file;
+	auto res = fopen_s(&file, fileName.c_str(), "rb");
 
-	for (size_t col = 0; col < _width; col++)
+	if (!file)
+		return std::nullopt;
+
+	// Read the header of the TGA, compare it with the known headers for compressed and uncompressed TGAs
+	unsigned char header[18];
+	fread(header, sizeof(unsigned char) * 18, 1, file);
+
+	while (header[0] > 0)
 	{
-		for (size_t row = 0; row < _height; row++)
-		{
-			pixels[4*(row*_width + col) + 0] = 19 * ((4*(row * _width + col) + 0) % 13);
-			pixels[4*(row*_width + col) + 1] = 19 * ((4*(row * _width + col) + 1) % 13);
-			pixels[4*(row*_width + col) + 2] = 19 * ((4*(row * _width + col) + 2) % 13);
-			pixels[4*(row*_width + col) + 3] = 19 * ((4*(row * _width + col) + 3) % 13);
-		}
+		--header[0];
+
+		unsigned char temp;
+		fread(&temp, sizeof(unsigned char), 1, file);
 	}
 
-	return pixels;
+	auto width = header[13] * 256 + header[12];
+	auto height = header[15] * 256 + header[14];
+	auto bpp = header[16] / 8;
+
+	// check whether width, height an BitsPerPixel are valid
+	if ((width <= 0) || (height <= 0) || ((bpp != 1) && (bpp != 3) && (bpp != 4)))
+	{
+		fclose(file);
+		return std::nullopt;
+	}
+
+	// allocate the TgaLoader-buffer
+	auto pixels = std::vector<unsigned char>(width * height * 4);
+
+	if (header[2] == 2)
+	{
+		unsigned char pixel[4] = { 255, 255, 255, 255 };
+		const int numPixels = width * height;
+
+		for (int i = 0; i < numPixels; ++i)
+		{
+			fread(pixel, sizeof(unsigned char) * bpp, 1, file);
+
+			if (bpp == 1)
+			{
+				pixel[1] = pixel[0];
+				pixel[2] = pixel[0];
+				pixel[3] = pixel[0];
+			}
+
+			pixels[(i * 4) + 0] = pixel[0];
+			pixels[(i * 4) + 1] = pixel[1];
+			pixels[(i * 4) + 2] = pixel[2];
+			pixels[(i * 4) + 3] = pixel[3];
+		}
+	}
+	else
+	{
+		fclose(file);
+		return std::nullopt;
+	}
+
+	fclose(file);
+	return std::tuple<std::vector<unsigned char>, int, int>(pixels, width, height);
 }
+

@@ -39,7 +39,7 @@ public:
 	}
 
 	virtual void Init();
-	virtual void Draw(const DrawContext& ctx);
+	virtual void Draw(DrawContext& ctx);
 	virtual bool Destroy();
 
 	int Width() const;

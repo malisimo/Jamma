@@ -180,6 +180,12 @@
     <ClInclude Include="include\Main.h" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="textures\grid.tga">
+      <DeploymentContent>true</DeploymentContent>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <Content Include="shaders\texture.frag">
       <DeploymentContent>true</DeploymentContent>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

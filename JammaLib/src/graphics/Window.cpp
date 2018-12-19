@@ -189,6 +189,8 @@ int Window::Create(HINSTANCE hInstance, int nCmdShow)
 	glEnable(GL_DEBUG_OUTPUT);
 	glDebugMessageCallback(Window::MessageCallback, 0);
 	
+	glEnable(GL_DEPTH_TEST);
+
 	InitScene();
 
 	const char* glVersion = (const char *)glGetString(GL_VERSION);

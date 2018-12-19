@@ -55,7 +55,7 @@ public:
 
 public:
 	virtual bool Init();
-	virtual void Draw(const DrawContext& ctx);
+	virtual void Draw(DrawContext& ctx);
 	virtual bool Destroy();
 	
 private:
@@ -78,6 +78,6 @@ private:
 	bool InitTexture();
 	bool InitVertexArray();
 
-	unsigned char* LoadTexture();
+	static std::optional<std::tuple<std::vector<unsigned char>, int, int>> LoadTga(const std::string& fileName);
 };
 

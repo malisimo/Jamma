@@ -8,7 +8,7 @@ public:
 	~Drawable();
 
 public:
-	virtual void Draw(const DrawContext& ctx);
+	virtual void Draw(DrawContext& ctx);
 	virtual bool Destroy();
 };
 

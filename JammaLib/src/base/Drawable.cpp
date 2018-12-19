@@ -9,7 +9,7 @@ Drawable::~Drawable()
 {
 }
 
-void Drawable::Draw(const DrawContext& ctx)
+void Drawable::Draw(DrawContext& ctx)
 {
 }
 

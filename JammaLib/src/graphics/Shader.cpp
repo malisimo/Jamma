@@ -40,7 +40,7 @@ GLuint Shader::Name() const
 	return _shader;
 }
 
-void Shader::Activate(const GlDrawContext& ctx)
+void Shader::Activate(GlDrawContext& ctx)
 {
 	if (_state == READY)
 	{

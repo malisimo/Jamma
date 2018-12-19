@@ -29,12 +29,20 @@
     <Filter Include="shaders">
       <UniqueIdentifier>{89578bc5-6be5-4850-8817-d6a5099ea419}</UniqueIdentifier>
     </Filter>
+    <Filter Include="textures">
+      <UniqueIdentifier>{aaa83416-8aad-4c70-a7cb-08a7b92ce4e5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="textures\grid.tga">
+      <Filter>textures</Filter>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include="shaders\texture.frag">
-        <Filter>shaders</Filter>
+      <Filter>shaders</Filter>
     </Content>
-	<Content Include="shaders\texture.vert">
+    <Content Include="shaders\texture.vert">
       <Filter>shaders</Filter>
     </Content>
   </ItemGroup>
