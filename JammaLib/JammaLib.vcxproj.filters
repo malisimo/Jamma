@@ -152,6 +152,9 @@
     <ClInclude Include="src\utils\GlUtils.h">
       <Filter>src\utils</Filter>
     </ClInclude>
+    <ClInclude Include="src\audio\WavReadWriter.h">
+      <Filter>src\audio</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\stdafx.cpp">
@@ -231,6 +234,9 @@
     </ClCompile>
     <ClCompile Include="src\utils\GlUtils.cpp">
       <Filter>src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\audio\WavReadWriter.cpp">
+      <Filter>src\audio</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

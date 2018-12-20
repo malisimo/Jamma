@@ -19,7 +19,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
 	freopen_s(&newStderr, "CONOUT$", "w", stderr);
 	freopen_s(&newStdin, "CONIN$", "r", stdin);
 
-	Scene scene(1024, 768);
+	Scene scene(1600, 1100);
 	Window window(scene);
 
 	if (window.Create(hInstance, nCmdShow) != 0)

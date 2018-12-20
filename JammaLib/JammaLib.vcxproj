@@ -205,6 +205,7 @@
     <ClInclude Include="src\vst\Vst.h" />
     <ClInclude Include="src\engine\Trigger.h" />
     <ClInclude Include="src\engine\UndoHistory.h" />
+    <ClInclude Include="src\audio\WavReadWriter.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\glew\glew.h" />
@@ -234,6 +235,7 @@
     <ClCompile Include="src\vst\Vst.cpp" />
     <ClCompile Include="src\engine\Trigger.cpp" />
     <ClCompile Include="src\engine\UndoHistory.cpp" />
+    <ClCompile Include="src\audio\WavReadWriter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\graphics\Window.h" />

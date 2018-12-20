@@ -104,6 +104,14 @@ int Window::Create(HINSTANCE hInstance, int nCmdShow)
 		return 1;
 	}
 
+	PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = nullptr;
+	wglSwapIntervalEXT = reinterpret_cast<PFNWGLSWAPINTERVALEXTPROC>(wglGetProcAddress("wglSwapIntervalEXT"));
+	if (wglSwapIntervalEXT == nullptr)
+	{
+		ShowMessage(L"wglGetProcAddress() failed.");
+		return 1;
+	}
+
 	if (_config.Windowed == true)
 	{
 		AdjustSize();
@@ -175,6 +183,8 @@ int Window::Create(HINSTANCE hInstance, int nCmdShow)
 		ShowMessage(L"wglMakeCurrent() failed.");
 		return 1;
 	}
+
+	wglSwapIntervalEXT(1);
 
 	// Init opengl loader here (extra safe version)
 	GLenum err = glewInit();
