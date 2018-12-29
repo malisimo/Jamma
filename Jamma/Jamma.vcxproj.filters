@@ -26,24 +26,30 @@
     <Filter Include="dependencies\rtaudio">
       <UniqueIdentifier>{df693537-a715-4456-92a5-04373ad81351}</UniqueIdentifier>
     </Filter>
-    <Filter Include="shaders">
+    <Filter Include="resources">
+      <UniqueIdentifier>{15fc7c02-9d65-407f-b7ff-7d8ecbe325e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resources\shaders">
       <UniqueIdentifier>{89578bc5-6be5-4850-8817-d6a5099ea419}</UniqueIdentifier>
     </Filter>
-    <Filter Include="textures">
+    <Filter Include="resources\textures">
       <UniqueIdentifier>{aaa83416-8aad-4c70-a7cb-08a7b92ce4e5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="textures\grid.tga">
-      <Filter>textures</Filter>
+    <Content Include="resources\shaders\texture.frag">
+      <Filter>resources\shaders</Filter>
+    </Content>
+    <Content Include="resources\shaders\texture.vert">
+      <Filter>resources\shaders</Filter>
+    </Content>
+    <Content Include="resources\textures\grid.tga">
+      <Filter>resources\textures</Filter>
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="shaders\texture.frag">
-      <Filter>shaders</Filter>
-    </Content>
-    <Content Include="shaders\texture.vert">
-      <Filter>shaders</Filter>
-    </Content>
+    <Text Include="resources\ResourceList.txt">
+      <Filter>resources</Filter>
+    </Text>
   </ItemGroup>
 </Project>

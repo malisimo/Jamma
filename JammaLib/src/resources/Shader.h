@@ -14,7 +14,8 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "GlUtils.h"
-#include "GlDrawContext.h"
+#include "Resource.h"
+#include "../graphics/GlDrawContext.h"
 
 
 class Shader

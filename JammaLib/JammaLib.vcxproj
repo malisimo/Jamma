@@ -175,6 +175,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\resources\ShaderResource.h" />
+    <ClInclude Include="src\resources\Resource.h" />
+    <ClInclude Include="src\resources\ResourceLib.h" />
+    <ClInclude Include="src\graphics\Font.h" />
     <ClInclude Include="src\utils\GlUtils.h" />
     <ClInclude Include="src\graphics\GlDrawContext.h" />
     <ClInclude Include="src\base\DrawContext.h" />
@@ -185,7 +189,7 @@
     <ClInclude Include="lib\opengl\gl\wglew.h" />
     <ClInclude Include="lib\opengl\gl\wglext.h" />
     <ClInclude Include="src\graphics\Scene.h" />
-    <ClInclude Include="src\graphics\Shader.h" />
+    <ClInclude Include="src\resources\Shader.h" />
     <ClInclude Include="src\graphics\Image.h" />
     <ClInclude Include="src\base\ActionSender.h" />
     <ClInclude Include="src\io\LoopFile.h" />
@@ -206,6 +210,7 @@
     <ClInclude Include="src\engine\Trigger.h" />
     <ClInclude Include="src\engine\UndoHistory.h" />
     <ClInclude Include="src\audio\WavReadWriter.h" />
+    <ClInclude Include="src\resources\TextureResource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\glew\glew.h" />
@@ -213,11 +218,14 @@
     <ClInclude Include="lib\rtaudio\RtAudio.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\resources\ShaderResource.cpp" />
+    <ClCompile Include="src\resources\ResourceLib.cpp" />
+    <ClCompile Include="src\graphics\Font.cpp" />
     <ClCompile Include="src\utils\GlUtils.cpp" />
     <ClCompile Include="src\graphics\GlDrawContext.cpp" />
     <ClCompile Include="src\base\DrawContext.cpp" />
     <ClCompile Include="src\graphics\Scene.cpp" />
-    <ClCompile Include="src\graphics\Shader.cpp" />
+    <ClCompile Include="src\resources\Shader.cpp" />
     <ClCompile Include="src\graphics\Image.cpp" />
     <ClCompile Include="src\base\ActionSender.cpp" />
     <ClCompile Include="src\io\LoopFile.cpp" />
@@ -236,6 +244,7 @@
     <ClCompile Include="src\engine\Trigger.cpp" />
     <ClCompile Include="src\engine\UndoHistory.cpp" />
     <ClCompile Include="src\audio\WavReadWriter.cpp" />
+    <ClCompile Include="src\resources\TextureResource.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\graphics\Window.h" />

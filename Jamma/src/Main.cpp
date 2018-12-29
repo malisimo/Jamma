@@ -7,7 +7,9 @@
 
 #include "Main.h"
 #include "Window.h"
-
+#include <vector>
+#include <fstream>
+#include <sstream>
 
 int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
@@ -20,7 +22,8 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
 	freopen_s(&newStdin, "CONIN$", "r", stdin);
 
 	Scene scene(1600, 1100);
-	Window window(scene);
+	ResourceLib resourceLib;
+	Window window(scene, resourceLib);
 
 	if (window.Create(hInstance, nCmdShow) != 0)
 		PostQuitMessage(1);
@@ -48,3 +51,4 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
 
 	return (int)msg.wParam;
 }
+

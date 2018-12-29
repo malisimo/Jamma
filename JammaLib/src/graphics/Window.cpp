@@ -10,8 +10,10 @@
 
 ///////////////////////////////////////////////////////////
 
-Window::Window(Scene& scene) :
+Window::Window(Scene& scene,
+	ResourceLib& resourceLib) :
 	_scene(scene),
+	_resourceLib(resourceLib),
 	_style(WS_CAPTION | WS_SYSMENU | WS_CLIPSIBLINGS | WS_CLIPCHILDREN)
 {
 	_config.Width = scene.Width();
@@ -25,9 +27,46 @@ Window::~Window()
 {
 }
 
+void Window::LoadResources()
+{
+	std::ifstream inputFile;
+	inputFile.open("./resources/ResourceList.txt", std::ios::in);
+
+	if (inputFile.good())
+	{
+		std::string line;
+		int resourceType;
+		std::string name;
+		std::string arg;
+		std::vector<std::string> args;
+
+		// While we are able to get lines from the file
+		while (std::getline(inputFile, line))
+		{
+			// Parse the line from the file and
+			// set appropriate parameters
+			std::stringstream ss(line);
+
+			if (ss >> resourceType >> name)
+			{
+				args.clear();
+
+				while (ss >> arg)
+				{
+					args.push_back(arg);
+				}
+
+				_resourceLib.LoadResource((Resources::Type)resourceType, name, args);
+			}
+		}
+	}
+
+	std::cout << "Loaded " << _resourceLib.NumResources() << " resources" << std::endl;
+}
+
 void Window::InitScene()
 {
-	_scene.Init();
+	_scene.Init(_resourceLib);
 }
 
 void Window::ShowMessage(LPCWSTR message)
@@ -201,6 +240,7 @@ int Window::Create(HINSTANCE hInstance, int nCmdShow)
 	
 	glEnable(GL_DEPTH_TEST);
 
+	LoadResources();
 	InitScene();
 
 	const char* glVersion = (const char *)glGetString(GL_VERSION);

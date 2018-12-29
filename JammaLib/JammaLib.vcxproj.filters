@@ -48,6 +48,9 @@
     <Filter Include="lib\opengl\gl">
       <UniqueIdentifier>{451837af-5347-4888-8a7d-0557bf1141cd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\resources">
+      <UniqueIdentifier>{1bb16a90-7c53-4068-abc4-e7bd62de4055}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
@@ -134,9 +137,6 @@
     <ClInclude Include="src\graphics\Image.h">
       <Filter>src\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphics\Shader.h">
-      <Filter>src\graphics</Filter>
-    </ClInclude>
     <ClInclude Include="src\graphics\Scene.h">
       <Filter>src\graphics</Filter>
     </ClInclude>
@@ -154,6 +154,24 @@
     </ClInclude>
     <ClInclude Include="src\audio\WavReadWriter.h">
       <Filter>src\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\Font.h">
+      <Filter>src\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\Shader.h">
+      <Filter>src\resources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\ResourceLib.h">
+      <Filter>src\resources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\Resource.h">
+      <Filter>src\resources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\TextureResource.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\ShaderResource.h">
+      <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -220,9 +238,6 @@
     <ClCompile Include="src\graphics\Image.cpp">
       <Filter>src\graphics</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphics\Shader.cpp">
-      <Filter>src\graphics</Filter>
-    </ClCompile>
     <ClCompile Include="src\graphics\Scene.cpp">
       <Filter>src\graphics</Filter>
     </ClCompile>
@@ -237,6 +252,21 @@
     </ClCompile>
     <ClCompile Include="src\audio\WavReadWriter.cpp">
       <Filter>src\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\Font.cpp">
+      <Filter>src\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\resources\Shader.cpp">
+      <Filter>src\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\resources\ResourceLib.cpp">
+      <Filter>src\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\resources\TextureResource.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\resources\ShaderResource.cpp">
+      <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
