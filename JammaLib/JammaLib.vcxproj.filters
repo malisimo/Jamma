@@ -173,6 +173,9 @@
     <ClInclude Include="src\resources\ShaderResource.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="src\utils\FunctionUtils.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\stdafx.cpp">
