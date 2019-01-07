@@ -12,16 +12,16 @@ Image::Image() :
 
 bool Image::Init(ResourceLib& resourceLib)
 {
-	bool Validated = true;
+	auto validated = true;
 
-	if (Validated)
-		Validated = InitTexture(resourceLib);
-	if (Validated)
-		Validated = InitShader(resourceLib);
-	if (Validated)
-		Validated = InitVertexArray();
+	if (validated)
+		validated = InitTexture(resourceLib);
+	if (validated)
+		validated = InitShader(resourceLib);
+	if (validated)
+		validated = InitVertexArray();
 
-	return Validated && GlUtils::CheckError("Image::Init()");
+	return validated && GlUtils::CheckError("Image::Init()");
 }
 
 void Image::Draw(DrawContext& ctx)
@@ -32,12 +32,12 @@ void Image::Draw(DrawContext& ctx)
 	if (!texture && !shader)
 		return;
 
-	glUseProgram(shader->GetName());
+	glUseProgram(shader->GetId());
 	shader->SetUniforms(dynamic_cast<GlDrawContext&>(ctx));
 
 	glBindVertexArray(_vertexArray);
 
-	glBindTexture(GL_TEXTURE_2D, texture->GetName());
+	glBindTexture(GL_TEXTURE_2D, texture->GetId());
 
 	//glDrawArraysInstanced(GL_TRIANGLES, 0, VertexCount, 1);
 	glDrawArrays(GL_TRIANGLES, 0, VertexCount);
@@ -47,7 +47,7 @@ void Image::Draw(DrawContext& ctx)
 	glUseProgram(0);
 }
 
-bool Image::Destroy()
+bool Image::Release()
 {
 	glDeleteBuffers(2, _vertexBuffer);
 	_vertexBuffer[0] = 0;

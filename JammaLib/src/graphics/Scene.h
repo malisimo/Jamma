@@ -4,6 +4,7 @@
 #include "Drawable.h"
 #include "../resources/ResourceLib.h"
 #include "Image.h"
+#include "../gui/GuiLabel.h"
 #include "ActionReceiver.h"
 #include "Audible.h"
 #include "GlDrawContext.h"
@@ -15,7 +16,7 @@ class Scene :
 {
 public:
 	Scene(int width, int height);
-	~Scene() { Destroy(); }
+	~Scene() { Release(); }
 
 	// Copy
 	Scene(const Scene &) = delete;
@@ -36,7 +37,7 @@ public:
 	{
 		if (this != &other)
 		{
-			Destroy();
+			Release();
 			std::swap(_mvp, other._mvp);
 			_image.swap(other._image);
 		}
@@ -46,7 +47,7 @@ public:
 
 	virtual void Init(ResourceLib& resourceLib);
 	virtual void Draw(DrawContext& ctx);
-	virtual bool Destroy();
+	virtual bool Release();
 
 	int Width() const;
 	int Height() const;
@@ -58,5 +59,6 @@ private:
 	int _width;
 	int _height;
 	glm::mat4 _mvp;
+	std::unique_ptr<GuiLabel> _label;
 	std::unique_ptr<Image> _image;
 };

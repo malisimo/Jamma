@@ -66,7 +66,7 @@ void Shader::Activate(GlDrawContext& ctx)
 	}
 }
 
-void Shader::Destroy()
+void Shader::Release()
 {
 	glDeleteShader(_shader);
 

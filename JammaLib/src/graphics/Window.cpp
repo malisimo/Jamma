@@ -61,6 +61,8 @@ void Window::LoadResources()
 		}
 	}
 
+	_resourceLib.LoadFonts();
+
 	std::cout << "Loaded " << _resourceLib.NumResources() << " resources" << std::endl;
 }
 
@@ -298,7 +300,7 @@ void Window::Swap()
 	SwapBuffers(_dc);
 }
 
-void Window::Destroy()
+void Window::Release()
 {
 	wglMakeCurrent(NULL, NULL);
 

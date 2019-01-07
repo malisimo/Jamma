@@ -21,6 +21,8 @@
 #include <gl/gl.h>
 #include "Drawable.h"
 #include "../resources/TextureResource.h"
+#include "../resources/ShaderResource.h"
+#include "../graphics/GlDrawContext.h"
 #include "../utils/FunctionUtils.h"
 
 namespace FontOptions
@@ -54,9 +56,10 @@ namespace FontOptions
 
 	struct FontParams
 	{
+		unsigned int NumWidth;
+		unsigned int NumHeight;
 		unsigned int GridSize;
 		float CharHeight;
-		unsigned int NumChars;
 		unsigned int SpaceChar;
 		unsigned int DegreeChar;
 		FontSize Size;
@@ -69,7 +72,8 @@ public:
 	Font();
 	Font(FontOptions::FontParams params,
 		std::vector<float> charWidths,
-		std::weak_ptr<TextureResource> texture);
+		std::weak_ptr<TextureResource> texture,
+		std::weak_ptr<ShaderResource> shader);
 
 	// Copy
 	Font(const Font &) = delete;
@@ -78,16 +82,14 @@ public:
 	// Move
 	Font(Font &&other) :
 		_params(other._params),
-		_numWidth(other._numWidth),
-		_numHeight(other._numHeight),
 		_charWidths(std::move(other._charWidths)),
-		_texture(other._texture)
+		_texture(other._texture),
+		_shader(other._shader)
 	{
 		other._params = {};
-		other._numWidth = 0;
-		other._numHeight = 0;
 		other._charWidths = {};
 		other._texture = std::weak_ptr<TextureResource>();
+		other._shader = std::weak_ptr<ShaderResource>();
 	}
 
 	Font& operator=(Font &&other)
@@ -95,28 +97,29 @@ public:
 		if (this != &other)
 		{
 			std::swap(_params, other._params);
-			std::swap(_numWidth, other._numWidth);
-			std::swap(_numHeight, other._numHeight);
 			std::swap(_charWidths, other._charWidths);
 			_texture.swap(other._texture);
+			_shader.swap(other._shader);
 		}
 
 		return *this;
 	}
 
 	GLuint InitVertexArray(const std::string& str, GLenum usage);
+	void Draw(GlDrawContext& ctx, GLuint vertexArray, unsigned int numChars);
 	float MeasureString(const std::string& str);
 	float GetHeight();
 
-	static std::optional<std::unique_ptr<Font>> Load(FontOptions::FontSize size, ResourceLib& resourceLib);
+	static std::optional<std::unique_ptr<Font>> Load(FontOptions::FontSize size,
+		std::weak_ptr<TextureResource> texture,
+		std::weak_ptr<ShaderResource> shader);
+	static std::string GetFontName(FontOptions::FontSize size);
 
 private:
 	void FillPosUv(std::vector<GLfloat> vec, unsigned int index, char c);
 	int GetCharNum(char c);
 
-	static std::string GetFontName(FontOptions::FontSize size);
-	static std::string GetTextureFilename(FontOptions::FontSize size);
-	static std::string GetDataFilename(FontOptions::FontSize size);
+	static std::string GetFontFilename(FontOptions::FontSize size);
 
 public:
 	static const unsigned int MaxChars = 256;
@@ -125,28 +128,7 @@ public:
 
 private:
 	FontOptions::FontParams _params;
-	unsigned int _numWidth;
-	unsigned int _numHeight;
 	std::vector<float> _charWidths;
 	std::weak_ptr<TextureResource> _texture;
-};
-
-
-class FontRenderer
-{
-public:
-	FontRenderer();
-	~FontRenderer();
-
-	bool Init(ResourceLib& resourceLib);
-	float MeasureString(const std::string& str, FontOptions::FontSize size);
-	float FontHeight(FontOptions::FontSize size);
-
-private:
-	std::optional<Font*> GetFont(FontOptions::FontSize size);
-	bool LoadFonts(ResourceLib& resourceLib);
-
-private:
-	bool _loadedFonts;
-	std::map<FontOptions::FontSize, std::unique_ptr<Font>> _fonts;
+	std::weak_ptr<ShaderResource> _shader;
 };

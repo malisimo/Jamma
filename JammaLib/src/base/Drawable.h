@@ -9,6 +9,6 @@ public:
 
 public:
 	virtual void Draw(DrawContext& ctx);
-	virtual bool Destroy();
+	virtual bool Release();
 };
 

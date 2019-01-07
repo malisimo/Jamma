@@ -13,7 +13,7 @@ void Drawable::Draw(DrawContext& ctx)
 {
 }
 
-bool Drawable::Destroy()
+bool Drawable::Release()
 {
 	return true;
 }

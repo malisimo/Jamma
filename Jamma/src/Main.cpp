@@ -47,7 +47,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
 		window.Swap();
 	}
 
-	window.Destroy();
+	window.Release();
 
 	return (int)msg.wParam;
 }

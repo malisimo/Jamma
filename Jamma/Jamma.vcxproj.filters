@@ -35,21 +35,48 @@
     <Filter Include="resources\textures">
       <UniqueIdentifier>{aaa83416-8aad-4c70-a7cb-08a7b92ce4e5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="resources\fonts">
+      <UniqueIdentifier>{0216c653-6a7a-43e2-902c-7fc2f167cd2a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="resources\textures\grid.tga">
+      <Filter>resources\textures</Filter>
+    </Content>
+    <Content Include="resources\textures\font_large.tga">
+      <Filter>resources\textures</Filter>
+    </Content>
+    <Content Include="resources\textures\font_medium.tga">
+      <Filter>resources\textures</Filter>
+    </Content>
+    <Content Include="resources\textures\font_small.tga">
+      <Filter>resources\textures</Filter>
+    </Content>
+    <Content Include="resources\textures\font_tiny.tga">
+      <Filter>resources\textures</Filter>
+    </Content>
     <Content Include="resources\shaders\texture.frag">
       <Filter>resources\shaders</Filter>
     </Content>
     <Content Include="resources\shaders\texture.vert">
       <Filter>resources\shaders</Filter>
     </Content>
-    <Content Include="resources\textures\grid.tga">
-      <Filter>resources\textures</Filter>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <Text Include="resources\ResourceList.txt">
       <Filter>resources</Filter>
+    </Text>
+    <Text Include="resources\fonts\font_large.txt">
+      <Filter>resources\fonts</Filter>
+    </Text>
+    <Text Include="resources\fonts\font_medium.txt">
+      <Filter>resources\fonts</Filter>
+    </Text>
+    <Text Include="resources\fonts\font_small.txt">
+      <Filter>resources\fonts</Filter>
+    </Text>
+    <Text Include="resources\fonts\font_tiny.txt">
+      <Filter>resources\fonts</Filter>
     </Text>
   </ItemGroup>
 </Project>

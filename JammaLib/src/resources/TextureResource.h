@@ -6,7 +6,7 @@
 #include <gl/glew.h>
 #include <gl/gl.h>
 #include "Resource.h"
-#include "ResourceLib.h"
+#include "../utils/ImageUtils.h"
 
 class TextureResource : public Resource
 {
@@ -49,7 +49,7 @@ public:
 	}
 
 	virtual Resources::Type GetType() const override { return Resources::TEXTURE; }
-	virtual GLuint GetName() const override { return _texture; }
+	virtual GLuint GetId() const override { return _texture; }
 	virtual void Release() override;
 
 	unsigned int Width() { return _width; }

@@ -58,7 +58,7 @@ public:
 	void Center();
 	void Render();
 	void Swap();
-	void Destroy();
+	void Release();
 
 
 	static LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);

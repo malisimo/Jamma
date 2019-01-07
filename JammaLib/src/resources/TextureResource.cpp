@@ -25,7 +25,7 @@ void TextureResource::Release()
 
 std::optional<std::tuple<GLuint,unsigned int,unsigned int>> TextureResource::Load(std::string fileName)
 {
-	auto imageLoaded = ResourceLib::LoadTga(fileName);
+	auto imageLoaded = ImageUtils::LoadTga(fileName);
 
 	if (!imageLoaded.has_value())
 		return std::nullopt;
@@ -43,5 +43,5 @@ std::optional<std::tuple<GLuint,unsigned int,unsigned int>> TextureResource::Loa
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	return std::tuple<GLuint,unsigned int,unsigned int>(texture,width,height);
+	return std::tuple<GLuint,unsigned int,unsigned int>(texture, width, height);
 }

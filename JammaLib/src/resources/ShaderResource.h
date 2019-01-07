@@ -47,7 +47,7 @@ public:
 	}
 
 	virtual Resources::Type GetType() const override { return Resources::SHADER; }
-	virtual GLuint GetName() const override { return _shaderProgram; }
+	virtual GLuint GetId() const override { return _shaderProgram; }
 	virtual void Release() override;
 	
 	void SetUniforms(GlDrawContext& ctx);

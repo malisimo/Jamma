@@ -29,7 +29,7 @@ public:
 
 	bool Init(GLuint program, std::vector<std::string> uniforms);
 	void Activate(GlDrawContext& ctx);
-	void Destroy();
+	void Release();
 	GLuint Name() const;
 
 private:

@@ -176,6 +176,12 @@
     <ClInclude Include="src\utils\FunctionUtils.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="src\gui\GuiLabel.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utils\ImageUtils.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\stdafx.cpp">
@@ -269,6 +275,12 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\resources\ShaderResource.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\GuiLabel.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utils\ImageUtils.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

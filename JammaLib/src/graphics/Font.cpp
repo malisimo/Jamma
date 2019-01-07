@@ -1,11 +1,6 @@
 #include "Font.h"
 
-// Font class to load and set up individual fonts, and 
-// FontRenderer to hold a library of fonts with utility methods
-
-//
-// Font
-//
+// Font class represents an individual font of a particular size
 
 Font::Font()
 {
@@ -13,32 +8,20 @@ Font::Font()
 
 Font::Font(FontOptions::FontParams params,
 	std::vector<float> charWidths,
-	std::weak_ptr<TextureResource> texture) :
+	std::weak_ptr<TextureResource> texture,
+	std::weak_ptr<ShaderResource> shader) :
 	_params(params),
 	_charWidths(charWidths),
-	_texture(texture)
+	_texture(texture),
+	_shader(shader)
 {
 }
 
-std::optional<std::unique_ptr<Font>> Font::Load(FontOptions::FontSize size, ResourceLib& resourceLib)
+std::optional<std::unique_ptr<Font>> Font::Load(FontOptions::FontSize size,
+	std::weak_ptr<TextureResource> texture,
+	std::weak_ptr<ShaderResource> shader)
 {
-	// Load up the texture AND the text file
-	auto fontName = GetFontName(size);
-	auto resourceOpt = resourceLib.GetResource(fontName);
-
-	if (!resourceOpt.has_value())
-		return std::nullopt;
-
-	auto resource = resourceOpt.value().lock();
-	if (!resource)
-		return std::nullopt;
-
-	if (!Resources::TEXTURE == resource->GetType())
-		return std::nullopt;
-
-	auto texture = std::dynamic_pointer_cast<TextureResource>(resource);
-
-	auto datafilename = GetDataFilename(size);
+	auto datafilename = GetFontFilename(size);
 
 	std::ifstream inputFile;
 	inputFile.open(datafilename.c_str());
@@ -56,13 +39,22 @@ std::optional<std::unique_ptr<Font>> Font::Load(FontOptions::FontSize size, Reso
 	int linenum = 0;
 	unsigned int param1;
 	float param2;
-	unsigned int gridSize;
-	unsigned int spaceChar;
-	unsigned int degreeChar;
-	float charHeight;
+	unsigned int gridSize = 1;
+	unsigned int spaceChar = 0;
+	unsigned int degreeChar = 0;
+	float charHeight = 16.f;
 	std::vector<float> charWidths;
 
 	std::string line;
+	unsigned int texWidth = 0;
+	unsigned int texHeight = 0;
+
+	auto textureResource = texture.lock();
+	if (textureResource)
+	{
+		texWidth = textureResource->Width();
+		texHeight = textureResource->Height();
+	}
 
 	// While we are able to get lines from the file
 	while (std::getline(inputFile, line))
@@ -76,37 +68,39 @@ std::optional<std::unique_ptr<Font>> Font::Load(FontOptions::FontSize size, Reso
 		// set appropriate parameters
 		std::stringstream ss(line);
 
-		if (linenum == 1)
+		switch (linenum)
 		{
+		case 1:
 			while (ss >> param2)
 			{
 				charWidths.push_back(param2 + 1.0f);
 			}
-		}
-		else if (linenum == 2)
-		{
+			break;
+		case 2:
 			if (ss >> param2)
 				charHeight = param2;
-		}
-		else if (linenum == 3)
-		{
+
+			break;
+		case 3:
 			if (ss >> param1)
 				gridSize = param1;
-		}
-		else if (linenum == 4)
-		{
+
+			break;
+		case 4:
 			if (ss >> param1)
 				spaceChar = param1;
-		}
-		else if (linenum == 5)
-		{
+
+			break;
+		case 5:
 			if (ss >> param1)
 				degreeChar = param1;
+
+			break;
 		}
 	}
 
-	auto numWidth = (unsigned int)(((double)texture->Width()) / ((double)gridSize));
-	auto numHeight = (unsigned int)(((double)texture->Height()) / ((double)gridSize));
+	auto numWidth = (unsigned int)(((double)texWidth) / ((double)gridSize));
+	auto numHeight = (unsigned int)(((double)texHeight) / ((double)gridSize));
 
 	auto numChars = charWidths.size();
 	if (numChars > 0)
@@ -121,11 +115,30 @@ std::optional<std::unique_ptr<Font>> Font::Load(FontOptions::FontSize size, Reso
 		if (spaceChar < numChars)
 			charWidths[spaceChar] = (totalwidth / ((float)numChars)) - 4.0f;
 
-		FontOptions::FontParams fontParams = { gridSize, charHeight, (unsigned int)numChars, spaceChar, degreeChar, size };
-		return std::make_unique<Font>(fontParams, charWidths, texture);
+		FontOptions::FontParams fontParams = { numWidth, numHeight, gridSize, charHeight, spaceChar, degreeChar, size };
+		return std::make_unique<Font>(fontParams, charWidths, texture, shader);
 	}
 
 	return std::nullopt;
+}
+
+std::string Font::GetFontName(FontOptions::FontSize size)
+{
+	std::string fontname("");
+
+	switch (size)
+	{
+	case FontOptions::FONT_TINY:
+		return "font_tiny";
+	case FontOptions::FONT_SMALL:
+		return "font_small";
+	case FontOptions::FONT_MEDIUM:
+		return "font_medium";
+	case FontOptions::FONT_LARGE:
+		return "font_large";
+	}
+
+	return "";
 }
 
 GLuint Font::InitVertexArray(const std::string& str, GLenum usage)
@@ -169,6 +182,29 @@ GLuint Font::InitVertexArray(const std::string& str, GLenum usage)
 	return vao;
 }
 
+void Font::Draw(GlDrawContext& ctx, GLuint vertexArray, unsigned int numChars)
+{
+	auto texture = _texture.lock();
+	auto shader = _shader.lock();
+
+	if (!texture || !shader)
+		return;
+
+	glUseProgram(shader->GetId());
+	shader->SetUniforms(ctx);
+
+	glBindVertexArray(vertexArray);
+
+	glBindTexture(GL_TEXTURE_2D, texture->GetId());
+
+	//glDrawArraysInstanced(GL_TRIANGLES, 0, VertexCount, 1);
+	glDrawArrays(GL_TRIANGLES, 0, numChars * 6);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindVertexArray(0);
+	glUseProgram(0);
+}
+
 float Font::MeasureString(const std::string& str)
 {
 	const char* chars = str.c_str();
@@ -195,53 +231,55 @@ float Font::GetHeight()
 
 void Font::FillPosUv(std::vector<GLfloat> vec, unsigned int index, char c)
 {
-	int startIndex = index * 5;
-	int row = c / _numWidth;
-	int col = c % _numWidth;
+	if (0 == _params.NumWidth)
+		return;
 
-	auto du = 1.0f;
-	auto dv = 1.0f;
+	if (0 == _params.NumHeight)
+		return;
 
-	if (_numWidth > 0)
-		du /= _numWidth;
-	if (_numHeight > 0)
-		dv /= _numHeight;
+	float scal = 0.001f;
+	float z = -1.0f;
+	int startIndex = index * 5 * 6;
+	int row = c / _params.NumWidth;
+	int col = c % _params.NumWidth;
+	auto du = 1.0f / _params.NumWidth;
+	auto dv = 1.0f / _params.NumHeight;
 
-	vec[startIndex + 0] = index * (float)_params.GridSize; // x1
-	vec[startIndex + 1] = 0; // y1
-	vec[startIndex + 2] = 0; // z
-	vec[startIndex + 3] = col * du; // u1
-	vec[startIndex + 4] = row * dv; // v1
+	vec[startIndex + 0] = scal * index * (float)_params.GridSize; // x1
+	vec[startIndex + 1] = scal * 0; // y1
+	vec[startIndex + 2] = scal * z; // z
+	vec[startIndex + 3] = scal * col * du; // u1
+	vec[startIndex + 4] = scal * row * dv; // v1
 
-	vec[startIndex + 5] = index * (float)_params.GridSize; // x1
-	vec[startIndex + 6] = (float)_params.GridSize; // y2
-	vec[startIndex + 7] = 0; // z
-	vec[startIndex + 8] = col * du; // u1
-	vec[startIndex + 9] = (row + 1) * dv; // v2
+	vec[startIndex + 5] = scal * index * (float)_params.GridSize; // x1
+	vec[startIndex + 6] = scal * (float)_params.GridSize; // y2
+	vec[startIndex + 7] = scal * z; // z
+	vec[startIndex + 8] = scal * col * du; // u1
+	vec[startIndex + 9] = scal * (row + 1) * dv; // v2
 
-	vec[startIndex + 10] = (index + 1) * (float)_params.GridSize; // x2
-	vec[startIndex + 11] = 0; // y1
-	vec[startIndex + 12] = 0; // z
-	vec[startIndex + 13] = (col + 1) * du; // u2
-	vec[startIndex + 14] = row * dv; // v1
+	vec[startIndex + 10] = scal * (index + 1) * (float)_params.GridSize; // x2
+	vec[startIndex + 11] = scal * 0; // y1
+	vec[startIndex + 12] = scal * z; // z
+	vec[startIndex + 13] = scal * (col + 1) * du; // u2
+	vec[startIndex + 14] = scal * row * dv; // v1
 
-	vec[startIndex + 15] = (index + 1) * (float)_params.GridSize; // x2
-	vec[startIndex + 16] = 0; // y1
-	vec[startIndex + 17] = 0; // z
-	vec[startIndex + 18] = (col + 1) * du; // u2
-	vec[startIndex + 19] = row * dv; // v1
+	vec[startIndex + 15] = scal * (index + 1) * (float)_params.GridSize; // x2
+	vec[startIndex + 16] = scal * 0; // y1
+	vec[startIndex + 17] = scal * z; // z
+	vec[startIndex + 18] = scal * (col + 1) * du; // u2
+	vec[startIndex + 19] = scal * row * dv; // v1
 
-	vec[startIndex + 0] = index * (float)_params.GridSize; // x1
-	vec[startIndex + 1] = (float)_params.GridSize; // y2
-	vec[startIndex + 2] = 0; // z
-	vec[startIndex + 3] = col * du; // u1
-	vec[startIndex + 4] = (row + 1) * dv; // v2
+	vec[startIndex + 20] = scal * index * (float)_params.GridSize; // x1
+	vec[startIndex + 21] = scal * (float)_params.GridSize; // y2
+	vec[startIndex + 22] = scal * z; // z
+	vec[startIndex + 23] = scal * col * du; // u1
+	vec[startIndex + 24] = scal * (row + 1) * dv; // v2
 
-	vec[startIndex + 20] = index * (float)_params.GridSize; // x2
-	vec[startIndex + 21] = (float)_params.GridSize; // y2
-	vec[startIndex + 22] = 0; // z
-	vec[startIndex + 23] = (col + 1) * du; // u2
-	vec[startIndex + 24] = (row + 1) * dv; // v2
+	vec[startIndex + 25] = scal * index * (float)_params.GridSize; // x2
+	vec[startIndex + 26] = scal * (float)_params.GridSize; // y2
+	vec[startIndex + 27] = scal * z; // z
+	vec[startIndex + 28] = scal * (col + 1) * du; // u2
+	vec[startIndex + 29] = scal * (row + 1) * dv; // v2
 }
 
 int Font::GetCharNum(char c)
@@ -253,124 +291,18 @@ int Font::GetCharNum(char c)
 
 	int charnum = ((int)c) - (int)Font::StartChar;
 
-	if ((charnum >= 0) && (charnum < (int)_params.NumChars) && (charnum < (int)MaxChars))
+	if ((charnum >= 0) && (charnum < (int)(_params.NumWidth * _params.NumHeight)) && (charnum < (int)MaxChars))
 		return charnum;
 
 	return (int)_params.SpaceChar;
 }
 
-std::string Font::GetFontName(FontOptions::FontSize size)
-{
-	std::string fontname("");
-
-	switch (size)
-	{
-	case FontOptions::FONT_TINY:
-		return "font_tiny";
-	case FontOptions::FONT_SMALL:
-		return "font_small";
-	case FontOptions::FONT_MEDIUM:
-		return "font_medium";
-	case FontOptions::FONT_LARGE:
-		return "font_large";
-	}
-
-	return "";
-}
-
-std::string Font::GetTextureFilename(FontOptions::FontSize size)
-{
-	auto fontName = GetFontName(size);
-	
-	std::stringstream texturefilenamess;
-	texturefilenamess << "./Textures/" << fontName << ".png";
-
-	return texturefilenamess.str();
-}
-
-std::string Font::GetDataFilename(FontOptions::FontSize size)
+std::string Font::GetFontFilename(FontOptions::FontSize size)
 {
 	auto fontName = GetFontName(size);
 
 	std::stringstream datafilenamess;
-	datafilenamess << "./Resources/" << fontName << ".txt";
+	datafilenamess << "./Resources/Fonts/" << fontName << ".txt";
 
 	return datafilenamess.str();
-}
-
-
-//
-// FontRenderer
-//
-
-FontRenderer::FontRenderer() :
-	_loadedFonts(false)
-{
-}
-
-FontRenderer::~FontRenderer()
-{
-	_fonts.clear();
-}
-
-bool FontRenderer::Init(ResourceLib& resourceLib)
-{
-	int numbytes = Font::MaxVerts * 3 * sizeof(float);
-	return LoadFonts(resourceLib);
-}
-
-float FontRenderer::MeasureString(const std::string& str, FontOptions::FontSize size)
-{
-	auto fontOpt = GetFont(size);
-
-	if (!fontOpt.has_value())
-		return 0;
-
-	return fontOpt.value()->MeasureString(str);
-}
-
-float FontRenderer::FontHeight(FontOptions::FontSize size)
-{
-	auto fontOpt = GetFont(size);
-
-	if (!fontOpt.has_value())
-		return 0;
-
-	return fontOpt.value()->GetHeight();
-}
-
-std::optional<Font*> FontRenderer::GetFont(FontOptions::FontSize size)
-{
-	if (_fonts.count(size) > 0)
-	{
-		auto font = _fonts.at(size).get();
-		if (nullptr == font)
-			return std::nullopt;
-
-		return font;
-	}
-
-	return std::nullopt;
-}
-
-bool FontRenderer::LoadFonts(ResourceLib& resourceLib)
-{
-	if (_fonts.size() >= (sizeof(FontOptions::FontSizes) / sizeof(int)))
-		return true;
-
-	_fonts.clear();
-
-	bool res = false;
-	for (auto size : FontOptions::FontSizes)
-	{
-		auto font = Font::Load(size, resourceLib);
-		FontOptions::FontParams fontParams{ 1, 2.f, 3, 4, 5, FontOptions::FONT_TINY };
-
-		if (font.has_value())
-			_fonts[size].swap(font.value());
-		else
-			res = false;
-	}
-
-	return res;
 }

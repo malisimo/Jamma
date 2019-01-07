@@ -17,7 +17,7 @@ class Image :
 {
 public:
 	Image();
-	~Image() { Destroy(); }
+	~Image() { Release(); }
 
 	// Copy
 	Image(const Image &) = delete;
@@ -41,7 +41,7 @@ public:
 	{
 		if (this != &other)
 		{
-			Destroy();
+			Release();
 			std::swap(_vertexArray, other._vertexArray);
 			std::swap(_vertexBuffer, other._vertexBuffer);
 			_texture.swap(other._texture);
@@ -54,7 +54,7 @@ public:
 public:
 	virtual bool Init(ResourceLib& resourceLib);
 	virtual void Draw(DrawContext& ctx);
-	virtual bool Destroy();
+	virtual bool Release();
 	
 private:
 	const int VertexCount = 6;

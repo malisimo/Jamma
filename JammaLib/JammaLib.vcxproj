@@ -175,6 +175,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\utils\ImageUtils.h" />
+    <ClInclude Include="src\gui\GuiLabel.h" />
     <ClInclude Include="src\utils\FunctionUtils.h" />
     <ClInclude Include="src\resources\ShaderResource.h" />
     <ClInclude Include="src\resources\Resource.h" />
@@ -219,6 +221,8 @@
     <ClInclude Include="lib\rtaudio\RtAudio.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\utils\ImageUtils.cpp" />
+    <ClCompile Include="src\gui\GuiLabel.cpp" />
     <ClCompile Include="src\resources\ShaderResource.cpp" />
     <ClCompile Include="src\resources\ResourceLib.cpp" />
     <ClCompile Include="src\graphics\Font.cpp" />

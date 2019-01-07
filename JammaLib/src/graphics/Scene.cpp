@@ -1,14 +1,17 @@
 #include "Scene.h"
 
 Scene::Scene(int width, int height) :
-	_image(std::make_unique<Image>()),
 	_width(width),
-	_height(height)
+	_height(height),
+	_mvp(glm::mat4()),
+	_label(std::make_unique<GuiLabel>("Hello")),
+	_image(std::make_unique<Image>())
 {
 }
 
 void Scene::Init(ResourceLib& resourceLib)
 {
+	_label->Init(resourceLib);
 	_image->Init(resourceLib);
 
 	auto projection = glm::perspective(glm::radians(45.0f), (float)_width / (float)_height, 0.1f, 100.0f);
@@ -23,11 +26,12 @@ void Scene::Draw(DrawContext& ctx)
 	glCtx.SetUniform("MVP", mvp);
 
 	_image->Draw(ctx);
+	_label->Draw(ctx);
 }
 
-bool Scene::Destroy()
+bool Scene::Release()
 {
-	_image->Destroy();
+	_image->Release();
 	return true;
 }
 

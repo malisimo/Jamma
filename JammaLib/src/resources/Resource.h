@@ -17,7 +17,7 @@ class Resource
 {
 public:
 	virtual Resources::Type GetType() const { return Resources::NONE; }
-	virtual GLuint GetName() const { return 0; }
+	virtual GLuint GetId() const { return 0; }
 	virtual void Release() {}
 };
 
