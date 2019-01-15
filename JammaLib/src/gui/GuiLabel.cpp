@@ -12,7 +12,7 @@ GuiLabel::GuiLabel(const std::string& str) :
 
 bool GuiLabel::Init(ResourceLib& resourceLib)
 {
-	auto fontOpt = resourceLib.GetFont(FontOptions::FONT_TINY);
+	auto fontOpt = resourceLib.GetFont(FontOptions::FONT_LARGE);
 
 	if (!fontOpt.has_value())
 		return false;

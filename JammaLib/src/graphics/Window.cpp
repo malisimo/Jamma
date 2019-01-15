@@ -240,7 +240,10 @@ int Window::Create(HINSTANCE hInstance, int nCmdShow)
 	glEnable(GL_DEBUG_OUTPUT);
 	glDebugMessageCallback(Window::MessageCallback, 0);
 	
-	glEnable(GL_DEPTH_TEST);
+	// Need to re-enable this and disable depth rendering by fonts (semi transparent imgs)
+	//glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	LoadResources();
 	InitScene();
@@ -332,8 +335,6 @@ void APIENTRY Window::MessageCallback(GLenum source,
 		type, severity, message);
 }
 
-///////////////////////////////////////////////////////////
-
 LRESULT CALLBACK Window::WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
@@ -349,5 +350,6 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWnd, UINT message, WPARAM wParam,
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
 	}
-	return 0;		// message handled
+
+	return 0;
 }

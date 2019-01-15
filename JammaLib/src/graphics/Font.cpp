@@ -56,7 +56,6 @@ std::optional<std::unique_ptr<Font>> Font::Load(FontOptions::FontSize size,
 		texHeight = textureResource->Height();
 	}
 
-	// While we are able to get lines from the file
 	while (std::getline(inputFile, line))
 	{
 		linenum++;
@@ -73,7 +72,7 @@ std::optional<std::unique_ptr<Font>> Font::Load(FontOptions::FontSize size,
 		case 1:
 			while (ss >> param2)
 			{
-				charWidths.push_back(param2 + 1.0f);
+				charWidths.push_back(param2 + 10.0f);
 			}
 			break;
 		case 2:
@@ -143,36 +142,52 @@ std::string Font::GetFontName(FontOptions::FontSize size)
 
 GLuint Font::InitVertexArray(const std::string& str, GLenum usage)
 {
+	if (0 == _params.NumWidth)
+		return 0;
+
+	if (0 == _params.NumHeight)
+		return 0;
+
+	auto texWidth = 1U;
+	auto texHeight = 1U;
+	auto textureResource = _texture.lock();
+	if (textureResource)
+	{
+		texWidth = textureResource->Width();
+		texHeight = textureResource->Height();
+	}
+
+	auto du = (float)_params.GridSize / (float)texWidth;
+	auto dv = (float)_params.GridSize / (float)texHeight;
+
 	GLuint vao;
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
-	GLuint vbo;
-	glGenBuffers(1, &vbo);
+	GLuint vbo[2];
+	glGenBuffers(2, vbo);
 
 	auto numChars = str.size();
 	auto numVerts = numChars * 6;
-	std::vector<GLfloat> posUv(numVerts * 5);
+	std::vector<GLfloat> pos(numVerts * 5);
+	std::vector<GLfloat> uv(numVerts * 5);
+
+	auto currentPos = 0.0f;
 
 	for (unsigned int i = 0; i < numChars; i++)
 	{
-		FillPosUv(posUv, i, str[i]);
+		currentPos = FillPosUv(pos, uv, i, currentPos, str[i], du, dv);
 	}
 
-	static const GLfloat verts[] = {
-		-0.5f, -0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f,
-		-0.5f,  0.5f, 0.0f,
-		-0.5f,  0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f,
-		0.5f,  0.5f, 0.0f,
-	};
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, posUv.size() * sizeof(GLfloat), posUv.data(), usage);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+	glBufferData(GL_ARRAY_BUFFER, pos.size() * sizeof(GLfloat), pos.data(), GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5, 0);
 	glEnableVertexAttribArray(0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	glBufferData(GL_ARRAY_BUFFER, uv.size() * sizeof(GLfloat), uv.data(), GL_STATIC_DRAW);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(1);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
@@ -193,11 +208,9 @@ void Font::Draw(GlDrawContext& ctx, GLuint vertexArray, unsigned int numChars)
 	glUseProgram(shader->GetId());
 	shader->SetUniforms(ctx);
 
-	glBindVertexArray(vertexArray);
-
+ 	glBindVertexArray(vertexArray);
 	glBindTexture(GL_TEXTURE_2D, texture->GetId());
 
-	//glDrawArraysInstanced(GL_TRIANGLES, 0, VertexCount, 1);
 	glDrawArrays(GL_TRIANGLES, 0, numChars * 6);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -205,7 +218,7 @@ void Font::Draw(GlDrawContext& ctx, GLuint vertexArray, unsigned int numChars)
 	glUseProgram(0);
 }
 
-float Font::MeasureString(const std::string& str)
+float Font::MeasureString(const std::string& str) const
 {
 	const char* chars = str.c_str();
 	unsigned int len = (unsigned int)strlen(chars);
@@ -224,65 +237,12 @@ float Font::MeasureString(const std::string& str)
 	return totallength;
 }
 
-float Font::GetHeight()
+float Font::GetHeight() const
 {
 	return _params.CharHeight;
 }
 
-void Font::FillPosUv(std::vector<GLfloat> vec, unsigned int index, char c)
-{
-	if (0 == _params.NumWidth)
-		return;
-
-	if (0 == _params.NumHeight)
-		return;
-
-	float scal = 0.001f;
-	float z = -1.0f;
-	int startIndex = index * 5 * 6;
-	int row = c / _params.NumWidth;
-	int col = c % _params.NumWidth;
-	auto du = 1.0f / _params.NumWidth;
-	auto dv = 1.0f / _params.NumHeight;
-
-	vec[startIndex + 0] = scal * index * (float)_params.GridSize; // x1
-	vec[startIndex + 1] = scal * 0; // y1
-	vec[startIndex + 2] = scal * z; // z
-	vec[startIndex + 3] = scal * col * du; // u1
-	vec[startIndex + 4] = scal * row * dv; // v1
-
-	vec[startIndex + 5] = scal * index * (float)_params.GridSize; // x1
-	vec[startIndex + 6] = scal * (float)_params.GridSize; // y2
-	vec[startIndex + 7] = scal * z; // z
-	vec[startIndex + 8] = scal * col * du; // u1
-	vec[startIndex + 9] = scal * (row + 1) * dv; // v2
-
-	vec[startIndex + 10] = scal * (index + 1) * (float)_params.GridSize; // x2
-	vec[startIndex + 11] = scal * 0; // y1
-	vec[startIndex + 12] = scal * z; // z
-	vec[startIndex + 13] = scal * (col + 1) * du; // u2
-	vec[startIndex + 14] = scal * row * dv; // v1
-
-	vec[startIndex + 15] = scal * (index + 1) * (float)_params.GridSize; // x2
-	vec[startIndex + 16] = scal * 0; // y1
-	vec[startIndex + 17] = scal * z; // z
-	vec[startIndex + 18] = scal * (col + 1) * du; // u2
-	vec[startIndex + 19] = scal * row * dv; // v1
-
-	vec[startIndex + 20] = scal * index * (float)_params.GridSize; // x1
-	vec[startIndex + 21] = scal * (float)_params.GridSize; // y2
-	vec[startIndex + 22] = scal * z; // z
-	vec[startIndex + 23] = scal * col * du; // u1
-	vec[startIndex + 24] = scal * (row + 1) * dv; // v2
-
-	vec[startIndex + 25] = scal * index * (float)_params.GridSize; // x2
-	vec[startIndex + 26] = scal * (float)_params.GridSize; // y2
-	vec[startIndex + 27] = scal * z; // z
-	vec[startIndex + 28] = scal * (col + 1) * du; // u2
-	vec[startIndex + 29] = scal * (row + 1) * dv; // v2
-}
-
-int Font::GetCharNum(char c)
+int Font::GetCharNum(char c) const
 {
 	if (c == 32)
 		return (int)_params.SpaceChar;
@@ -295,6 +255,80 @@ int Font::GetCharNum(char c)
 		return charnum;
 
 	return (int)_params.SpaceChar;
+}
+
+float Font::FillPosUv(std::vector<GLfloat>& pos,
+	std::vector<GLfloat>& uv,
+	unsigned int index,
+	float xOffset,
+	char c,
+	float du,
+	float dv) const
+{
+	if (0 == _params.NumWidth)
+		return xOffset;
+
+	if (0 == _params.NumHeight)
+		return xOffset;
+
+	float scal = 1.0f;
+	float z = 0.0f;
+
+	auto charNum = GetCharNum(c);
+	auto charWidth = (float)_params.GridSize;
+	if (charNum >= 0)
+		charWidth = (float)((int)(_charWidths[charNum] + 0.5f));
+
+	int posStartIndex = index * 3 * 6;
+	int uvStartIndex = index * 2 * 6;
+	int row = charNum / _params.NumWidth;
+	int col = charNum % _params.NumWidth;
+
+	// Position
+	pos[posStartIndex + 0] = scal * xOffset; // x1
+	pos[posStartIndex + 1] = scal * 0.0f; // y1
+	pos[posStartIndex + 2] = scal * z; // z
+
+	pos[posStartIndex + 3] = scal * xOffset; // x1
+	pos[posStartIndex + 4] = scal * _params.GridSize; // y2
+	pos[posStartIndex + 5] = scal * z; // z
+
+	pos[posStartIndex + 6] = scal * (xOffset + _params.GridSize); // x2
+	pos[posStartIndex + 7] = scal * 0.0f; // y1
+	pos[posStartIndex + 8] = scal * z; // z
+
+	pos[posStartIndex + 9] = scal * (xOffset + _params.GridSize); // x2
+	pos[posStartIndex + 10] = scal * 0.0f; // y1
+	pos[posStartIndex + 11] = scal * z; // z
+
+	pos[posStartIndex + 12] = scal * xOffset; // x1
+	pos[posStartIndex + 13] = scal * _params.GridSize; // y2
+	pos[posStartIndex + 14] = scal * z; // z
+
+	pos[posStartIndex + 15] = scal * (xOffset + _params.GridSize); // x2
+	pos[posStartIndex + 16] = scal * _params.GridSize; // y2
+	pos[posStartIndex + 17] = scal * z; // z
+
+	// Texture coords
+	uv[uvStartIndex + 0] = col * du; // u1
+	uv[uvStartIndex + 1] = 1.0f - (row + 1) * dv; // v2
+	
+	uv[uvStartIndex + 2] = col * du; // u1
+	uv[uvStartIndex + 3] = 1.0f - row * dv; // v1
+	
+	uv[uvStartIndex + 4] = (col + 1) * du; // u2
+	uv[uvStartIndex + 5] = 1.0f - (row + 1) * dv; // v2
+	
+	uv[uvStartIndex + 6] = (col + 1) * du; // u2
+	uv[uvStartIndex + 7] = 1.0f - (row + 1) * dv; // v2
+	
+	uv[uvStartIndex + 8] = col * du; // u1
+	uv[uvStartIndex + 9] = 1.0f - row * dv; // v1
+
+	uv[uvStartIndex + 10] = (col + 1) * du; // u2
+	uv[uvStartIndex + 11] = 1.0f - row * dv; // v1
+
+	return xOffset + charWidth;
 }
 
 std::string Font::GetFontFilename(FontOptions::FontSize size)

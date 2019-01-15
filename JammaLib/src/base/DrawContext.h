@@ -13,5 +13,9 @@ public:
 	{
 		return DEFAULT;
 	}
+
+public:
+	unsigned int Width;
+	unsigned int Height;
 };
 

@@ -27,10 +27,12 @@ public:
 		_width(other._width),
 		_height(other._height),
 		_mvp(other._mvp),
+		_overlayMvp(other._overlayMvp),
 		_image(std::move(other._image))
 	{
 		other._image = std::make_unique<Image>();
 		other._mvp = glm::mat4();
+		other._overlayMvp = glm::mat4();
 	}
 
 	Scene& operator=(Scene &&other)
@@ -39,6 +41,7 @@ public:
 		{
 			Release();
 			std::swap(_mvp, other._mvp);
+			std::swap(_overlayMvp, other._overlayMvp);
 			_image.swap(other._image);
 		}
 
@@ -59,6 +62,7 @@ private:
 	int _width;
 	int _height;
 	glm::mat4 _mvp;
+	glm::mat4 _overlayMvp;
 	std::unique_ptr<GuiLabel> _label;
 	std::unique_ptr<Image> _image;
 };

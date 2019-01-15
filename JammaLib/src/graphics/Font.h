@@ -107,8 +107,8 @@ public:
 
 	GLuint InitVertexArray(const std::string& str, GLenum usage);
 	void Draw(GlDrawContext& ctx, GLuint vertexArray, unsigned int numChars);
-	float MeasureString(const std::string& str);
-	float GetHeight();
+	float MeasureString(const std::string& str) const;
+	float GetHeight() const;
 
 	static std::optional<std::unique_ptr<Font>> Load(FontOptions::FontSize size,
 		std::weak_ptr<TextureResource> texture,
@@ -116,8 +116,14 @@ public:
 	static std::string GetFontName(FontOptions::FontSize size);
 
 private:
-	void FillPosUv(std::vector<GLfloat> vec, unsigned int index, char c);
-	int GetCharNum(char c);
+	int GetCharNum(char c) const;
+	float FillPosUv(std::vector<GLfloat>& pos,
+		std::vector<GLfloat>& uv,
+		unsigned int index,
+		float xOffset,
+		char c,
+		float du,
+		float dv) const;
 
 	static std::string GetFontFilename(FontOptions::FontSize size);
 

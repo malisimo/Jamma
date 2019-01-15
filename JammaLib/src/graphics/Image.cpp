@@ -29,7 +29,7 @@ void Image::Draw(DrawContext& ctx)
 	auto texture = _texture.lock();
 	auto shader = _shader.lock();
 
-	if (!texture && !shader)
+	if (!texture || !shader)
 		return;
 
 	glUseProgram(shader->GetId());

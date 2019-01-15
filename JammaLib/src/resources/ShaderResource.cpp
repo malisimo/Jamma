@@ -57,6 +57,7 @@ void ShaderResource::SetUniforms(GlDrawContext& ctx)
 	for (auto uniform : _uniforms)
 	{
 		auto uniformOpt = ctx.GetUniform(uniform.first);
+		GLint mvloc = glGetUniformLocation(_shaderProgram, "dummy");
 
 		if (uniformOpt.has_value())
 		{

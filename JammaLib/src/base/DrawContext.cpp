@@ -1,6 +1,8 @@
 #include "DrawContext.h"
 
-DrawContext::DrawContext()
+DrawContext::DrawContext() :
+	Width(0),
+	Height(0)
 {
 }
 
