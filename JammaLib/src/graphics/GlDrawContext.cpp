@@ -13,7 +13,7 @@ std::optional<std::any> GlDrawContext::GetUniform(std::string name)
 	auto it = _uniforms.find(name);
 
 	if (it != _uniforms.end())
-		return std::optional<std::any>(it->second);
+		return it->second;
 
 	return std::nullopt;
 }

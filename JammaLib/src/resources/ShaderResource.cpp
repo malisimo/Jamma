@@ -57,7 +57,6 @@ void ShaderResource::SetUniforms(GlDrawContext& ctx)
 	for (auto uniform : _uniforms)
 	{
 		auto uniformOpt = ctx.GetUniform(uniform.first);
-		GLint mvloc = glGetUniformLocation(_shaderProgram, "dummy");
 
 		if (uniformOpt.has_value())
 		{
@@ -69,6 +68,16 @@ void ShaderResource::SetUniforms(GlDrawContext& ctx)
 				glUniform1f(uniform.second, std::any_cast<float&>(val));
 			else if (val.type() == typeid(glm::mat4))
 				glUniformMatrix4fv(uniform.second, 1, GL_FALSE, glm::value_ptr(std::any_cast<glm::mat4&>(val)));
+			else if (val.type() == typeid(std::vector<glm::mat4>))
+			{
+				auto stack = std::any_cast<std::vector<glm::mat4>>(val);
+				auto collapsed = glm::mat4(1.0);
+				for (auto m : stack)
+				{
+					collapsed *= m;
+				}
+				glUniformMatrix4fv(uniform.second, 1, GL_FALSE, glm::value_ptr(collapsed));
+			}
 		}
 	}
 
