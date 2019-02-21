@@ -1,6 +1,7 @@
 #include "Audible.h"
 
-Audible::Audible()
+Audible::Audible(AudibleParams params) :
+	_audibleParams(params)
 {
 }
 

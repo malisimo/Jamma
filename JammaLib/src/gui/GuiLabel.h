@@ -1,20 +1,35 @@
 #pragma once
 
 #include <memory>
+#include "GuiElement.h"
 #include "Drawable.h"
 #include "../graphics/Font.h"
 #include "../resources/ResourceLib.h"
 
-class GuiLabel : public Drawable
+class GuiLabelParams : public GuiElementParams
 {
 public:
-	GuiLabel(const std::string& str);
-	~GuiLabel() { Release(); }
+	GuiLabelParams(GuiElementParams params,
+		std::string string) :
+		GuiElementParams(params),
+		String(string)
+	{}
 
 public:
-	bool Init(ResourceLib& resourceLib);
+	std::string String;
+};
+
+class GuiLabel :
+	public GuiElement
+{
+public:
+	GuiLabel(GuiLabelParams guiParams);
+	~GuiLabel() { ReleaseResources(); }
+
+public:
 	virtual void Draw(DrawContext& ctx) override;
-	virtual bool Release() override;
+	virtual bool InitResources(ResourceLib& resourceLib) override;
+	virtual bool ReleaseResources() override;
 
 private:
 	bool InitVertexArray();
@@ -26,4 +41,3 @@ private:
 	std::weak_ptr<ShaderResource> _shader;
 	std::weak_ptr<Font> _font;
 };
-

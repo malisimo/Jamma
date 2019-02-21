@@ -1,11 +1,9 @@
 #include "Vst.h"
 
-
-
-Vst::Vst()
+Vst::Vst() :
+	Audible(AudibleParams{})
 {
 }
-
 
 Vst::~Vst()
 {

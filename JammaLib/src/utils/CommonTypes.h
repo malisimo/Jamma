@@ -1,0 +1,77 @@
+#pragma once
+
+struct Position2d
+{
+	int X;
+	int Y;
+
+	Position2d operator+(const Position2d& a) const
+	{
+		return { a.X + X, a.Y + Y };
+	}
+
+	Position2d operator-(const Position2d& a) const
+	{
+		return { a.X - X, a.Y - Y };
+	}
+
+	Position2d operator*(const Position2d& a) const
+	{
+		return { a.X * X, a.Y * Y };
+	}
+
+	bool operator==(const Position2d& a) const
+	{
+		return (a.X == X && a.Y == Y);
+	}
+
+	static Position2d Clamp(Position2d v, Position2d vMin, Position2d vMax)
+	{
+		return Position2d{
+			v.X < vMin.X ? vMin.X : v.X > vMax.X ? vMax.X : v.X,
+			v.Y < vMin.Y ? vMin.Y : v.Y > vMax.Y ? vMax.Y : v.Y
+		};
+	}
+};
+
+struct Size2d
+{
+	unsigned int Width;
+	unsigned int Height;
+
+	Size2d operator+(const Size2d& a) const
+	{
+		return { a.Width + Width, a.Height + Height };
+	}
+
+	Size2d operator-(const Size2d& a) const
+	{
+		return { a.Width - Width, a.Height - Height };
+	}
+
+	Size2d operator*(const Size2d& a) const
+	{
+		return { a.Width * Width, a.Height * Height };
+	}
+
+	bool operator==(const Size2d& a) const
+	{
+		return (a.Width == Width && a.Height == Height);
+	}
+
+	static Size2d Clamp(Size2d v, Size2d vMin, Size2d vMax)
+	{
+		auto newSize = v;
+
+		if (v.Width < vMin.Width)
+			newSize.Width = vMin.Width;
+		if (v.Width > vMax.Width)
+			newSize.Width = vMax.Width;
+		if (v.Height < vMin.Height)
+			newSize.Height = vMin.Height;
+		if (v.Height > vMax.Height)
+			newSize.Height = vMax.Height;
+
+		return newSize;
+	}
+};

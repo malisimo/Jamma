@@ -175,6 +175,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\gui\GuiSlider.h" />
+    <ClInclude Include="src\base\Moveable.h" />
+    <ClInclude Include="src\base\Sizeable.h" />
+    <ClInclude Include="src\utils\CommonTypes.h" />
+    <ClInclude Include="src\actions\CursorAction.h" />
+    <ClInclude Include="src\actions\KeyAction.h" />
+    <ClInclude Include="src\actions\TouchAction.h" />
+    <ClInclude Include="src\actions\TouchMoveAction.h" />
+    <ClInclude Include="src\gui\GuiGrid.h" />
+    <ClInclude Include="src\base\GuiElement.h" />
     <ClInclude Include="src\utils\ImageUtils.h" />
     <ClInclude Include="src\gui\GuiLabel.h" />
     <ClInclude Include="src\utils\FunctionUtils.h" />
@@ -197,9 +207,8 @@
     <ClInclude Include="src\base\ActionSender.h" />
     <ClInclude Include="src\io\LoopFile.h" />
     <ClInclude Include="src\audio\AudioFader.h" />
-    <ClInclude Include="src\gui\GuiTexture.h" />
+    <ClInclude Include="src\gui\GuiButton.h" />
     <ClInclude Include="src\gui\GuiModel.h" />
-    <ClInclude Include="src\gui\GuiPanel.h" />
     <ClInclude Include="src\base\ActionReceiver.h" />
     <ClInclude Include="src\engine\Loop.h" />
     <ClInclude Include="src\base\Action.h" />
@@ -214,6 +223,8 @@
     <ClInclude Include="src\engine\UndoHistory.h" />
     <ClInclude Include="src\audio\WavReadWriter.h" />
     <ClInclude Include="src\resources\TextureResource.h" />
+    <ClInclude Include="src\base\Touchable.h" />
+    <ClInclude Include="src\actions\WindowAction.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\glew\glew.h" />
@@ -221,6 +232,15 @@
     <ClInclude Include="lib\rtaudio\RtAudio.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\gui\GuiSlider.cpp" />
+    <ClCompile Include="src\base\Moveable.cpp" />
+    <ClCompile Include="src\base\Sizeable.cpp" />
+    <ClCompile Include="src\actions\CursorAction.cpp" />
+    <ClCompile Include="src\actions\KeyAction.cpp" />
+    <ClCompile Include="src\actions\TouchAction.cpp" />
+    <ClCompile Include="src\actions\TouchMoveAction.cpp" />
+    <ClCompile Include="src\gui\GuiGrid.cpp" />
+    <ClCompile Include="src\base\GuiElement.cpp" />
     <ClCompile Include="src\utils\ImageUtils.cpp" />
     <ClCompile Include="src\gui\GuiLabel.cpp" />
     <ClCompile Include="src\resources\ShaderResource.cpp" />
@@ -235,9 +255,8 @@
     <ClCompile Include="src\base\ActionSender.cpp" />
     <ClCompile Include="src\io\LoopFile.cpp" />
     <ClCompile Include="src\audio\AudioFader.cpp" />
-    <ClCompile Include="src\gui\GuiTexture.cpp" />
+    <ClCompile Include="src\gui\GuiButton.cpp" />
     <ClCompile Include="src\gui\GuiModel.cpp" />
-    <ClCompile Include="src\gui\GuiPanel.cpp" />
     <ClCompile Include="src\base\ActionReceiver.cpp" />
     <ClCompile Include="src\engine\Loop.cpp" />
     <ClCompile Include="src\base\Action.cpp" />
@@ -250,6 +269,8 @@
     <ClCompile Include="src\engine\UndoHistory.cpp" />
     <ClCompile Include="src\audio\WavReadWriter.cpp" />
     <ClCompile Include="src\resources\TextureResource.cpp" />
+    <ClCompile Include="src\base\Touchable.cpp" />
+    <ClCompile Include="src\actions\WindowAction.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\graphics\Window.h" />

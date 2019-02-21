@@ -19,7 +19,6 @@
 #include <memory>
 #include <gl/glew.h>
 #include <gl/gl.h>
-#include "Drawable.h"
 #include "../resources/TextureResource.h"
 #include "../resources/ShaderResource.h"
 #include "../graphics/GlDrawContext.h"
@@ -29,19 +28,19 @@ namespace FontOptions
 {
 	enum FontSize
 	{
-		FONT_TINY = 0,
-		FONT_SMALL = 1,
-		FONT_MEDIUM = 2,
-		FONT_LARGE = 3
+		FONT_TINY,
+		FONT_SMALL,
+		FONT_MEDIUM,
+		FONT_LARGE
 	};
 
 	static const FontOptions::FontSize FontSizes[] = { FontOptions::FONT_LARGE, FontOptions::FONT_MEDIUM, FontOptions::FONT_SMALL, FontOptions::FONT_TINY };
 
 	enum TextAlign
 	{
-		TEXTALIGN_LEFT = 0,
-		TEXTALIGN_RIGHT = 1,
-		TEXTALIGN_CENTRE = 2
+		TEXTALIGN_LEFT,
+		TEXTALIGN_RIGHT,
+		TEXTALIGN_CENTRE
 	};
 
 	struct Colour

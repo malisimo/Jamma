@@ -1,11 +1,9 @@
 #include "Loop.h"
 
-
-
-Loop::Loop()
+Loop::Loop() :
+	Audible(AudibleParams{})
 {
 }
-
 
 Loop::~Loop()
 {

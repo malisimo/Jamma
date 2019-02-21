@@ -9,15 +9,27 @@
 #include "glm/glm.hpp"
 
 #include "Drawable.h"
+#include "Sizeable.h"
 #include "../resources/ResourceLib.h"
 #include "GlUtils.h"
 
-class Image :
-	public Drawable
+class ImageParams : public DrawableParams, public SizeableParams
 {
 public:
-	Image();
-	~Image() { Release(); }
+	ImageParams(DrawableParams drawParams,
+		SizeableParams sizeParams) :
+		DrawableParams(drawParams),
+		SizeableParams(sizeParams)
+	{}
+};
+
+class Image :
+	public Drawable,
+	public Sizeable
+{
+public:
+	Image(ImageParams drawParams);
+	~Image() { ReleaseResources(); }
 
 	// Copy
 	Image(const Image &) = delete;
@@ -25,6 +37,8 @@ public:
 
 	// Move
 	Image(Image &&other) :
+		Drawable(other._drawParams),
+		Sizeable(other._sizeParams),
 		_vertexArray(other._vertexArray),
 		_vertexBuffer{ other._vertexBuffer[0], other._vertexBuffer[1] },
 		_texture(std::move(other._texture)),
@@ -41,7 +55,7 @@ public:
 	{
 		if (this != &other)
 		{
-			Release();
+			ReleaseResources();
 			std::swap(_vertexArray, other._vertexArray);
 			std::swap(_vertexBuffer, other._vertexBuffer);
 			_texture.swap(other._texture);
@@ -52,15 +66,12 @@ public:
 	}
 
 public:
-	virtual bool Init(ResourceLib& resourceLib);
-	virtual void Draw(DrawContext& ctx);
-	virtual bool Release();
+	virtual void Draw(DrawContext& ctx) override;
+	virtual bool InitResources(ResourceLib& resourceLib) override;
+	virtual bool ReleaseResources() override;
 	
 private:
 	const int VertexCount = 6;
-
-	int _width;
-	int _height;
 
 	GLuint _vertexArray;
 	GLuint _vertexBuffer[2];
@@ -72,4 +83,3 @@ private:
 	bool InitShader(ResourceLib& resourceLib);
 	bool InitVertexArray();
 };
-

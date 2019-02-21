@@ -1,6 +1,8 @@
 #include "GuiModel.h"
 
-GuiModel::GuiModel()
+GuiModel::GuiModel(GuiModelParams params) :
+	GuiElement(params),
+	_modelParams(params)
 {
 }
 

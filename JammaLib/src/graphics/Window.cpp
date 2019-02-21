@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////
 //
-// Copyright(c) 2018-2019 Matt Jones
+// Author 2019 Matt Jones
 // Subject to the MIT license, see LICENSE file.
 //
 ///////////////////////////////////////////////////////////
@@ -8,19 +8,18 @@
 #include "Window.h"
 #include "StringUtils.h"
 
-///////////////////////////////////////////////////////////
-
 Window::Window(Scene& scene,
 	ResourceLib& resourceLib) :
 	_scene(scene),
 	_resourceLib(resourceLib),
-	_style(WS_CAPTION | WS_SYSMENU | WS_CLIPSIBLINGS | WS_CLIPCHILDREN)
+	_style(WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN),
+	_resizing(false),
+	_trackingMouse(false),
+	_buttonsDown(0)
 {
-	_config.Width = scene.Width();
-	_config.Height = scene.Height();
-	_config.PosX = CW_USEDEFAULT;
-	_config.PosY = 0;
-	_config.Windowed = true;
+	_config.Size = { scene.Width(), scene.Height() };
+	_config.Position = { CW_USEDEFAULT, 0};
+	_config.State = WINDOWED;
 }
 
 Window::~Window()
@@ -68,7 +67,7 @@ void Window::LoadResources()
 
 void Window::InitScene()
 {
-	_scene.Init(_resourceLib);
+	_scene.InitResources(_resourceLib);
 }
 
 void Window::ShowMessage(LPCWSTR message)
@@ -78,22 +77,28 @@ void Window::ShowMessage(LPCWSTR message)
 
 int Window::Create(HINSTANCE hInstance, int nCmdShow)
 {
-	_windowClass = MAKEINTATOM(RegisterClass(hInstance));
+	//_windowClass = MAKEINTATOM([&](auto& hInstance){return Window::RegisterClass(hInstance, window)}());
+	//_windowClass = MAKEINTATOM(Window::RegisterClass(hInstance));
+	//_windowClass = reinterpret_cast<LPCWSTR>(static_cast<ULONG_PTR>(static_cast<WORD>(Window::Register(hInstance))));
+	_windowClass = MAKEINTATOM(Window::Register(hInstance));
 	if (_windowClass == 0) {
 		ShowMessage(L"registerClass() failed.");
 		return 1;
 	}
 
 	// Temporary window creation to get supported formats
-	HWND fakeWND = CreateWindow(
+	HWND fakeWND = CreateWindowEx(
+		0,
 		_windowClass, L"Fake Window",
 		_style,
 		0, 0,						// Position x, y
 		1, 1,						// width, height
-		NULL, NULL,					// parent window, menu
-		hInstance, NULL);			// instance, param
+		nullptr, nullptr,					// parent window, menu
+		hInstance, nullptr);			// instance, param
 
 	HDC fakeDC = GetDC(fakeWND);	// Device Context
+
+	//DwmExtendFrameIntoClientArea
 
 	PIXELFORMATDESCRIPTOR fakePFD;
 	ZeroMemory(&fakePFD, sizeof(fakePFD));
@@ -128,7 +133,7 @@ int Window::Create(HINSTANCE hInstance, int nCmdShow)
 		return 1;
 	}
 
-	// get pointers to functions (or init opengl loader here)
+	// Get pointers to functions (or init opengl loader here)
 	PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB = nullptr;
 	wglChoosePixelFormatARB = reinterpret_cast<PFNWGLCHOOSEPIXELFORMATARBPROC>(wglGetProcAddress("wglChoosePixelFormatARB"));
 	if (wglChoosePixelFormatARB == nullptr)
@@ -153,20 +158,21 @@ int Window::Create(HINSTANCE hInstance, int nCmdShow)
 		return 1;
 	}
 
-	if (_config.Windowed == true)
+	if (WINDOWED == _config.State)
 	{
 		AdjustSize();
 		Center();
 	}
 
-	// create a new window and context
-	_wnd = CreateWindow(
+	// Create a new window and context
+	_wnd = CreateWindowEx(
+		WS_EX_ACCEPTFILES,
 		_windowClass, L"OpenGL Window",	// class name, window name
 		_style,							// styles
-		_config.PosX, _config.PosY,		// posx, posy. If x is set to CW_USEDEFAULT y is ignored
-		_config.Width, _config.Height,	// width, height
-		NULL, NULL,						// parent window, menu
-		hInstance, NULL);				// instance, param
+		_config.Position.X, _config.Position.Y,		// posx, posy. If x is set to CW_USEDEFAULT y is ignored
+		_config.Size.Width, _config.Size.Height,	// width, height
+		nullptr, nullptr,						// parent window, menu
+		hInstance, this);				// instance, param
 
 	_dc = GetDC(_wnd);
 
@@ -186,7 +192,7 @@ int Window::Create(HINSTANCE hInstance, int nCmdShow)
 	};
 
 	int pixelFormatID; UINT numFormats;
-	const bool status = wglChoosePixelFormatARB(_dc, pixelAttribs, NULL, 1, &pixelFormatID, &numFormats);
+	const bool status = wglChoosePixelFormatARB(_dc, pixelAttribs, nullptr, 1, &pixelFormatID, &numFormats);
 
 	if (status == false || numFormats == 0)
 	{
@@ -209,13 +215,13 @@ int Window::Create(HINSTANCE hInstance, int nCmdShow)
 	};
 
 	_rc = wglCreateContextAttribsARB(_dc, 0, contextAttribs);
-	if (_rc == NULL) {
+	if (_rc == nullptr) {
 		ShowMessage(L"wglCreateContextAttribsARB() failed.");
 		return 1;
 	}
 
 	// Delete temporary context and window
-	wglMakeCurrent(NULL, NULL);
+	wglMakeCurrent(nullptr, nullptr);
 	wglDeleteContext(fakeRC);
 	ReleaseDC(fakeWND, fakeDC);
 	DestroyWindow(fakeWND);
@@ -260,34 +266,76 @@ int Window::Create(HINSTANCE hInstance, int nCmdShow)
 	return 0;
 }
 
-ATOM Window::RegisterClass(HINSTANCE hInstance)
+void Window::SetWindowHandle(HWND wnd)
 {
-	WNDCLASSEX wcex;
-	ZeroMemory(&wcex, sizeof(wcex));
-	wcex.cbSize = sizeof(wcex);
-	wcex.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-	wcex.lpfnWndProc = WindowProcedure;
-	wcex.hInstance = hInstance;
-	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wcex.lpszClassName = TEXT("Core");
-
-	return RegisterClassEx(&wcex);
+	_wnd = wnd;
 }
 
 void Window::AdjustSize()
 {
-	RECT rect = { 0, 0, _config.Width, _config.Height };
+	RECT rect = { 0, 0, (LONG)_config.Size.Width, (LONG)_config.Size.Height };
 	AdjustWindowRect(&rect, _style, false);
-	_config.Width = rect.right - rect.left;
-	_config.Height = rect.bottom - rect.top;
+
+	long w = rect.right - rect.left;
+	long h = rect.bottom - rect.top;
+
+	_config.Size = {
+		w < 1 ? 1 : (unsigned int)w, 
+		h < 1 ? 1 : (unsigned int)h };
+
+	_scene.SetSize(_config.Size);
+}
+
+Window::Config Window::GetConfig() const
+{
+	return _config;
+}
+
+Size2d Window::GetMinSize() const
+{
+	return { 200, 200 };
+}
+
+bool Window::IsFullscreen() const
+{
+	return FULLSCREEN == _config.State;
+}
+
+bool Window::IsResizing() const
+{
+	return _resizing;
+}
+
+void Window::SetResizing(bool resizing)
+{
+	_resizing = resizing;
+}
+
+bool Window::IsTrackingMouse() const
+{
+	return _trackingMouse;
+}
+
+void Window::SetTrackingMouse(bool tracking)
+{
+	_trackingMouse = tracking;
+}
+
+void Window::Resize(Size2d size, WindowState state)
+{
+}
+
+void Window::SetWindowState(WindowState state)
+{
+	_config.State = state;
 }
 
 void Window::Center()
 {
 	RECT primaryDisplaySize;
 	SystemParametersInfo(SPI_GETWORKAREA, 0, &primaryDisplaySize, 0);
-	_config.PosX = (primaryDisplaySize.right - _config.Width) / 2;
-	_config.PosY = (primaryDisplaySize.bottom - _config.Height) / 2;
+	_config.Position.X = (primaryDisplaySize.right - (int)_config.Size.Width) / 2;
+	_config.Position.Y = (primaryDisplaySize.bottom - (int)_config.Size.Height) / 2;
 }
 
 void Window::Render()
@@ -305,7 +353,7 @@ void Window::Swap()
 
 void Window::Release()
 {
-	wglMakeCurrent(NULL, NULL);
+	wglMakeCurrent(nullptr, nullptr);
 
 	if (_rc)
 		wglDeleteContext(_rc);
@@ -317,9 +365,60 @@ void Window::Release()
 		DestroyWindow(_wnd);
 }
 
-Window::Config Window::GetConfig()
+void Window::OnAction(WindowAction winAction)
 {
-	return _config;
+	switch (winAction.WindowEventType)
+	{
+	case WindowAction::SIZE:
+		_config.Size = winAction.Size;
+		AdjustSize();
+		break;
+	case WindowAction::SIZE_MINIMISE:
+		SetWindowState(Window::MINIMISED);
+		break;
+	case WindowAction::SIZE_MAXIMISE:
+		SetWindowState(Window::MAXIMISED);
+		_config.Size = winAction.Size;
+		AdjustSize();
+	case WindowAction::DESTROY:
+		break;
+	}
+}
+
+void Window::OnAction(TouchAction touchAction)
+{
+	switch (touchAction.Touch)
+	{
+	case TouchAction::TOUCH_MOUSE:
+		if (0 == _buttonsDown)
+			SetCapture(_wnd);
+
+		switch (touchAction.State)
+		{
+		case TouchAction::TOUCH_DOWN:
+			_buttonsDown |= touchAction.Index;
+			break;
+		case TouchAction::TOUCH_UP:
+			_buttonsDown &= ~touchAction.Index;
+
+			if (_buttonsDown == 0)
+				ReleaseCapture();
+			break;
+		}
+		break;
+	}
+
+	_scene.OnAction(touchAction);
+}
+
+void Window::OnAction(TouchMoveAction touchAction)
+{
+	_scene.OnAction(touchAction);
+}
+
+void Window::OnAction(KeyAction keyAction)
+{
+	_scene.OnAction(keyAction);
 }
 
 void APIENTRY Window::MessageCallback(GLenum source,
@@ -335,21 +434,427 @@ void APIENTRY Window::MessageCallback(GLenum source,
 		type, severity, message);
 }
 
-LRESULT CALLBACK Window::WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+ATOM Window::Register(HINSTANCE hInstance)
 {
-	switch (message)
-	{
-		case WM_KEYDOWN:
-			if (wParam == VK_ESCAPE)
-				PostQuitMessage(0);
+	WNDCLASSEX wcex;
+	ZeroMemory(&wcex, sizeof(wcex));
+	wcex.cbSize = sizeof(wcex);
+	InitStyle(wcex);
+	wcex.lpfnWndProc = WindowProcedure;
+	wcex.hInstance = hInstance;
+	wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
+	wcex.lpszClassName = TEXT("JammaWindow");
 
-			break;
-		case WM_CLOSE:
-			PostQuitMessage(0);
-			break;
-		default:
-			return DefWindowProc(hWnd, message, wParam, lParam);
+	return RegisterClassEx(&wcex);
+}
+
+void Window::InitStyle(WNDCLASSEX& wcex) noexcept
+{
+	//wcex.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_BTNFACE + 1);
+	wcex.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+}
+
+LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wParam, LPARAM lParam) noexcept
+{
+	Window* window = nullptr;
+
+	if (message == WM_NCCREATE)
+	{
+		window = reinterpret_cast<Window*>(reinterpret_cast<CREATESTRUCT*>(lParam)->lpCreateParams);
+		SetWindowLongPtr(hWindow, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(window));
+		
+		if (window)
+			window->SetWindowHandle(hWindow);
+	}
+	else
+	{
+		window = reinterpret_cast<Window*>(GetWindowLongPtr(hWindow, GWLP_USERDATA));
 	}
 
-	return 0;
+	if (!window)
+		return 0;
+
+	switch (message)
+	{
+	case WM_COMMAND:
+	{
+		return 0;
+	}
+	case WM_SIZE:
+	{
+		if (!window->IsFullscreen())
+		{
+			WindowAction winAction;
+
+			switch (wParam)
+			{
+			case SIZE_MINIMIZED:
+				winAction.WindowEventType = WindowAction::SIZE_MINIMISE;
+				break;
+			case SIZE_MAXIMIZED:
+				winAction.WindowEventType = WindowAction::SIZE_MAXIMISE;
+				break;
+			default:
+				winAction.WindowEventType = WindowAction::SIZE;
+				break;
+			}
+			winAction.Size = { LOWORD(lParam), HIWORD(lParam) };
+			window->OnAction(winAction);
+		}
+
+		// If the device is not nullptr and the WM_SIZE message is not a
+		// SIZE_MINIMIZED event, store the new dimensions so we can
+		// reset the device once sizing has finished.
+		//if (!window->IsFullscreen())
+		//{
+		//	if (/*(_device() != nullptr) &&*/ (wParam != SIZE_MINIMIZED))
+		//	{
+		//		WindowState windowState = WINDOWED;
+
+		//		if (wParam == SIZE_MAXIMIZED)
+		//			windowState = MAXIMISED;
+
+		//		Size2d size = { LOWORD(lParam), HIWORD(lParam) };
+		//		window->Resize(size, windowState);
+
+		//		/*if (wParam == SIZE_MAXIMIZED)
+		//		WinMan->Reset();
+		//		else if ((wParam == SIZE_RESTORED) && (!_resizing))
+		//		WinMan->Reset();*/
+		//	}
+		//}
+	}
+	break;
+	case WM_SIZING:
+		window->Render();
+		window->Swap();
+		break;
+	case WM_GETMINMAXINFO:
+	{
+		// Window size/position is going to change
+		// Intercept lParam pointer to MINMAXINFO structure and apply custom dimensions
+		MINMAXINFO* MinMaxInfo = (MINMAXINFO*)lParam;
+
+		auto min = window->GetMinSize();
+
+		MinMaxInfo->ptMinTrackSize.x = (long)min.Width;
+		MinMaxInfo->ptMinTrackSize.y = (long)min.Height;
+	}
+	case WM_ENTERSIZEMOVE:
+	{
+		if (window->IsResizing())
+		{
+			window->SetResizing(false);
+		}
+	}
+	break;
+	case WM_ERASEBKGND:
+	{
+		// Disable background painting during resize
+		// (otherwise we get horrid white flickering).
+		if (window->IsResizing())
+		{
+			return 0;
+		}
+	}
+	break;
+	case WM_CAPTURECHANGED:
+	{
+		if (window->IsResizing())
+		{
+			window->SetResizing(false);
+		}
+	}
+	break;
+	case WM_EXITSIZEMOVE:
+	{
+		if (window->IsResizing())
+		{
+			window->SetResizing(false);
+		}
+	}
+	break;
+	case WM_SETCURSOR:
+	{
+		/*MOUSEOVERSTATE mouseoverstate = MOUSEOVER_NORMAL;
+
+		if (Component::MasterOverComponent() != nullptr)
+		mouseoverstate = Component::MasterOverComponent()->MouseOverState();
+
+		switch (mouseoverstate)
+		{
+		case MOUSEOVER_HAND:
+		SetCursor(HandCursor);
+		break;
+		case MOUSEOVER_OPENHAND:
+		SetCursor(OpenHandCursor);
+		break;
+		case MOUSEOVER_CLOSEDHAND:
+		SetCursor(ClosedHandCursor);
+		break;
+		case MOUSEOVER_CARET:
+		SetCursor(CaretCursor);
+		break;
+		default:
+		SetCursor(ArrowCursor);
+		break;
+		}*/
+	}
+	break;
+	case WM_LBUTTONDOWN:
+	{
+		int x = GET_X_LPARAM(lParam);
+		int y = GET_Y_LPARAM(lParam);
+
+		TouchAction touchAction;
+		touchAction.Touch = TouchAction::TOUCH_MOUSE;
+		touchAction.State = TouchAction::TOUCH_DOWN;
+		touchAction.Index = 0;
+		touchAction.Position = { x, y };
+
+		window->OnAction(touchAction);
+
+		return 0;
+	}
+	case WM_LBUTTONUP:
+	{
+		int x = GET_X_LPARAM(lParam);
+		int y = GET_Y_LPARAM(lParam);
+
+		TouchAction touchAction;
+		touchAction.Touch = TouchAction::TOUCH_MOUSE;
+		touchAction.State = TouchAction::TOUCH_UP;
+		touchAction.Index = 0;
+		touchAction.Position = { x, y };
+
+		window->OnAction(touchAction);
+
+		return 0;
+	}
+	case WM_RBUTTONDOWN:
+	{
+		int x = GET_X_LPARAM(lParam);
+		int y = GET_Y_LPARAM(lParam);
+
+		TouchAction touchAction;
+		touchAction.Touch = TouchAction::TOUCH_MOUSE;
+		touchAction.State = TouchAction::TOUCH_DOWN;
+		touchAction.Index = 2;
+		touchAction.Position = { x, y };
+
+		window->OnAction(touchAction);
+
+		return 0;
+	}
+	case WM_RBUTTONUP:
+	{
+		int x = GET_X_LPARAM(lParam);
+		int y = GET_Y_LPARAM(lParam);
+
+		TouchAction touchAction;
+		touchAction.Touch = TouchAction::TOUCH_MOUSE;
+		touchAction.State = TouchAction::TOUCH_UP;
+		touchAction.Index = 2;
+		touchAction.Position = { x, y };
+
+		window->OnAction(touchAction);
+
+		return 0;
+	}
+	case WM_MBUTTONDOWN:
+	{
+		int x = GET_X_LPARAM(lParam);
+		int y = GET_Y_LPARAM(lParam);
+
+		TouchAction touchAction;
+		touchAction.Touch = TouchAction::TOUCH_MOUSE;
+		touchAction.State = TouchAction::TOUCH_DOWN;
+		touchAction.Index = 1;
+		touchAction.Position = { x, y };
+
+		window->OnAction(touchAction);
+
+		return 0;
+	}
+	case WM_MBUTTONUP:
+	{
+		int x = GET_X_LPARAM(lParam);
+		int y = GET_Y_LPARAM(lParam);
+
+		TouchAction touchAction;
+		touchAction.Touch = TouchAction::TOUCH_MOUSE;
+		touchAction.State = TouchAction::TOUCH_UP;
+		touchAction.Index = 1;
+		touchAction.Position = { x, y };
+
+		window->OnAction(touchAction);
+
+		return 0;
+	}
+	case WM_MOUSELEAVE:
+	{
+		std::cout << "Left Client Area...\n";
+		return 0;
+	}
+	case WM_MOUSEMOVE:
+	{
+		TouchMoveAction touchAction;
+		touchAction.Touch = TouchAction::TOUCH_MOUSE;
+		touchAction.Position = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+
+		window->OnAction(touchAction);
+		//_scene.OnMouseMove(x, y);
+
+		/*MOUSEOVERSTATE mouseoverstate = MOUSEOVER_NORMAL;
+
+		if (Component::MasterOverComponent() != nullptr)
+		mouseoverstate = Component::MasterOverComponent()->MouseOverState();
+
+		if (ButtonsDown > 0)
+		{
+		// Do the SetCursor stuff here since we have started mouse capture
+		switch (mouseoverstate)
+		{
+		case MOUSEOVER_HAND:
+		SetCursor(HandCursor);
+		break;
+		case MOUSEOVER_OPENHAND:
+		SetCursor(OpenHandCursor);
+		break;
+		case MOUSEOVER_CLOSEDHAND:
+		SetCursor(ClosedHandCursor);
+		break;
+		case MOUSEOVER_CARET:
+		SetCursor(CaretCursor);
+		break;
+		default:
+		SetCursor(ArrowCursor);
+		break;
+		}
+		}*/
+
+		if (!window->IsTrackingMouse())
+		{
+			TRACKMOUSEEVENT tme;
+			tme.cbSize = sizeof(TRACKMOUSEEVENT);
+			tme.dwFlags = TME_LEAVE;
+			tme.hwndTrack = hWindow;
+
+			if (::_TrackMouseEvent(&tme))
+			{
+				window->SetTrackingMouse(true);
+			}
+		}
+
+		return 0;
+	}
+	case WM_MOUSEWHEEL:
+	{
+		int x = GET_X_LPARAM(lParam);
+		int y = GET_Y_LPARAM(lParam);
+		int delta = GET_Y_LPARAM(wParam);
+
+		delta /= WHEEL_DELTA;
+
+		POINT pt = { x, y };
+
+		TouchAction touchAction;
+		touchAction.Touch = TouchAction::TOUCH_MOUSE;
+		touchAction.State = TouchAction::TOUCH_DOWN;
+		touchAction.Index = 4;
+		touchAction.Value = delta;
+
+		if (ScreenToClient(hWindow, &pt))
+		{
+			touchAction.Position = { pt.x, pt.y };
+		}
+		else
+		{
+			touchAction.Position = { x, y };
+		}
+
+		window->OnAction(touchAction);
+
+		return 0;
+	}
+	case WM_KEYDOWN:
+	{
+		bool repeatkey = false;
+
+		if (lParam & (0x01 << 30))
+			repeatkey = true;
+
+		if (!repeatkey)
+		{
+			std::cout << "KeyDown " << wParam << "\n";
+
+			KeyAction keyAction;
+			keyAction.KeyChar = (unsigned int)wParam;
+			keyAction.KeyActionType = KeyAction::KEY_DOWN;
+
+			window->OnAction(keyAction);
+		}
+
+		return 0;
+	}
+	case WM_KEYUP:
+	{
+		std::cout << "KeyUp " << wParam << "\n";
+
+		KeyAction keyAction;
+		keyAction.KeyChar = (unsigned int)wParam;
+		keyAction.KeyActionType = KeyAction::KEY_UP;
+
+		window->OnAction(keyAction);
+
+		return 0;
+	}
+	case WM_SYSKEYDOWN:
+	{
+		bool repeatkey = false;
+
+		if (lParam & (0x01 << 30))
+			repeatkey = true;
+
+		if (!repeatkey)
+		{
+			std::cout << "SysKeyDown " << wParam << "\n";
+
+			KeyAction keyAction;
+			keyAction.KeyChar = (unsigned int)wParam;
+			keyAction.IsSystem = true;
+			keyAction.KeyActionType = KeyAction::KEY_DOWN;
+
+			window->OnAction(keyAction);
+		}
+		return 0;
+	}
+	case WM_SYSKEYUP:
+	{
+		std::cout << "SysKeyUp " << wParam << "\n";
+
+		bool repeatkey = false;
+
+		KeyAction keyAction;
+		keyAction.KeyChar = (unsigned int)wParam;
+		keyAction.IsSystem = true;
+		keyAction.KeyActionType = KeyAction::KEY_UP;
+
+		window->OnAction(keyAction);
+		return 0;
+	}
+	case WM_DESTROY:
+	{
+		WindowAction winAction;
+		winAction.WindowEventType = WindowAction::DESTROY;
+
+		window->OnAction(winAction);
+
+		FreeConsole();
+		PostQuitMessage(0);
+		break;
+	}
+	}
+
+	return DefWindowProc(hWindow, message, wParam, lParam);
 }

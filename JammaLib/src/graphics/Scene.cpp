@@ -1,29 +1,34 @@
 #include "Scene.h"
 
-Scene::Scene(int width, int height) :
-	_width(width),
-	_height(height),
+Scene::Scene(SceneParams params) :
+	Drawable(params),
+	Sizeable(params),
+	Audible(params),
 	_viewProj(glm::mat4()),
 	_overlayViewProj(glm::mat4()),
-	_label(std::make_unique<GuiLabel>("Hello")),
-	_image(std::make_unique<Image>())
+	_label(nullptr),
+	_slider(nullptr),
+	_image(std::make_unique<Image>(ImageParams(DrawableParams{ "grid" }, SizeableParams{ 450, 450 })))
 {
-}
+	GuiLabelParams labelParams(GuiElementParams(
+		DrawableParams{ "" },
+		MoveableParams{ 10,10 },
+		SizeableParams{ 200,80 },
+		"",
+		"",
+		"",
+		{}), "Hello");
+	_label = std::make_unique<GuiLabel>(labelParams);
 
-void Scene::Init(ResourceLib& resourceLib)
-{
-	_label->Init(resourceLib);
-	_image->Init(resourceLib);
-
-	auto ar = _height > 0 ? (float)_width / (float)_height : 1.0f;
-	auto projection = glm::perspective(glm::radians(45.0f), ar, 0.1f, 100.0f);
-	_viewProj = projection * View();
-
-	auto hScale = _width > 0 ? 2.0f / (float)_width : 1.0f;
-	auto vScale = _height > 0 ? 2.0f / (float)_height : 1.0f;
-	_overlayViewProj = glm::mat4(1.0);
-	_overlayViewProj = glm::translate(_overlayViewProj, glm::vec3(-1.0f, -1.0f, -1.0f));
-	_overlayViewProj = glm::scale(_overlayViewProj, glm::vec3(hScale, vScale, 1.0f));
+	// Nicer with default constructor
+	GuiSliderParams sliderParams;
+	sliderParams.Position = { 50,50 };
+	sliderParams.Size = { 256, 256 };
+	sliderParams.MinSize = { 256, 256 };
+	sliderParams.Texture = "fader_back";
+	sliderParams.DragTexture = "fader";
+	sliderParams.DragOverTexture = "fader_over";
+	_slider = std::make_unique<GuiSlider>(sliderParams);
 }
 
 void Scene::Draw(DrawContext& ctx)
@@ -44,22 +49,74 @@ void Scene::Draw(DrawContext& ctx)
 	glCtx.SetUniform("MVP", mvp);
 
 	_label->Draw(ctx);
+	_slider->Draw(ctx);
 }
 
-bool Scene::Release()
+bool Scene::InitResources(ResourceLib& resourceLib)
 {
-	_image->Release();
-	return true;
+	_label->InitResources(resourceLib);
+	_slider->InitResources(resourceLib);
+	_image->InitResources(resourceLib);
+
+	InitSize();
+
+	return Drawable::InitResources(resourceLib);
 }
 
-int Scene::Width() const
+bool Scene::ReleaseResources()
 {
-	return _width;
+	_image->ReleaseResources();
+	return Drawable::ReleaseResources();
 }
 
-int Scene::Height() const
+void Scene::SetSize(Size2d size)
 {
-	return _height;
+	_sizeParams.Size = size;
+
+	InitSize();
+}
+
+unsigned int Scene::Width() const
+{
+	return _sizeParams.Size.Width;
+}
+
+unsigned int Scene::Height() const
+{
+	return _sizeParams.Size.Height;
+}
+
+void Scene::OnAction(TouchAction touchAction)
+{
+	std::cout << "Touch action " << touchAction.Touch << " [" << touchAction.State << "] " << touchAction.Index << std::endl;
+	_slider->OnAction(touchAction);
+}
+
+void Scene::OnAction(TouchMoveAction touchAction)
+{
+	std::cout << "Touch Move action " << touchAction.Touch << " [" << touchAction.Position.X << "," << touchAction.Position.Y << "] " << touchAction.Index << std::endl;
+	_slider->OnAction(touchAction);
+}
+
+void Scene::OnAction(KeyAction keyAction)
+{
+	std::cout << "Key action " << keyAction.KeyActionType << " [" << keyAction.KeyChar << "]" << std::endl;
+	//_slider->OnAction(keyAction);
+}
+
+void Scene::InitSize()
+{
+	auto ar = _sizeParams.Size.Height > 0 ?
+		(float)_sizeParams.Size.Width / (float)_sizeParams.Size.Height :
+		1.0f;
+	auto projection = glm::perspective(glm::radians(45.0f), ar, 0.1f, 100.0f);
+	_viewProj = projection * View();
+
+	auto hScale = _sizeParams.Size.Width > 0 ? 2.0f / (float)_sizeParams.Size.Width : 1.0f;
+	auto vScale = _sizeParams.Size.Height > 0 ? 2.0f / (float)_sizeParams.Size.Height : 1.0f;
+	_overlayViewProj = glm::mat4(1.0);
+	_overlayViewProj = glm::translate(_overlayViewProj, glm::vec3(-1.0f, -1.0f, -1.0f));
+	_overlayViewProj = glm::scale(_overlayViewProj, glm::vec3(hScale, vScale, 1.0f));
 }
 
 glm::mat4 Scene::View()

@@ -1,27 +1,13 @@
 ﻿#include "Image.h"
 
-Image::Image() :
-	_width(1024),
-	_height(768),
+Image::Image(ImageParams params) :
+	Drawable(params),
+	Sizeable(params),
 	_vertexArray(0),
 	_vertexBuffer{ 0,0 },
 	_texture(std::weak_ptr<TextureResource>()),
 	_shader(std::weak_ptr<ShaderResource>())
 {
-}
-
-bool Image::Init(ResourceLib& resourceLib)
-{
-	auto validated = true;
-
-	if (validated)
-		validated = InitTexture(resourceLib);
-	if (validated)
-		validated = InitShader(resourceLib);
-	if (validated)
-		validated = InitVertexArray();
-
-	return validated && GlUtils::CheckError("Image::Init()");
 }
 
 void Image::Draw(DrawContext& ctx)
@@ -47,7 +33,21 @@ void Image::Draw(DrawContext& ctx)
 	glUseProgram(0);
 }
 
-bool Image::Release()
+bool Image::InitResources(ResourceLib& resourceLib)
+{
+	auto validated = true;
+
+	if (validated)
+		validated = InitTexture(resourceLib);
+	if (validated)
+		validated = InitShader(resourceLib);
+	if (validated)
+		validated = InitVertexArray();
+
+	return validated && GlUtils::CheckError("Image::Init()");
+}
+
+bool Image::ReleaseResources()
 {
 	glDeleteBuffers(2, _vertexBuffer);
 	_vertexBuffer[0] = 0;

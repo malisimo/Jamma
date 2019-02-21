@@ -1,14 +1,21 @@
 #pragma once
 
-#include "Drawable.h"
+#include "GuiElement.h"
 
-class GuiModel : public Drawable
+class GuiModelParams : public GuiElementParams
+{
+};
+
+class GuiModel :
+	public GuiElement
 {
 public:
-	GuiModel();
+	GuiModel(GuiModelParams params);
 	~GuiModel();
 
 public:
 	void Draw(DrawContext& ctx) override;
-};
 
+protected:
+	GuiModelParams _modelParams;
+};
