@@ -1,16 +1,15 @@
 #include "GuiElement.h"
 
-
 GuiElement::GuiElement(GuiElementParams params) :
 	Drawable(params),
 	Moveable(params),
 	Sizeable(params),
 	_guiParams(params),
 	_state(STATE_NORMAL),
-	_texture(ImageParams(DrawableParams{ params.Texture }, SizeableParams{ params.Size,params.MinSize })),
-	_overTexture(ImageParams(DrawableParams{ params.OverTexture }, SizeableParams{ params.Size,params.MinSize })),
-	_downTexture(ImageParams(DrawableParams{ params.DownTexture }, SizeableParams{ params.Size,params.MinSize })),
-	_outTexture(ImageParams(DrawableParams{ params.OutTexture }, SizeableParams{ params.Size,params.MinSize }))
+	_texture(ImageParams(DrawableParams{ params.Texture }, SizeableParams{ params.Size,params.MinSize }, "texture")),
+	_overTexture(ImageParams(DrawableParams{ params.OverTexture }, SizeableParams{ params.Size,params.MinSize }, "texture")),
+	_downTexture(ImageParams(DrawableParams{ params.DownTexture }, SizeableParams{ params.Size,params.MinSize }, "texture")),
+	_outTexture(ImageParams(DrawableParams{ params.OutTexture }, SizeableParams{ params.Size,params.MinSize }, "texture"))
 {
 }
 
@@ -20,6 +19,16 @@ GuiElement::~GuiElement()
 
 void GuiElement::UpdateChildren()
 {
+}
+
+void GuiElement::SetSize(Size2d size)
+{
+	Sizeable::SetSize(size);
+
+	_texture.SetSize(_sizeParams.Size);
+	_overTexture.SetSize(_sizeParams.Size);
+	_downTexture.SetSize(_sizeParams.Size);
+	_outTexture.SetSize(_sizeParams.Size);
 }
 
 void GuiElement::Draw(DrawContext& ctx)

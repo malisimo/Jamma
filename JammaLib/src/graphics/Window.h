@@ -82,6 +82,7 @@ public:
 	void SetTrackingMouse(bool resizing);
 	void Resize(Size2d size, WindowState state);
 	void SetWindowState(WindowState state);
+	Size2d GetSize();
 	void Center();
 	void Render();
 	void Swap();

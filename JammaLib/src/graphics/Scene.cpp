@@ -8,7 +8,7 @@ Scene::Scene(SceneParams params) :
 	_overlayViewProj(glm::mat4()),
 	_label(nullptr),
 	_slider(nullptr),
-	_image(std::make_unique<Image>(ImageParams(DrawableParams{ "grid" }, SizeableParams{ 450, 450 })))
+	_image(std::make_unique<Image>(ImageParams(DrawableParams{ "grid" }, SizeableParams{ 450, 450 }, "texture")))
 {
 	GuiLabelParams labelParams(GuiElementParams(
 		DrawableParams{ "" },
@@ -26,6 +26,8 @@ Scene::Scene(SceneParams params) :
 	sliderParams.Size = { 256, 256 };
 	sliderParams.MinSize = { 256, 256 };
 	sliderParams.Texture = "fader_back";
+	sliderParams.DragControlOffset = { 5,5 };
+	sliderParams.DragControlSize = { 32,32 };
 	sliderParams.DragTexture = "fader";
 	sliderParams.DragOverTexture = "fader_over";
 	_slider = std::make_unique<GuiSlider>(sliderParams);
@@ -41,15 +43,15 @@ void Scene::Draw(DrawContext& ctx)
 	mvp.push_back(_viewProj);
 	glCtx.SetUniform("MVP", mvp);
 
-	_image->Draw(ctx);
+	//_image->Draw(ctx);
 
 	// Draw overlays
 	mvp.clear();
 	mvp.push_back(_overlayViewProj);
 	glCtx.SetUniform("MVP", mvp);
 
-	_label->Draw(ctx);
 	_slider->Draw(ctx);
+	_label->Draw(ctx);
 }
 
 bool Scene::InitResources(ResourceLib& resourceLib)

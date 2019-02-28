@@ -5,9 +5,19 @@ Image::Image(ImageParams params) :
 	Sizeable(params),
 	_vertexArray(0),
 	_vertexBuffer{ 0,0 },
+	_shaderName(params.Shader),
 	_texture(std::weak_ptr<TextureResource>()),
 	_shader(std::weak_ptr<ShaderResource>())
 {
+}
+
+void Image::SetSize(Size2d size)
+{
+	ReleaseResources();
+
+	Sizeable::SetSize(size);
+
+	InitVertexArray();
 }
 
 void Image::Draw(DrawContext& ctx)
@@ -61,7 +71,7 @@ bool Image::ReleaseResources()
 
 bool Image::InitTexture(ResourceLib& resourceLib)
 {
-	auto textureOpt = resourceLib.GetResource("grid");
+	auto textureOpt = resourceLib.GetResource(_drawParams.Texture);
 	
 	if (!textureOpt.has_value())
 		return false;
@@ -81,7 +91,7 @@ bool Image::InitTexture(ResourceLib& resourceLib)
 
 bool Image::InitShader(ResourceLib& resourceLib)
 {
-	auto shaderOpt = resourceLib.GetResource("texture");
+	auto shaderOpt = resourceLib.GetResource(_shaderName);
 
 	if (!shaderOpt.has_value())
 		return false;
@@ -107,12 +117,12 @@ bool Image::InitVertexArray()
 	glGenBuffers(2, _vertexBuffer);
 
 	static const GLfloat verts[] = {
-		-0.5f, -0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f,
-		-0.5f,  0.5f, 0.0f,
-		-0.5f,  0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f,
-		0.5f,  0.5f, 0.0f,
+		0.0f, 0.0f, 0.0f,
+		(float)_sizeParams.Size.Width, 0.0f, 0.0f,
+		0.0f,  (float)_sizeParams.Size.Height, 0.0f,
+		0.0f,  (float)_sizeParams.Size.Height, 0.0f,
+		(float)_sizeParams.Size.Width, 0.0f, 0.0f,
+		(float)_sizeParams.Size.Width, (float)_sizeParams.Size.Height, 0.0f,
 	};
 
 	glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer[0]);

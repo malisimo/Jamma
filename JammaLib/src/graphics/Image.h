@@ -17,10 +17,15 @@ class ImageParams : public DrawableParams, public SizeableParams
 {
 public:
 	ImageParams(DrawableParams drawParams,
-		SizeableParams sizeParams) :
+		SizeableParams sizeParams,
+		std::string shader) :
 		DrawableParams(drawParams),
-		SizeableParams(sizeParams)
+		SizeableParams(sizeParams),
+		Shader(shader)
 	{}
+
+public:
+	std::string Shader;
 };
 
 class Image :
@@ -66,6 +71,7 @@ public:
 	}
 
 public:
+	virtual void SetSize(Size2d size) override;
 	virtual void Draw(DrawContext& ctx) override;
 	virtual bool InitResources(ResourceLib& resourceLib) override;
 	virtual bool ReleaseResources() override;
@@ -75,6 +81,7 @@ private:
 
 	GLuint _vertexArray;
 	GLuint _vertexBuffer[2];
+	std::string _shaderName;
 	std::weak_ptr<TextureResource> _texture;
 	std::weak_ptr<ShaderResource> _shader;
 

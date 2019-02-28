@@ -164,13 +164,19 @@ int Window::Create(HINSTANCE hInstance, int nCmdShow)
 		Center();
 	}
 
+	RECT winRect = {
+		_config.Position.X, _config.Position.Y,
+		_config.Size.Width, _config.Size.Height };
+
+	AdjustWindowRect(&winRect, _style, false);	
+
 	// Create a new window and context
 	_wnd = CreateWindowEx(
 		WS_EX_ACCEPTFILES,
 		_windowClass, L"OpenGL Window",	// class name, window name
 		_style,							// styles
-		_config.Position.X, _config.Position.Y,		// posx, posy. If x is set to CW_USEDEFAULT y is ignored
-		_config.Size.Width, _config.Size.Height,	// width, height
+		winRect.left, winRect.top,		// posx, posy. If x is set to CW_USEDEFAULT y is ignored
+		winRect.right - winRect.left, winRect.bottom - winRect.top,	// width, height
 		nullptr, nullptr,						// parent window, menu
 		hInstance, this);				// instance, param
 
@@ -328,6 +334,11 @@ void Window::Resize(Size2d size, WindowState state)
 void Window::SetWindowState(WindowState state)
 {
 	_config.State = state;
+}
+
+Size2d Window::GetSize()
+{
+	return _config.Size;
 }
 
 void Window::Center()
@@ -603,14 +614,20 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 	break;
 	case WM_LBUTTONDOWN:
 	{
+		int winHeight = (int)window->GetSize().Height;
 		int x = GET_X_LPARAM(lParam);
 		int y = GET_Y_LPARAM(lParam);
+		POINT pt = { x, y };
 
 		TouchAction touchAction;
 		touchAction.Touch = TouchAction::TOUCH_MOUSE;
 		touchAction.State = TouchAction::TOUCH_DOWN;
 		touchAction.Index = 0;
-		touchAction.Position = { x, y };
+
+		if (ScreenToClient(hWindow, &pt))
+			touchAction.Position = { pt.x, winHeight - pt.y };
+		else
+			touchAction.Position = { x, winHeight - y };
 
 		window->OnAction(touchAction);
 
@@ -618,14 +635,20 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 	}
 	case WM_LBUTTONUP:
 	{
+		int winHeight = (int)window->GetSize().Height;
 		int x = GET_X_LPARAM(lParam);
 		int y = GET_Y_LPARAM(lParam);
+		POINT pt = { x, y };
 
 		TouchAction touchAction;
 		touchAction.Touch = TouchAction::TOUCH_MOUSE;
 		touchAction.State = TouchAction::TOUCH_UP;
 		touchAction.Index = 0;
-		touchAction.Position = { x, y };
+
+		if (ScreenToClient(hWindow, &pt))
+			touchAction.Position = { pt.x, winHeight - pt.y };
+		else
+			touchAction.Position = { x, winHeight - y };
 
 		window->OnAction(touchAction);
 
@@ -633,14 +656,20 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 	}
 	case WM_RBUTTONDOWN:
 	{
+		int winHeight = (int)window->GetSize().Height;
 		int x = GET_X_LPARAM(lParam);
 		int y = GET_Y_LPARAM(lParam);
+		POINT pt = { x, y };
 
 		TouchAction touchAction;
 		touchAction.Touch = TouchAction::TOUCH_MOUSE;
 		touchAction.State = TouchAction::TOUCH_DOWN;
 		touchAction.Index = 2;
-		touchAction.Position = { x, y };
+
+		if (ScreenToClient(hWindow, &pt))
+			touchAction.Position = { pt.x, winHeight - pt.y };
+		else
+			touchAction.Position = { x, winHeight - y };
 
 		window->OnAction(touchAction);
 
@@ -648,14 +677,20 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 	}
 	case WM_RBUTTONUP:
 	{
+		int winHeight = (int)window->GetSize().Height;
 		int x = GET_X_LPARAM(lParam);
 		int y = GET_Y_LPARAM(lParam);
+		POINT pt = { x, y };
 
 		TouchAction touchAction;
 		touchAction.Touch = TouchAction::TOUCH_MOUSE;
 		touchAction.State = TouchAction::TOUCH_UP;
 		touchAction.Index = 2;
-		touchAction.Position = { x, y };
+
+		if (ScreenToClient(hWindow, &pt))
+			touchAction.Position = { pt.x, winHeight - pt.y };
+		else
+			touchAction.Position = { x, winHeight - y };
 
 		window->OnAction(touchAction);
 
@@ -663,14 +698,20 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 	}
 	case WM_MBUTTONDOWN:
 	{
+		int winHeight = (int)window->GetSize().Height;
 		int x = GET_X_LPARAM(lParam);
 		int y = GET_Y_LPARAM(lParam);
+		POINT pt = { x, y };
 
 		TouchAction touchAction;
 		touchAction.Touch = TouchAction::TOUCH_MOUSE;
 		touchAction.State = TouchAction::TOUCH_DOWN;
 		touchAction.Index = 1;
-		touchAction.Position = { x, y };
+
+		if (ScreenToClient(hWindow, &pt))
+			touchAction.Position = { pt.x, winHeight - pt.y };
+		else
+			touchAction.Position = { x, winHeight - y };
 
 		window->OnAction(touchAction);
 
@@ -678,14 +719,20 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 	}
 	case WM_MBUTTONUP:
 	{
+		int winHeight = (int)window->GetSize().Height;
 		int x = GET_X_LPARAM(lParam);
 		int y = GET_Y_LPARAM(lParam);
+		POINT pt = { x, y };
 
 		TouchAction touchAction;
 		touchAction.Touch = TouchAction::TOUCH_MOUSE;
 		touchAction.State = TouchAction::TOUCH_UP;
 		touchAction.Index = 1;
-		touchAction.Position = { x, y };
+
+		if (ScreenToClient(hWindow, &pt))
+			touchAction.Position = { pt.x, winHeight - pt.y };
+		else
+			touchAction.Position = { x, winHeight - y };
 
 		window->OnAction(touchAction);
 
@@ -698,21 +745,29 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 	}
 	case WM_MOUSEMOVE:
 	{
+		int winHeight = (int)window->GetSize().Height;
+		int x = GET_X_LPARAM(lParam);
+		int y = GET_Y_LPARAM(lParam);
+		POINT pt = { x, y };
+
 		TouchMoveAction touchAction;
 		touchAction.Touch = TouchAction::TOUCH_MOUSE;
-		touchAction.Position = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+
+		if (ScreenToClient(hWindow, &pt))
+			touchAction.Position = { pt.x, winHeight - pt.y };
+		else
+			touchAction.Position = { x, winHeight - y };
 
 		window->OnAction(touchAction);
 		//_scene.OnMouseMove(x, y);
 
 		/*MOUSEOVERSTATE mouseoverstate = MOUSEOVER_NORMAL;
 
-		if (Component::MasterOverComponent() != nullptr)
-		mouseoverstate = Component::MasterOverComponent()->MouseOverState();
+		mouseoverstate = overComponent->MouseOverState();
 
 		if (ButtonsDown > 0)
 		{
-		// Do the SetCursor stuff here since we have started mouse capture
+		// Started mouse capture
 		switch (mouseoverstate)
 		{
 		case MOUSEOVER_HAND:
@@ -750,6 +805,7 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 	}
 	case WM_MOUSEWHEEL:
 	{
+		int winHeight = (int)window->GetSize().Height;
 		int x = GET_X_LPARAM(lParam);
 		int y = GET_Y_LPARAM(lParam);
 		int delta = GET_Y_LPARAM(wParam);
@@ -765,13 +821,9 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 		touchAction.Value = delta;
 
 		if (ScreenToClient(hWindow, &pt))
-		{
-			touchAction.Position = { pt.x, pt.y };
-		}
+			touchAction.Position = { pt.x, winHeight - pt.y };
 		else
-		{
-			touchAction.Position = { x, y };
-		}
+			touchAction.Position = { x, winHeight - y };
 
 		window->OnAction(touchAction);
 

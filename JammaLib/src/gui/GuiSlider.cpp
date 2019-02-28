@@ -10,7 +10,7 @@ GuiSlider::GuiSlider(GuiSliderParams params) :
 	_dragElement(GuiElementParams(
 		DrawableParams{ params.DragTexture },
 		MoveableParams{ params.Position },
-		SizeableParams{ params.Size, params.MinSize },
+		SizeableParams{ params.DragControlSize, params.DragControlSize },
 		params.DragOverTexture,
 		params.DragDownTexture,
 		params.DragOutTexture,
@@ -40,6 +40,8 @@ GuiSlider::GuiSlider(GuiSliderParams params) :
 			Position2d{ params.DragControlOffset.X, ((int)round(valFrac * params.DragLength)) + params.DragControlOffset.Y } :
 			Position2d{ ((int)round(valFrac * params.DragLength)) + params.DragControlOffset.X, params.DragControlOffset.Y };
 	};
+
+	_dragElement.SetPosition(_calcDragPosFun(0.0f));
 }
 
 GuiSlider::~GuiSlider()
@@ -51,10 +53,30 @@ double GuiSlider::Value() const
 	return _calcValueFun(_dragElement.Position());
 }
 
+bool GuiSlider::HitTest(Position2d pos)
+{
+	auto localPos = pos - _moveParams.Position;
+
+	for (auto& child : _children)
+	{
+		if (child.HitTest(localPos))
+			return true;
+	}
+
+	if (localPos.X > _dragElement.Position().X && localPos.X < _dragElement.Position().X + (int)_dragElement.GetSize().Width)
+	{
+		auto res = (localPos.Y > _dragElement.Position().Y && localPos.Y < _dragElement.Position().X + (int)_dragElement.GetSize().Height);
+
+		return res;
+	}
+
+	return false;
+}
+
 void GuiSlider::Draw(DrawContext & ctx)
 {
-	_dragElement.Draw(ctx);
 	GuiElement::Draw(ctx);
+	//_dragElement.Draw(ctx);
 }
 
 void GuiSlider::OnAction(TouchAction action)
@@ -97,25 +119,14 @@ void GuiSlider::OnAction(TouchMoveAction action)
 	_dragElement.SetPosition(_calcDragPosFun(newValue));
 }
 
-GuiSliderParams::GuiSliderParams() :
-	GuiElementParams(DrawableParams{ "" },
-		MoveableParams{ 0,0 },
-		SizeableParams{ 1,1 },
-		"",
-		"",
-		"",
-		{}),
-	Orientation(SLIDER_VERTICAL),
-	Min(0.0),
-	Max(1.0),
-	DragLength(1),
-	Steps(0),
-	Quantised(false),
-	DragTexture(""),
-	DragOverTexture(""),
-	DragDownTexture(""),
-	DragOutTexture(""),
-	DragControlOffset({ 0,0 }),
-	DragControlSize({ 1,1 })
+bool GuiSlider::InitResources(ResourceLib& resourceLib)
 {
+	_dragElement.InitResources(resourceLib);
+	return GuiElement::InitResources(resourceLib);
+}
+
+bool GuiSlider::ReleaseResources()
+{
+	_dragElement.ReleaseResources();
+	return GuiElement::ReleaseResources();
 }

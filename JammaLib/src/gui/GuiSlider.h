@@ -17,9 +17,12 @@ public:
 public:
 	double Value() const;
 
+	virtual bool HitTest(Position2d pos) override;
 	virtual void Draw(DrawContext& ctx) override;
 	virtual void OnAction(TouchAction action) override;
 	virtual void OnAction(TouchMoveAction action) override;
+	virtual bool InitResources(ResourceLib& resourceLib) override;
+	virtual bool ReleaseResources() override;
 
 private:
 	std::function<double(Position2d)> _calcValueFun;
@@ -35,7 +38,28 @@ private:
 class GuiSliderParams : public GuiElementParams
 {
 public:
-	GuiSliderParams();
+	GuiSliderParams() :
+		GuiElementParams(DrawableParams{ "" },
+			MoveableParams{ 0,0 },
+			SizeableParams{ 1,1 },
+			"",
+			"",
+			"",
+			{}),
+		Orientation(SLIDER_VERTICAL),
+		Min(0.0),
+		Max(1.0),
+		DragLength(1),
+		Steps(0),
+		Quantised(false),
+		DragTexture(""),
+		DragOverTexture(""),
+		DragDownTexture(""),
+		DragOutTexture(""),
+		DragControlOffset({ 0,0 }),
+		DragControlSize({ 1,1 })
+	{
+	}
 
 	enum SliderOrientation
 	{

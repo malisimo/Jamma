@@ -29,8 +29,8 @@ public:
 		MoveableParams(moveParams),
 		SizeableParams(sizeParams),
 		OverTexture(overTexture),
-		DownTexture(overTexture),
-		OutTexture(overTexture),
+		DownTexture(downTexture),
+		OutTexture(outTexture),
 		ChildParams(childParams)
 	{
 	}
@@ -58,6 +58,7 @@ public:
 	};
 
 public:
+	virtual void SetSize(Size2d size) override;
 	virtual void Draw(DrawContext& ctx) override;
 	virtual bool HitTest(Position2d pos);
 	virtual bool InitResources(ResourceLib& resourceLib) override;

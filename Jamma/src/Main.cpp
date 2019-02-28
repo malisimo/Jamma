@@ -21,7 +21,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
 	freopen_s(&newStderr, "CONOUT$", "w", stderr);
 	freopen_s(&newStdin, "CONIN$", "r", stdin);
 
-	Scene scene(SceneParams(DrawableParams{ "" }, SizeableParams{ 1600, 1100 }, AudibleParams{}));
+	Scene scene(SceneParams(DrawableParams{ "" }, SizeableParams{ 1400, 1000 }, AudibleParams{}));
 	ResourceLib resourceLib;
 	Window window(scene, resourceLib);
 
