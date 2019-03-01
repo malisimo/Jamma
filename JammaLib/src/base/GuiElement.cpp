@@ -17,10 +17,6 @@ GuiElement::~GuiElement()
 {
 }
 
-void GuiElement::UpdateChildren()
-{
-}
-
 void GuiElement::SetSize(Size2d size)
 {
 	Sizeable::SetSize(size);
@@ -33,6 +29,9 @@ void GuiElement::SetSize(Size2d size)
 
 void GuiElement::Draw(DrawContext& ctx)
 {
+	auto &glCtx = dynamic_cast<GlDrawContext&>(ctx);
+	glCtx.PushMvp(glm::translate(glm::mat4(1.0), glm::vec3(_moveParams.Position.X, _moveParams.Position.Y, 0.f)));
+
 	switch (_state)
 	{
 	case STATE_OVER:
@@ -51,11 +50,13 @@ void GuiElement::Draw(DrawContext& ctx)
 
 	for (auto& child : _children)
 		child.Draw(ctx);
+
+	glCtx.PopMvp();
 }
 
 bool GuiElement::HitTest(Position2d pos)
 {
-	auto localPos = pos - _moveParams.Position;
+	auto localPos = ToLocal(pos);
 
 	for (auto& child : _children)
 	{
@@ -89,4 +90,9 @@ bool GuiElement::ReleaseResources()
 	_outTexture.ReleaseResources();
 
 	return true;
+}
+
+Position2d GuiElement::ToLocal(Position2d pos)
+{
+	return pos - _moveParams.Position;
 }

@@ -152,9 +152,6 @@
     <ClInclude Include="src\graphics\Font.h">
       <Filter>src\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\resources\Shader.h">
-      <Filter>src\resources</Filter>
-    </ClInclude>
     <ClInclude Include="src\resources\ResourceLib.h">
       <Filter>src\resources</Filter>
     </ClInclude>
@@ -214,6 +211,9 @@
     </ClInclude>
     <ClInclude Include="src\gui\GuiSlider.h">
       <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\Shader.h">
+      <Filter>src\resources</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -292,9 +292,6 @@
     <ClCompile Include="src\graphics\Font.cpp">
       <Filter>src\graphics</Filter>
     </ClCompile>
-    <ClCompile Include="src\resources\Shader.cpp">
-      <Filter>src\resources</Filter>
-    </ClCompile>
     <ClCompile Include="src\resources\ResourceLib.cpp">
       <Filter>src\resources</Filter>
     </ClCompile>
@@ -345,6 +342,9 @@
     </ClCompile>
     <ClCompile Include="src\gui\GuiSlider.cpp">
       <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\Shader.cpp">
+      <Filter>src\resources</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

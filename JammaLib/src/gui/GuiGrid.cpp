@@ -16,7 +16,7 @@ std::vector<unsigned int> GetCellSizes(std::vector<Cell> cells)
 	return {};
 }
 
-void GuiGrid::UpdateChildren()
+/*void GuiGrid::UpdateChildren()
 {
 	auto x = 0;
 	auto y = 0;
@@ -29,3 +29,4 @@ void GuiGrid::UpdateChildren()
 		//child.SetSize(w, h);
 	}
 }
+*/

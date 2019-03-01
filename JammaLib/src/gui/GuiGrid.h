@@ -29,9 +29,8 @@ public:
 public:
 	static std::vector<unsigned int> GetCellSizes(std::vector<Cell> cells);
 
-
 protected:
-	virtual void UpdateChildren() override;
+	//virtual void UpdateChildren() override;
 
 protected:
 	Orientation _orientation;

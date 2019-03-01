@@ -6,7 +6,7 @@
 #include <gl/glew.h>
 #include <gl/gl.h>
 #include "glm/glm.hpp"
-#include "Shader.h"
+#include "../graphics/Shader.h"
 #include "Resource.h"
 
 class ShaderResource : public Resource

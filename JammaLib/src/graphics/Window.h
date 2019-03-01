@@ -72,7 +72,6 @@ public:
 	void SetWindowHandle(HWND wnd);
 	void ShowMessage(LPCWSTR message);
 	int Create(HINSTANCE hInstance, int nCmdShow);
-	void AdjustSize();
 	Config GetConfig() const;
 	Size2d GetMinSize() const;
 	bool IsFullscreen() const;
@@ -83,7 +82,6 @@ public:
 	void Resize(Size2d size, WindowState state);
 	void SetWindowState(WindowState state);
 	Size2d GetSize();
-	void Center();
 	void Render();
 	void Swap();
 	void Release();
@@ -93,6 +91,8 @@ public:
 	virtual void OnAction(TouchMoveAction touchAction) override;
 	virtual void OnAction(KeyAction touchAction) override;
 
+	static Size2d AdjustSize(Size2d size, DWORD style);
+	static Position2d Center(Size2d size);
 	static ATOM Register(HINSTANCE hInstance);
 	static LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) noexcept;
 

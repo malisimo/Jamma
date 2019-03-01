@@ -23,11 +23,12 @@ Scene::Scene(SceneParams params) :
 	// Nicer with default constructor
 	GuiSliderParams sliderParams;
 	sliderParams.Position = { 50,50 };
-	sliderParams.Size = { 256, 256 };
-	sliderParams.MinSize = { 256, 256 };
-	sliderParams.Texture = "fader_back";
-	sliderParams.DragControlOffset = { 5,5 };
+	sliderParams.Size = { 40,342 };
+	sliderParams.MinSize = { 40,342 };
+	sliderParams.DragLength = 300;
+	sliderParams.DragControlOffset = { 4,5 };
 	sliderParams.DragControlSize = { 32,32 };
+	sliderParams.Texture = "fader_back";
 	sliderParams.DragTexture = "fader";
 	sliderParams.DragOverTexture = "fader_over";
 	_slider = std::make_unique<GuiSlider>(sliderParams);
@@ -35,23 +36,22 @@ Scene::Scene(SceneParams params) :
 
 void Scene::Draw(DrawContext& ctx)
 {
-	std::vector<glm::mat4> mvp;
-
 	// Draw scene
 	auto &glCtx = dynamic_cast<GlDrawContext&>(ctx);
-	mvp.clear();
-	mvp.push_back(_viewProj);
-	glCtx.SetUniform("MVP", mvp);
+	glCtx.ClearMvp();
+	glCtx.PushMvp(_viewProj);
 
 	//_image->Draw(ctx);
+	glCtx.PopMvp();
 
 	// Draw overlays
-	mvp.clear();
-	mvp.push_back(_overlayViewProj);
-	glCtx.SetUniform("MVP", mvp);
+	glCtx.ClearMvp();
+	glCtx.PushMvp(_overlayViewProj);
 
 	_slider->Draw(ctx);
 	_label->Draw(ctx);
+
+	glCtx.PopMvp();
 }
 
 bool Scene::InitResources(ResourceLib& resourceLib)

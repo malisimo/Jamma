@@ -116,7 +116,7 @@ bool Image::InitVertexArray()
 
 	glGenBuffers(2, _vertexBuffer);
 
-	static const GLfloat verts[] = {
+	GLfloat verts[] = {
 		0.0f, 0.0f, 0.0f,
 		(float)_sizeParams.Size.Width, 0.0f, 0.0f,
 		0.0f,  (float)_sizeParams.Size.Height, 0.0f,

@@ -65,7 +65,7 @@ public:
 	virtual bool ReleaseResources() override;
 
 protected:
-	virtual void UpdateChildren();
+	Position2d ToLocal(Position2d pos);
 
 protected:
 	GuiElementParams _guiParams;

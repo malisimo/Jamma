@@ -76,19 +76,26 @@ bool GuiSlider::HitTest(Position2d pos)
 void GuiSlider::Draw(DrawContext & ctx)
 {
 	GuiElement::Draw(ctx);
-	//_dragElement.Draw(ctx);
+
+	auto &glCtx = dynamic_cast<GlDrawContext&>(ctx);
+	glCtx.PushMvp(glm::translate(glm::mat4(1.0), glm::vec3(_moveParams.Position.X, _moveParams.Position.Y, 0.f)));
+	_dragElement.Draw(ctx);
+	glCtx.PopMvp();
 }
 
 void GuiSlider::OnAction(TouchAction action)
 {
+	auto localPos = ToLocal(action.Position);
+
 	if (_isDragging)
 	{
 		if (TouchAction::TOUCH_UP == action.State)
 		{
 			_isDragging = false;
 
-			if (_dragElement.HitTest(action.Position))
+			if (_dragElement.HitTest(localPos))
 			{
+				std::cout << "Slider UP" << std::endl;
 				//_receiver.OnAction();
 			}
 		}
@@ -97,8 +104,9 @@ void GuiSlider::OnAction(TouchAction action)
 	{
 		if (TouchAction::TOUCH_DOWN == action.State)
 		{
-			if (_dragElement.HitTest(action.Position))
+			if (_dragElement.HitTest(localPos))
 			{
+				std::cout << "Slider DOWN" << std::endl;
 				_isDragging = true;
 				_initClickPos = action.Position;
 				_initDragPos = _dragElement.Position();
@@ -112,7 +120,7 @@ void GuiSlider::OnAction(TouchMoveAction action)
 	if (!_isDragging)
 		return;
 
-	auto dPos = _initClickPos - action.Position;
+	auto dPos = action.Position - _initClickPos;
 	auto dragPos = _initDragPos + dPos;	
 	auto newValue = _calcValueFun(dragPos);
 

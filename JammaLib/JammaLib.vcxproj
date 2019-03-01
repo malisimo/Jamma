@@ -202,7 +202,7 @@
     <ClInclude Include="lib\opengl\gl\wglew.h" />
     <ClInclude Include="lib\opengl\gl\wglext.h" />
     <ClInclude Include="src\graphics\Scene.h" />
-    <ClInclude Include="src\resources\Shader.h" />
+    <ClInclude Include="src\graphics\Shader.h" />
     <ClInclude Include="src\graphics\Image.h" />
     <ClInclude Include="src\base\ActionSender.h" />
     <ClInclude Include="src\io\LoopFile.h" />
@@ -250,7 +250,7 @@
     <ClCompile Include="src\graphics\GlDrawContext.cpp" />
     <ClCompile Include="src\base\DrawContext.cpp" />
     <ClCompile Include="src\graphics\Scene.cpp" />
-    <ClCompile Include="src\resources\Shader.cpp" />
+    <ClCompile Include="src\graphics\Shader.cpp" />
     <ClCompile Include="src\graphics\Image.cpp" />
     <ClCompile Include="src\base\ActionSender.cpp" />
     <ClCompile Include="src\io\LoopFile.cpp" />

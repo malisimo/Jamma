@@ -158,25 +158,16 @@ int Window::Create(HINSTANCE hInstance, int nCmdShow)
 		return 1;
 	}
 
-	if (WINDOWED == _config.State)
-	{
-		AdjustSize();
-		Center();
-	}
-
-	RECT winRect = {
-		_config.Position.X, _config.Position.Y,
-		_config.Size.Width, _config.Size.Height };
-
-	AdjustWindowRect(&winRect, _style, false);	
+	auto size = (WINDOWED == _config.State) ? AdjustSize(_config.Size, _style) : _config.Size;
+	auto pos = (WINDOWED == _config.State) ? Center(size) : _config.Position;
 
 	// Create a new window and context
 	_wnd = CreateWindowEx(
 		WS_EX_ACCEPTFILES,
 		_windowClass, L"OpenGL Window",	// class name, window name
 		_style,							// styles
-		winRect.left, winRect.top,		// posx, posy. If x is set to CW_USEDEFAULT y is ignored
-		winRect.right - winRect.left, winRect.bottom - winRect.top,	// width, height
+		pos.X, pos.Y,		// posx, posy. If x is set to CW_USEDEFAULT y is ignored
+		size.Width, size.Height,	// width, height
 		nullptr, nullptr,						// parent window, menu
 		hInstance, this);				// instance, param
 
@@ -261,11 +252,11 @@ int Window::Create(HINSTANCE hInstance, int nCmdShow)
 	InitScene();
 
 	const char* glVersion = (const char *)glGetString(GL_VERSION);
-	size_t size = strlen(glVersion) + 1;
-	wchar_t* glVersionStr = new wchar_t[size];
+	size_t versionStrSize = strlen(glVersion) + 1;
+	wchar_t* glVersionStr = new wchar_t[versionStrSize];
 
 	size_t outSize;
-	mbstowcs_s(&outSize, glVersionStr, size, glVersion, size - 1);
+	mbstowcs_s(&outSize, glVersionStr, versionStrSize, glVersion, versionStrSize - 1);
 	SetWindowText(_wnd, glVersionStr);
 	ShowWindow(_wnd, nCmdShow);
 
@@ -275,21 +266,6 @@ int Window::Create(HINSTANCE hInstance, int nCmdShow)
 void Window::SetWindowHandle(HWND wnd)
 {
 	_wnd = wnd;
-}
-
-void Window::AdjustSize()
-{
-	RECT rect = { 0, 0, (LONG)_config.Size.Width, (LONG)_config.Size.Height };
-	AdjustWindowRect(&rect, _style, false);
-
-	long w = rect.right - rect.left;
-	long h = rect.bottom - rect.top;
-
-	_config.Size = {
-		w < 1 ? 1 : (unsigned int)w, 
-		h < 1 ? 1 : (unsigned int)h };
-
-	_scene.SetSize(_config.Size);
 }
 
 Window::Config Window::GetConfig() const
@@ -341,14 +317,6 @@ Size2d Window::GetSize()
 	return _config.Size;
 }
 
-void Window::Center()
-{
-	RECT primaryDisplaySize;
-	SystemParametersInfo(SPI_GETWORKAREA, 0, &primaryDisplaySize, 0);
-	_config.Position.X = (primaryDisplaySize.right - (int)_config.Size.Width) / 2;
-	_config.Position.Y = (primaryDisplaySize.bottom - (int)_config.Size.Height) / 2;
-}
-
 void Window::Render()
 {
 	glClearColor(0.129f, 0.586f, 0.949f, 1.0f);
@@ -382,7 +350,7 @@ void Window::OnAction(WindowAction winAction)
 	{
 	case WindowAction::SIZE:
 		_config.Size = winAction.Size;
-		AdjustSize();
+		//AdjustSize();
 		break;
 	case WindowAction::SIZE_MINIMISE:
 		SetWindowState(Window::MINIMISED);
@@ -390,7 +358,7 @@ void Window::OnAction(WindowAction winAction)
 	case WindowAction::SIZE_MAXIMISE:
 		SetWindowState(Window::MAXIMISED);
 		_config.Size = winAction.Size;
-		AdjustSize();
+		//AdjustSize();
 	case WindowAction::DESTROY:
 		break;
 	}
@@ -407,10 +375,10 @@ void Window::OnAction(TouchAction touchAction)
 		switch (touchAction.State)
 		{
 		case TouchAction::TOUCH_DOWN:
-			_buttonsDown |= touchAction.Index;
+			_buttonsDown |= (1 << touchAction.Index);
 			break;
 		case TouchAction::TOUCH_UP:
-			_buttonsDown &= ~touchAction.Index;
+			_buttonsDown &= ~(1 << touchAction.Index);
 
 			if (_buttonsDown == 0)
 				ReleaseCapture();
@@ -443,6 +411,29 @@ void APIENTRY Window::MessageCallback(GLenum source,
 	fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
 		(type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
 		type, severity, message);
+}
+
+Size2d Window::AdjustSize(Size2d size, DWORD style)
+{
+	RECT rect = { 0, 0, (LONG)size.Width, (LONG)size.Height };
+	AdjustWindowRect(&rect, style, false);
+
+	long w = rect.right - rect.left;
+	long h = rect.bottom - rect.top;
+
+	return {
+		w < 1 ? 1 : (unsigned int)w,
+		h < 1 ? 1 : (unsigned int)h };
+}
+
+Position2d Window::Center(Size2d size)
+{
+	RECT primaryDisplaySize;
+	SystemParametersInfo(SPI_GETWORKAREA, 0, &primaryDisplaySize, 0);
+
+	return {
+		(primaryDisplaySize.right - (int)size.Width) / 2,
+		(primaryDisplaySize.bottom - (int)size.Height) / 2 };
 }
 
 ATOM Window::Register(HINSTANCE hInstance)
@@ -623,12 +614,7 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 		touchAction.Touch = TouchAction::TOUCH_MOUSE;
 		touchAction.State = TouchAction::TOUCH_DOWN;
 		touchAction.Index = 0;
-
-		if (ScreenToClient(hWindow, &pt))
-			touchAction.Position = { pt.x, winHeight - pt.y };
-		else
-			touchAction.Position = { x, winHeight - y };
-
+		touchAction.Position = { x, winHeight - y };
 		window->OnAction(touchAction);
 
 		return 0;
@@ -644,12 +630,7 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 		touchAction.Touch = TouchAction::TOUCH_MOUSE;
 		touchAction.State = TouchAction::TOUCH_UP;
 		touchAction.Index = 0;
-
-		if (ScreenToClient(hWindow, &pt))
-			touchAction.Position = { pt.x, winHeight - pt.y };
-		else
-			touchAction.Position = { x, winHeight - y };
-
+		touchAction.Position = { x, winHeight - y };
 		window->OnAction(touchAction);
 
 		return 0;
@@ -665,12 +646,7 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 		touchAction.Touch = TouchAction::TOUCH_MOUSE;
 		touchAction.State = TouchAction::TOUCH_DOWN;
 		touchAction.Index = 2;
-
-		if (ScreenToClient(hWindow, &pt))
-			touchAction.Position = { pt.x, winHeight - pt.y };
-		else
-			touchAction.Position = { x, winHeight - y };
-
+		touchAction.Position = { x, winHeight - y };
 		window->OnAction(touchAction);
 
 		return 0;
@@ -686,12 +662,7 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 		touchAction.Touch = TouchAction::TOUCH_MOUSE;
 		touchAction.State = TouchAction::TOUCH_UP;
 		touchAction.Index = 2;
-
-		if (ScreenToClient(hWindow, &pt))
-			touchAction.Position = { pt.x, winHeight - pt.y };
-		else
-			touchAction.Position = { x, winHeight - y };
-
+		touchAction.Position = { x, winHeight - y };
 		window->OnAction(touchAction);
 
 		return 0;
@@ -707,12 +678,7 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 		touchAction.Touch = TouchAction::TOUCH_MOUSE;
 		touchAction.State = TouchAction::TOUCH_DOWN;
 		touchAction.Index = 1;
-
-		if (ScreenToClient(hWindow, &pt))
-			touchAction.Position = { pt.x, winHeight - pt.y };
-		else
-			touchAction.Position = { x, winHeight - y };
-
+		touchAction.Position = { x, winHeight - y };
 		window->OnAction(touchAction);
 
 		return 0;
@@ -728,12 +694,7 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 		touchAction.Touch = TouchAction::TOUCH_MOUSE;
 		touchAction.State = TouchAction::TOUCH_UP;
 		touchAction.Index = 1;
-
-		if (ScreenToClient(hWindow, &pt))
-			touchAction.Position = { pt.x, winHeight - pt.y };
-		else
-			touchAction.Position = { x, winHeight - y };
-
+		touchAction.Position = { x, winHeight - y };
 		window->OnAction(touchAction);
 
 		return 0;
@@ -752,14 +713,8 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 
 		TouchMoveAction touchAction;
 		touchAction.Touch = TouchAction::TOUCH_MOUSE;
-
-		if (ScreenToClient(hWindow, &pt))
-			touchAction.Position = { pt.x, winHeight - pt.y };
-		else
-			touchAction.Position = { x, winHeight - y };
-
+		touchAction.Position = { x, winHeight - y };
 		window->OnAction(touchAction);
-		//_scene.OnMouseMove(x, y);
 
 		/*MOUSEOVERSTATE mouseoverstate = MOUSEOVER_NORMAL;
 
@@ -819,12 +774,7 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 		touchAction.State = TouchAction::TOUCH_DOWN;
 		touchAction.Index = 4;
 		touchAction.Value = delta;
-
-		if (ScreenToClient(hWindow, &pt))
-			touchAction.Position = { pt.x, winHeight - pt.y };
-		else
-			touchAction.Position = { x, winHeight - y };
-
+		touchAction.Position = { x, winHeight - y };
 		window->OnAction(touchAction);
 
 		return 0;
@@ -832,6 +782,9 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 	case WM_KEYDOWN:
 	{
 		bool repeatkey = false;
+
+		if (VK_ESCAPE == wParam)
+			PostMessage(hWindow, WM_CLOSE, 0, 0);
 
 		if (lParam & (0x01 << 30))
 			repeatkey = true;

@@ -7,17 +7,17 @@ struct Position2d
 
 	Position2d operator+(const Position2d& a) const
 	{
-		return { a.X + X, a.Y + Y };
+		return { X + a.X, Y + a.Y };
 	}
 
 	Position2d operator-(const Position2d& a) const
 	{
-		return { a.X - X, a.Y - Y };
+		return { X - a.X, Y - a.Y };
 	}
 
 	Position2d operator*(const Position2d& a) const
 	{
-		return { a.X * X, a.Y * Y };
+		return { X * a.X, Y * a.Y };
 	}
 
 	bool operator==(const Position2d& a) const
@@ -41,17 +41,20 @@ struct Size2d
 
 	Size2d operator+(const Size2d& a) const
 	{
-		return { a.Width + Width, a.Height + Height };
+		return { Width + a.Width, Height + a.Height };
 	}
 
 	Size2d operator-(const Size2d& a) const
 	{
-		return { a.Width - Width, a.Height - Height };
+		auto w = Width <= a.Width ? (Width - a.Width) : 0;
+		auto h = Height <= a.Height ? (Height - a.Height) : 0;
+
+		return { w, h };
 	}
 
 	Size2d operator*(const Size2d& a) const
 	{
-		return { a.Width * Width, a.Height * Height };
+		return { Width * a.Width, Height * a.Height };
 	}
 
 	bool operator==(const Size2d& a) const
