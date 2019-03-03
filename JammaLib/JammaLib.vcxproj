@@ -98,7 +98,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;GLEW_STATIC;__WINDOWS_DS__;__WINDOWS_ASIO__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)src\base;$(ProjectDir)src\utils;$(ProjectDir)lib\opengl;$(ProjectDir)lib;$(ProjectDir)lib\rtaudio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeaderFile>include\stdafx.h</PrecompiledHeaderFile>
@@ -112,6 +112,13 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <AdditionalDependencies>dsound.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(WindowsSdkDir)Lib\10.0.16299.0\um\x86</AdditionalLibraryDirectories>
+    </Lib>
+    <PreBuildEvent>
+      <Command>echo $(WindowsSdkDir)</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -119,7 +126,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;GLEW_STATIC;__WINDOWS_DS__;__WINDOWS_ASIO__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)src\base;$(ProjectDir)src\utils;$(ProjectDir)lib\opengl;$(ProjectDir)lib;$(ProjectDir)lib\rtaudio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>include\stdafx.h</PrecompiledHeaderFile>
@@ -131,6 +138,13 @@
       <AdditionalLibraryDirectories>$(WindowsSDK_LibraryPath_x86);$(ProjectDir)lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <AdditionalDependencies>dsound.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(WindowsSdkDir)Lib\10.0.16299.0\um\x86</AdditionalLibraryDirectories>
+    </Lib>
+    <PreBuildEvent>
+      <Command>echo $(WindowsSdkDir)</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -138,7 +152,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_LIB;GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_LIB;GLEW_STATIC;__WINDOWS_DS__;__WINDOWS_ASIO__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)src\base;$(ProjectDir)src\utils;$(ProjectDir)lib\opengl;$(ProjectDir)lib;$(ProjectDir)lib\rtaudio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>include\stdafx.h</PrecompiledHeaderFile>
@@ -150,6 +164,14 @@
       <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <AdditionalDependencies>dsound.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(WindowsSdkDir)Lib\10.0.16299.0\um\x64</AdditionalLibraryDirectories>
+    </Lib>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -159,7 +181,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_LIB;GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_LIB;GLEW_STATIC;__WINDOWS_DS__;__WINDOWS_ASIO__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)src\base;$(ProjectDir)src\utils;$(ProjectDir)lib\opengl;$(ProjectDir)lib;$(ProjectDir)lib\rtaudio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>include\stdafx.h</PrecompiledHeaderFile>
@@ -173,8 +195,28 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <AdditionalDependencies>dsound.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(WindowsSdkDir)Lib\10.0.16299.0\um\x64</AdditionalLibraryDirectories>
+    </Lib>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="lib\rtaudio\include\asio.h" />
+    <ClInclude Include="lib\rtaudio\include\asiodrivers.h" />
+    <ClInclude Include="lib\rtaudio\include\asiodrvr.h" />
+    <ClInclude Include="lib\rtaudio\include\asiolist.h" />
+    <ClInclude Include="lib\rtaudio\include\asiosys.h" />
+    <ClInclude Include="lib\rtaudio\include\dsound.h" />
+    <ClInclude Include="lib\rtaudio\include\functiondiscoverykeys_devpkey.h" />
+    <ClInclude Include="lib\rtaudio\include\ginclude.h" />
+    <ClInclude Include="lib\rtaudio\include\iasiodrv.h" />
+    <ClInclude Include="lib\rtaudio\include\iasiothiscallresolver.h" />
+    <ClInclude Include="lib\rtaudio\include\soundcard.h" />
+    <ClInclude Include="src\audio\AudioDevice.h" />
     <ClInclude Include="src\gui\GuiSlider.h" />
     <ClInclude Include="src\base\Moveable.h" />
     <ClInclude Include="src\base\Sizeable.h" />
@@ -225,6 +267,7 @@
     <ClInclude Include="src\resources\TextureResource.h" />
     <ClInclude Include="src\base\Touchable.h" />
     <ClInclude Include="src\actions\WindowAction.h" />
+    <ClInclude Include="src\resources\WavResource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\glew\glew.h" />
@@ -232,6 +275,11 @@
     <ClInclude Include="lib\rtaudio\RtAudio.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="lib\rtaudio\include\asio.cpp" />
+    <ClCompile Include="lib\rtaudio\include\asiodrivers.cpp" />
+    <ClCompile Include="lib\rtaudio\include\asiolist.cpp" />
+    <ClCompile Include="lib\rtaudio\include\iasiothiscallresolver.cpp" />
+    <ClCompile Include="src\audio\AudioDevice.cpp" />
     <ClCompile Include="src\gui\GuiSlider.cpp" />
     <ClCompile Include="src\base\Moveable.cpp" />
     <ClCompile Include="src\base\Sizeable.cpp" />
@@ -271,6 +319,7 @@
     <ClCompile Include="src\resources\TextureResource.cpp" />
     <ClCompile Include="src\base\Touchable.cpp" />
     <ClCompile Include="src\actions\WindowAction.cpp" />
+    <ClCompile Include="src\resources\WavResource.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\graphics\Window.h" />

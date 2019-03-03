@@ -5,7 +5,7 @@ TextureResource::TextureResource(std::string name,
 	GLuint texture,
 	unsigned int width,
 	unsigned int height) :
-	_name(name),
+	Resource(name),
 	_width(width),
 	_height(height),
 	_texture(texture)

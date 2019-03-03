@@ -45,6 +45,19 @@ bool ResourceLib::LoadResource(Resources::Type type, std::string name, std::vect
 
 			return true;
 		}
+		case Resources::WAV:
+		{
+			auto wavFile = "./resources/wav/" + name + ".wav";
+			auto wavOpt = WavResource::Load(wavFile);
+
+			if (wavOpt.has_value())
+			{ 
+				auto[wav, numSamps, sampleRate] = wavOpt.value();
+				_resources.emplace(name, std::make_shared<WavResource>(name, wav, numSamps, sampleRate));
+			}
+
+			return true;
+		}
 	}
 
 	return false;

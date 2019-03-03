@@ -20,7 +20,7 @@ public:
 	ShaderResource& operator=(const ShaderResource &) = delete;
 
 	ShaderResource(ShaderResource &&other) :
-		_name(other._name),
+		Resource(other._name),
 		_shaderProgram(other._shaderProgram),
 		_uniforms(other._uniforms)
 	{
@@ -60,7 +60,6 @@ private:
 	static bool AddStageFromFile(GLuint shaderProgram, const std::string& filePath, GLenum shaderType);
 
 private:
-	std::string _name;
 	GLuint _shaderProgram;
 	std::map<std::string, GLint> _uniforms;
 };

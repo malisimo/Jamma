@@ -1,8 +1,11 @@
 #pragma once
+#include <memory>
 #include "glm/glm.hpp"
 #include "glm/ext.hpp"
 #include "Drawable.h"
 #include "../resources/ResourceLib.h"
+#include "../audio/AudioDevice.h"
+#include "../engine/Loop.h"
 #include "Image.h"
 #include "../gui/GuiLabel.h"
 #include "../gui/GuiSlider.h"
@@ -26,7 +29,8 @@ public:
 	{}
 };
 
-class Scene : 
+class Scene :
+	public std::enable_shared_from_this<Scene>,
 	public Drawable,
 	public Sizeable,
 	public Audible,
@@ -47,10 +51,14 @@ public:
 		Audible(std::move(other)),
 		_viewProj(other._viewProj),
 		_overlayViewProj(other._overlayViewProj),
+		_audioDevice(std::move(other._audioDevice)),
+		_loop(std::move(other._loop)),
 		_image(std::move(other._image)),
 		_label(std::move(other._label)),
 		_slider(std::move(other._slider))
 	{
+		other._audioDevice = std::make_unique<AudioDevice>();
+		other._loop = std::make_unique<Loop>();
 		other._image = std::make_unique<Image>(ImageParams(DrawableParams{ "" }, SizeableParams{ 1, 1 }, "texture"));
 		other._label = std::make_unique<GuiLabel>(GuiLabelParams(GuiElementParams(DrawableParams{ "" }, MoveableParams{ 0,0 }, SizeableParams{ 1,1 }, "", "", "", {}), ""));
 		other._slider = std::make_unique<GuiSlider>(GuiSliderParams());
@@ -73,6 +81,8 @@ public:
 			_label.swap(other._label);
 			_slider.swap(other._slider);
 			_image.swap(other._image);
+			_loop.swap(other._loop);
+			_audioDevice.swap(other._audioDevice);
 		}
 
 		return *this;
@@ -90,7 +100,13 @@ public:
 	virtual void OnAction(TouchMoveAction touchAction) override;
 	virtual void OnAction(KeyAction keyAction) override;
 
+	virtual void Play(float* buf, unsigned int numChans, unsigned int numSamps) override;
+
+	void InitAudio();
+	RtAudio::DeviceInfo AudioDeviceInfo();
+
 private:
+	static int OnAudio(void* outBuffer, void* inBuffer, unsigned int numSamps, double sampleRate, RtAudioStreamStatus status, void* userData);
 	void InitSize();
 	glm::mat4 View();
 
@@ -100,4 +116,6 @@ private:
 	std::unique_ptr<GuiLabel> _label;
 	std::unique_ptr<GuiSlider> _slider;
 	std::unique_ptr<Image> _image;
+	std::unique_ptr<Loop> _loop;
+	std::unique_ptr<AudioDevice> _audioDevice;
 };

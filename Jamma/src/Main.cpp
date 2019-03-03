@@ -28,6 +28,8 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
 	if (window.Create(hInstance, nCmdShow) != 0)
 		PostQuitMessage(1);
 
+	scene.InitAudio();
+
 	MSG msg;
 	bool active = true;
 	while (active)

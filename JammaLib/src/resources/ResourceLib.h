@@ -9,6 +9,7 @@
 #include "Resource.h"
 #include "TextureResource.h"
 #include "ShaderResource.h"
+#include "WavResource.h"
 #include "../graphics/Font.h"
 
 class ResourceLib

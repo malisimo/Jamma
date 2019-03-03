@@ -1,14 +1,8 @@
 #include "WavReadWriter.h"
 
-std::optional<std::tuple<std::unique_ptr<float[]>, unsigned int, unsigned int>>
+std::optional<std::tuple<std::vector<float>, unsigned int, unsigned int>>
 	WavReadWriter::ReadWavFile(const std::string& fname, unsigned int maxsamps)
 {
-	size_t numsampsloaded;
-	unsigned int samplerate;
-	unsigned int counter1;
-	char* cname;
-	char* datain;
-	FILE* fid;
 	struct SoundHeader info;
 	struct SoundHeader* pinfo = &info;
 
@@ -17,57 +11,53 @@ std::optional<std::tuple<std::unique_ptr<float[]>, unsigned int, unsigned int>>
 	if (maxsamps < 1)
 		return std::nullopt;
 
-	cname = new char[fname.size() + 1];
+	auto cname = new char[fname.size() + 1];
 	strcpy_s(cname, fname.size() + 1, fname.c_str());
 
-	fid = OpenSoundIn(cname, pinfo);
+	auto fid = OpenSoundIn(cname, pinfo);
 
 	delete cname;
 
 	if (fid == NULL)
 		return {};
 
-	numsampsloaded = maxsamps;
+	size_t numSampsLoaded = maxsamps;
 
 	// Only load the reported number of samples
 	// (but prevent loading more than the array can hold)
 	if (info.dlength < (long)(maxsamps * 2))
-		numsampsloaded = info.dlength / 2; // Two 16 bit integers per sample (32 bit float)
+		numSampsLoaded = info.dlength / 2; // Two 16 bit integers per sample (32 bit float)
 
-	if (numsampsloaded < 1)
+	if (numSampsLoaded < 1)
 	{
-		numsampsloaded = 0;
+		numSampsLoaded = 0;
 		fclose(fid);
 
 		return {};
 	}
 
-	samplerate = info.srate;
+	auto datain = new char[numSampsLoaded * 2];  // Two bytes per wav file sample (16 bit integer)
+	auto bytesread = fread(datain, 1, numSampsLoaded * 2, fid);
 
-	datain = new char[numsampsloaded * 2];  // Two bytes per wav file sample (16 bit integer)
-
-	auto bytesread = fread(datain, 1, numsampsloaded * 2, fid);
-
-	if ((bytesread / 2) < numsampsloaded)
-		numsampsloaded = bytesread / 2;  // Two bytes per wav file sample (16 bit integer)
+	if ((bytesread / 2) < numSampsLoaded)
+		numSampsLoaded = bytesread / 2;  // Two bytes per wav file sample (16 bit integer)
 
 	fclose(fid);
 
-	auto data = std::make_unique<float[]>(numsampsloaded);
+	std::vector<float> data(numSampsLoaded);
 
-	for (counter1 = 0; counter1<numsampsloaded; counter1++)
+	for (int i = 0; i<numSampsLoaded; i++)
 	{
-		data[counter1] = CharToFloat(datain + (counter1 * 2));
+		data[i] = CharToFloat(datain + (i * 2));
 	}
 
 	delete datain;
 
-	return std::make_tuple(std::move(data), (unsigned int)numsampsloaded, samplerate);
+	return std::make_tuple(std::move(data), (unsigned int)numSampsLoaded, info.srate);
 }
 
-bool WavReadWriter::WriteWavFile(std::string fname, std::shared_ptr<float[]> data, unsigned int numsamps, unsigned int samplerate)
+bool WavReadWriter::WriteWavFile(std::string fname, std::vector<float> data, unsigned int numSamps, unsigned int sampleRate)
 {
-	unsigned int counter1;
 	char* cname;
 	char* dataout;
 	struct SoundHeader info;
@@ -77,14 +67,14 @@ bool WavReadWriter::WriteWavFile(std::string fname, std::shared_ptr<float[]> dat
 	cname = new char[fname.size() + 1];
 	strcpy_s(cname, fname.size() + 1, fname.c_str());
 
-	if (numsamps < 1)
+	if (numSamps < 1)
 	{
 		delete cname;
 		return false;
 	}
 
-	info.srate = samplerate;
-	info.dlength = numsamps * 2;
+	info.srate = sampleRate;
+	info.dlength = numSamps * 2;
 	info.bits_per_samp = 16;
 
 	FillHeader(info);
@@ -96,14 +86,14 @@ bool WavReadWriter::WriteWavFile(std::string fname, std::shared_ptr<float[]> dat
 	if (fid == NULL)
 		return false;
 
-	dataout = new char[numsamps * 2]; // Two bytes per wav file sample (16 bit integer)
+	dataout = new char[numSamps * 2]; // Two bytes per wav file sample (16 bit integer)
 
-	for (counter1 = 0; counter1<numsamps; counter1++)
+	for (unsigned int i = 0; i < numSamps; i++)
 	{
-		FloatToChar(data[counter1], dataout + (counter1 * 2));
+		FloatToChar(data[i], dataout + (i * 2));
 	}
 
-	fwrite(dataout, 1, numsamps * 2, fid);
+	fwrite(dataout, 1, numSamps * 2, fid);
 
 	fclose(fid);
 	delete dataout;

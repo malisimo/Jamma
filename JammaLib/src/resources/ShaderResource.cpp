@@ -4,7 +4,7 @@
 ShaderResource::ShaderResource(std::string name,
 	GLuint shaderProgram,
 	std::vector<std::string> uniforms) :
-	_name(name),
+	Resource(name),
 	_shaderProgram(shaderProgram)
 {
 	glUseProgram(shaderProgram);

@@ -8,3 +8,7 @@ Audible::Audible(AudibleParams params) :
 Audible::~Audible()
 {
 }
+
+void Audible::Play(float* buf, unsigned int numChans, unsigned int numSamps)
+{
+}

@@ -88,4 +88,7 @@
       <Filter>resources\fonts</Filter>
     </Text>
   </ItemGroup>
+  <ItemGroup>
+    <Media Include="resources\wav\hh.wav" />
+  </ItemGroup>
 </Project>

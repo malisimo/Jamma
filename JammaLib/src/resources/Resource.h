@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <memory>
 #include <gl/glew.h>
 #include <gl/gl.h>
@@ -10,12 +11,16 @@ namespace Resources
 	{
 		NONE = 0,
 		TEXTURE = 1,
-		SHADER = 2
+		SHADER = 2,
+		WAV = 3
 	};
 };
 
 class Resource
 {
+public:
+	Resource(std::string name) : _name(name) {}
+
 public:
 	virtual Resources::Type GetType() const { return Resources::NONE; }
 	virtual GLuint GetId() const { return 0; }
@@ -39,5 +44,8 @@ public:
 		else
 			return std::nullopt;
 	}
+
+protected:
+	std::string _name;
 };
 

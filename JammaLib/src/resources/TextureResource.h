@@ -19,7 +19,7 @@ public:
 	TextureResource& operator=(const TextureResource &) = delete;
 
 	TextureResource(TextureResource &&other) :
-		_name(other._name),
+		Resource(other._name),
 		_width(other._width),
 		_height(other._height),
 		_texture(other._texture)
@@ -58,7 +58,6 @@ public:
 	static std::optional<std::tuple<GLuint, unsigned int, unsigned int>> Load(std::string fileName);
 
 private:
-	std::string _name;
 	unsigned int _width;
 	unsigned int _height;
 	GLuint _texture;

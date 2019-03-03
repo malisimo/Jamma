@@ -6,9 +6,10 @@ Scene::Scene(SceneParams params) :
 	Audible(params),
 	_viewProj(glm::mat4()),
 	_overlayViewProj(glm::mat4()),
-	_label(nullptr),
-	_slider(nullptr),
-	_image(std::make_unique<Image>(ImageParams(DrawableParams{ "grid" }, SizeableParams{ 450, 450 }, "texture")))
+	_label(std::unique_ptr<GuiLabel>()),
+	_slider(std::unique_ptr<GuiSlider>()),
+	_image(std::make_unique<Image>(ImageParams(DrawableParams{ "grid" }, SizeableParams{ 450, 450 }, "texture"))),
+	_audioDevice(std::unique_ptr<AudioDevice>())
 {
 	GuiLabelParams labelParams(GuiElementParams(
 		DrawableParams{ "" },
@@ -32,6 +33,8 @@ Scene::Scene(SceneParams params) :
 	sliderParams.DragTexture = "fader";
 	sliderParams.DragOverTexture = "fader_over";
 	_slider = std::make_unique<GuiSlider>(sliderParams);
+
+	_audioDevice = std::make_unique<AudioDevice>();
 }
 
 void Scene::Draw(DrawContext& ctx)
@@ -104,6 +107,38 @@ void Scene::OnAction(KeyAction keyAction)
 {
 	std::cout << "Key action " << keyAction.KeyActionType << " [" << keyAction.KeyChar << "]" << std::endl;
 	//_slider->OnAction(keyAction);
+}
+
+void Scene::Play(float* buf, unsigned int numChans, unsigned int numSamps)
+{
+	_loop->Play(buf, numChans, numSamps);
+}
+
+void Scene::InitAudio()
+{
+	auto dev = AudioDevice::Start(Scene::OnAudio,
+		[](RtAudioError::Type type, const std::string& err) { std::cout << "[" << type << " RtAudio Error] " << err << std::endl; },
+		this);
+
+	if (dev.has_value())
+		_audioDevice->SetDevice(std::move(dev.value()));
+}
+
+RtAudio::DeviceInfo Scene::AudioDeviceInfo()
+{
+	return _audioDevice->Current();
+}
+
+int Scene::OnAudio(void *outBuffer, void *inBuffer, unsigned int numSamps, double sampleRate, RtAudioStreamStatus status, void *userData)
+{
+	float* inBuf = (float*)inBuffer;
+	float* outBuf = (float*)outBuffer;
+	Scene* scene = (Scene*)userData;
+
+	auto audioDevice = scene->AudioDeviceInfo();
+	scene->Play(outBuf, audioDevice.outputChannels, numSamps);
+
+	return 0;
 }
 
 void Scene::InitSize()

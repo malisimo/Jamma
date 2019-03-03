@@ -251,6 +251,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Text>
   </ItemGroup>
+  <ItemGroup>
+    <Media Include="resources\wav\hh.wav" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

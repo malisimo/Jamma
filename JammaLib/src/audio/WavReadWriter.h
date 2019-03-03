@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <vector>
 #include <string>
 #include <optional>
 #include <memory>
@@ -25,19 +26,17 @@ struct SoundHeader
 class WavReadWriter
 {
 public:
-	static std::optional<std::tuple<std::unique_ptr<float[]>, unsigned int, unsigned int>>
+	static std::optional<std::tuple<std::vector<float>, unsigned int, unsigned int>>
 		ReadWavFile(const std::string& fname, unsigned int maxsamps);
 
 	static bool WriteWavFile(std::string fname, 
-		std::shared_ptr<float[]> data,
+		std::vector<float> data,
 		unsigned int numsamps,
 		unsigned int samplerate);
 
 private:
 	static FILE* OpenSoundIn(char *filename, struct SoundHeader *hdr);
 	static FILE* OpenSoundOut(char *filename, struct SoundHeader *hdr);
-	static void CloseSoundOut(FILE *file, long num_samples);
-	static void CloseSoundIn(FILE *file);
 	static void FillHeader(struct SoundHeader &hdr);
 
 	static void FloatToChar(float f, char* c);
