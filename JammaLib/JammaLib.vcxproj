@@ -216,6 +216,7 @@
     <ClInclude Include="lib\rtaudio\include\iasiodrv.h" />
     <ClInclude Include="lib\rtaudio\include\iasiothiscallresolver.h" />
     <ClInclude Include="lib\rtaudio\include\soundcard.h" />
+    <ClInclude Include="src\base\ResourceUser.h" />
     <ClInclude Include="src\audio\AudioDevice.h" />
     <ClInclude Include="src\gui\GuiSlider.h" />
     <ClInclude Include="src\base\Moveable.h" />
@@ -279,6 +280,7 @@
     <ClCompile Include="lib\rtaudio\include\asiodrivers.cpp" />
     <ClCompile Include="lib\rtaudio\include\asiolist.cpp" />
     <ClCompile Include="lib\rtaudio\include\iasiothiscallresolver.cpp" />
+    <ClCompile Include="src\base\ResourceUser.cpp" />
     <ClCompile Include="src\audio\AudioDevice.cpp" />
     <ClCompile Include="src\gui\GuiSlider.cpp" />
     <ClCompile Include="src\base\Moveable.cpp" />

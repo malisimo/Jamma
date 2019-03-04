@@ -47,6 +47,9 @@ public:
 	}
 
 public:
+	virtual Resources::Type GetType() const override { return Resources::WAV; }
+
+public:
 	unsigned int Length() const;
 	const std::vector<float>& Buffer();
 	static std::optional<std::tuple<std::vector<float>, unsigned int, unsigned int>> Load(const std::string& wavFile);

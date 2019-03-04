@@ -2,6 +2,7 @@
 
 #include <memory>
 #include "DrawContext.h"
+#include "ResourceUser.h"
 #include "../resources/ResourceLib.h"
 #include "../resources/TextureResource.h"
 
@@ -11,7 +12,7 @@ public:
 	std::string Texture;
 };
 
-class Drawable
+class Drawable : public ResourceUser
 {
 public:
 	Drawable(DrawableParams params);
@@ -19,8 +20,6 @@ public:
 
 public:
 	virtual void Draw(DrawContext& ctx);
-	virtual bool InitResources(ResourceLib& resourceLib);
-	virtual bool ReleaseResources();
 
 protected:
 	DrawableParams _drawParams;

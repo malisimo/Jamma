@@ -58,7 +58,7 @@ public:
 		_slider(std::move(other._slider))
 	{
 		other._audioDevice = std::make_unique<AudioDevice>();
-		other._loop = std::make_unique<Loop>();
+		other._loop = std::make_unique<Loop>(LoopParams());
 		other._image = std::make_unique<Image>(ImageParams(DrawableParams{ "" }, SizeableParams{ 1, 1 }, "texture"));
 		other._label = std::make_unique<GuiLabel>(GuiLabelParams(GuiElementParams(DrawableParams{ "" }, MoveableParams{ 0,0 }, SizeableParams{ 1,1 }, "", "", "", {}), ""));
 		other._slider = std::make_unique<GuiSlider>(GuiSliderParams());

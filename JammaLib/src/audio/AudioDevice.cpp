@@ -1,27 +1,47 @@
 #include "AudioDevice.h"
 
-AudioDevice::AudioDevice()
+AudioDevice::AudioDevice() :
+	_stream(std::unique_ptr<RtAudio>())
+{
+}
+
+AudioDevice::AudioDevice(std::unique_ptr<RtAudio> stream) :
+	_stream(std::move(stream))
 {
 }
 
 AudioDevice::~AudioDevice()
 {
+	if (!_stream)
+		return;
+
+	if (_stream->isStreamRunning())
+		_stream->stopStream();
+
+	if (_stream->isStreamOpen())
+		_stream->closeStream();
 }
 
 void AudioDevice::SetDevice(std::unique_ptr<RtAudio> device)
 {
-	_current = std::move(device);
+	_stream = std::move(device);
 }
 
-RtAudio::DeviceInfo AudioDevice::Current()
+void AudioDevice::Start()
 {
-	return _current->getDeviceInfo(0);
+	if (_stream)
+		_stream->startStream();
 }
 
-std::optional<std::unique_ptr<RtAudio>> AudioDevice::Start(
+RtAudio::DeviceInfo AudioDevice::GetStreamInfo()
+{
+	return _stream->getDeviceInfo(0);
+}
+
+std::optional<std::unique_ptr<AudioDevice>> AudioDevice::Open(
 	std::function<int(void*,void*,unsigned int,double,RtAudioStreamStatus,void*)> onAudio,
 	std::function<void(RtAudioError::Type,const std::string&)> onError,
-	Audible* audioReceiver)
+	void* audioReceiver)
 {
 	std::unique_ptr<RtAudio> rtAudio;
 
@@ -35,27 +55,29 @@ std::optional<std::unique_ptr<RtAudio>> AudioDevice::Start(
 		return std::nullopt;
 	}
 
+	unsigned int bufFrames = 1;
+
+	auto deviceCount = rtAudio->getDeviceCount();
 	auto inDeviceNum = rtAudio->getDefaultInputDevice();
 	auto outDeviceNum = rtAudio->getDefaultOutputDevice();
+	auto inDev = rtAudio->getDeviceInfo(inDeviceNum);
+	auto outDev = rtAudio->getDeviceInfo(outDeviceNum);
+
+	if ((inDev.inputChannels == 0) && (outDev.outputChannels == 0))
+		return std::nullopt;
 
 	RtAudio::StreamParameters inParams;
 	inParams.deviceId = inDeviceNum;
 	inParams.firstChannel = 0;
-	inParams.nChannels = 2;
+	inParams.nChannels = std::min(inDev.inputChannels, 2u);
 	RtAudio::StreamParameters outParams;
 	outParams.deviceId = outDeviceNum;
 	outParams.firstChannel = 0;
-	outParams.nChannels = 2;
+	outParams.nChannels = std::min(outDev.outputChannels, 2u);
 
 	RtAudio::StreamOptions streamOptions;
 	streamOptions.numberOfBuffers = 1;
 	streamOptions.flags = RTAUDIO_MINIMIZE_LATENCY;
-	
-	unsigned int bufFrames = 1;
-
-	auto deviceCount = rtAudio->getDeviceCount();
-	auto inDev = rtAudio->getDeviceInfo(inDeviceNum);
-	auto outDev = rtAudio->getDeviceInfo(outDeviceNum);
 
 	std::cout << "Opening audio stream" << std::endl;
 	std::cout << "[Input Device] " << inParams.deviceId << " : " << inParams.nChannels << "ch" << std::endl;
@@ -63,8 +85,8 @@ std::optional<std::unique_ptr<RtAudio>> AudioDevice::Start(
 
 	try
 	{
-		rtAudio->openStream(&outParams,
-			&inParams,
+		rtAudio->openStream(outParams.nChannels > 0 ? &outParams : nullptr,
+			inParams.nChannels > 0 ? &inParams : nullptr,
 			RTAUDIO_FLOAT32,
 			44100,
 			&bufFrames,
@@ -83,8 +105,5 @@ std::optional<std::unique_ptr<RtAudio>> AudioDevice::Start(
 	if (!rtAudio->isStreamOpen())
 		return std::nullopt;
 
-	if (!rtAudio->isStreamRunning())
-		return std::nullopt;
-
-	return rtAudio;
+	return std::make_unique<AudioDevice>(std::move(rtAudio));
 }

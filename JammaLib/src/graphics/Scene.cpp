@@ -34,6 +34,10 @@ Scene::Scene(SceneParams params) :
 	sliderParams.DragOverTexture = "fader_over";
 	_slider = std::make_unique<GuiSlider>(sliderParams);
 
+	LoopParams loopParams;
+	loopParams.Wav = "hh";
+	_loop = std::make_unique<Loop>(loopParams);
+
 	_audioDevice = std::make_unique<AudioDevice>();
 }
 
@@ -62,6 +66,7 @@ bool Scene::InitResources(ResourceLib& resourceLib)
 	_label->InitResources(resourceLib);
 	_slider->InitResources(resourceLib);
 	_image->InitResources(resourceLib);
+	_loop->InitResources(resourceLib);
 
 	InitSize();
 
@@ -70,7 +75,11 @@ bool Scene::InitResources(ResourceLib& resourceLib)
 
 bool Scene::ReleaseResources()
 {
+	_label->ReleaseResources();
+	_slider->ReleaseResources();
 	_image->ReleaseResources();
+	_loop->ReleaseResources();
+
 	return Drawable::ReleaseResources();
 }
 
@@ -116,17 +125,23 @@ void Scene::Play(float* buf, unsigned int numChans, unsigned int numSamps)
 
 void Scene::InitAudio()
 {
-	auto dev = AudioDevice::Start(Scene::OnAudio,
+	auto dev = AudioDevice::Open(Scene::OnAudio,
 		[](RtAudioError::Type type, const std::string& err) { std::cout << "[" << type << " RtAudio Error] " << err << std::endl; },
 		this);
 
 	if (dev.has_value())
-		_audioDevice->SetDevice(std::move(dev.value()));
+	{
+		_audioDevice = std::move(dev.value());
+		_audioDevice->Start();
+	}
 }
 
 RtAudio::DeviceInfo Scene::AudioDeviceInfo()
 {
-	return _audioDevice->Current();
+	if (_audioDevice)
+		_audioDevice->GetStreamInfo();
+
+	return RtAudio::DeviceInfo();
 }
 
 int Scene::OnAudio(void *outBuffer, void *inBuffer, unsigned int numSamps, double sampleRate, RtAudioStreamStatus status, void *userData)
@@ -134,9 +149,21 @@ int Scene::OnAudio(void *outBuffer, void *inBuffer, unsigned int numSamps, doubl
 	float* inBuf = (float*)inBuffer;
 	float* outBuf = (float*)outBuffer;
 	Scene* scene = (Scene*)userData;
+	RtAudio::DeviceInfo deviceInfo;
+	if (scene)
+		deviceInfo = scene->AudioDeviceInfo();
 
-	auto audioDevice = scene->AudioDeviceInfo();
-	scene->Play(outBuf, audioDevice.outputChannels, numSamps);
+	auto numChannels = deviceInfo.outputChannels;
+
+	for (unsigned int samp = 0; samp < numSamps; samp++)
+	{
+		for (unsigned int chan = 0; chan < numChannels; chan++)
+		{
+			outBuf[samp * numChannels + chan] = 0.0f;
+		}
+	}
+
+	scene->Play(outBuf, deviceInfo.outputChannels, numSamps);
 
 	return 0;
 }
