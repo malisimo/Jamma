@@ -103,10 +103,11 @@ public:
 	virtual void Play(float* buf, unsigned int numChans, unsigned int numSamps) override;
 
 	void InitAudio();
-	RtAudio::DeviceInfo AudioDeviceInfo();
+	RtAudio::DeviceInfo AudioInputDeviceInfo();
+	RtAudio::DeviceInfo AudioOutputDeviceInfo();
 
 private:
-	static int OnAudio(void* outBuffer, void* inBuffer, unsigned int numSamps, double sampleRate, RtAudioStreamStatus status, void* userData);
+	static int OnAudio(void* outBuffer, void* inBuffer, unsigned int numSamps, double streamTime, RtAudioStreamStatus status, void* userData);
 	void InitSize();
 	glm::mat4 View();
 

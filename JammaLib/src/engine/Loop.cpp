@@ -53,14 +53,18 @@ void Loop::Play(float* buf, unsigned int numChans, unsigned int numSamps)
 	if (!wav)
 		return;
 
+	auto wavLength = wav->Length();
 	auto wavBuf = wav->Buffer();
 	auto index = _index;
 
 	for (unsigned int i = 0; i < numSamps; i++)
 	{
 		buf[i*numChans] += wavBuf[index++];
+
+		if (index >= wavLength)
+			index -= wavLength;
 	}
 
 	_index += numSamps;
-	_index %= wav->Length();
+	_index %= wavLength;
 }

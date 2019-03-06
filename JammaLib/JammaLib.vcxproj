@@ -205,6 +205,8 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\audio\AudioMixer.h" />
+    <ClInclude Include="src\audio\AudioFaderExp.h" />
     <ClInclude Include="lib\rtaudio\include\asio.h" />
     <ClInclude Include="lib\rtaudio\include\asiodrivers.h" />
     <ClInclude Include="lib\rtaudio\include\asiodrvr.h" />
@@ -276,6 +278,8 @@
     <ClInclude Include="lib\rtaudio\RtAudio.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\audio\AudioMixer.cpp" />
+    <ClCompile Include="src\audio\AudioFaderExp.cpp" />
     <ClCompile Include="lib\rtaudio\include\asio.cpp" />
     <ClCompile Include="lib\rtaudio\include\asiodrivers.cpp" />
     <ClCompile Include="lib\rtaudio\include\asiolist.cpp" />

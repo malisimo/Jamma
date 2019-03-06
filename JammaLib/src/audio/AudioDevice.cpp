@@ -1,11 +1,17 @@
 #include "AudioDevice.h"
 
 AudioDevice::AudioDevice() :
+	_inDeviceInfo(RtAudio::DeviceInfo()),
+	_outDeviceInfo(RtAudio::DeviceInfo()),
 	_stream(std::unique_ptr<RtAudio>())
 {
 }
 
-AudioDevice::AudioDevice(std::unique_ptr<RtAudio> stream) :
+AudioDevice::AudioDevice(RtAudio::DeviceInfo inDeviceInfo,
+	RtAudio::DeviceInfo outDeviceInfo,
+	std::unique_ptr<RtAudio> stream) :
+	_inDeviceInfo(inDeviceInfo),
+	_outDeviceInfo(outDeviceInfo),
 	_stream(std::move(stream))
 {
 }
@@ -33,9 +39,14 @@ void AudioDevice::Start()
 		_stream->startStream();
 }
 
-RtAudio::DeviceInfo AudioDevice::GetStreamInfo()
+RtAudio::DeviceInfo AudioDevice::GetInputStreamInfo()
 {
-	return _stream->getDeviceInfo(0);
+	return _inDeviceInfo;
+}
+
+RtAudio::DeviceInfo AudioDevice::GetOutputStreamInfo()
+{
+	return _outDeviceInfo;
 }
 
 std::optional<std::unique_ptr<AudioDevice>> AudioDevice::Open(
@@ -55,7 +66,7 @@ std::optional<std::unique_ptr<AudioDevice>> AudioDevice::Open(
 		return std::nullopt;
 	}
 
-	unsigned int bufFrames = 1;
+	unsigned int bufFrames = 512;
 
 	auto deviceCount = rtAudio->getDeviceCount();
 	auto inDeviceNum = rtAudio->getDefaultInputDevice();
@@ -76,7 +87,7 @@ std::optional<std::unique_ptr<AudioDevice>> AudioDevice::Open(
 	outParams.nChannels = std::min(outDev.outputChannels, 2u);
 
 	RtAudio::StreamOptions streamOptions;
-	streamOptions.numberOfBuffers = 1;
+	streamOptions.numberOfBuffers = 4;
 	streamOptions.flags = RTAUDIO_MINIMIZE_LATENCY;
 
 	std::cout << "Opening audio stream" << std::endl;
@@ -105,5 +116,5 @@ std::optional<std::unique_ptr<AudioDevice>> AudioDevice::Open(
 	if (!rtAudio->isStreamOpen())
 		return std::nullopt;
 
-	return std::make_unique<AudioDevice>(std::move(rtAudio));
+	return std::make_unique<AudioDevice>(inDev, outDev, std::move(rtAudio));
 }

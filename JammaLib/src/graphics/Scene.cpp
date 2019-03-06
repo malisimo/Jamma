@@ -136,24 +136,34 @@ void Scene::InitAudio()
 	}
 }
 
-RtAudio::DeviceInfo Scene::AudioDeviceInfo()
+RtAudio::DeviceInfo Scene::AudioInputDeviceInfo()
 {
 	if (_audioDevice)
-		_audioDevice->GetStreamInfo();
+		return _audioDevice->GetInputStreamInfo();
 
 	return RtAudio::DeviceInfo();
 }
 
-int Scene::OnAudio(void *outBuffer, void *inBuffer, unsigned int numSamps, double sampleRate, RtAudioStreamStatus status, void *userData)
+RtAudio::DeviceInfo Scene::AudioOutputDeviceInfo()
+{
+	if (_audioDevice)
+		return _audioDevice->GetOutputStreamInfo();
+
+	return RtAudio::DeviceInfo();
+}
+
+int Scene::OnAudio(void *outBuffer, void *inBuffer, unsigned int numSamps, double streamTime, RtAudioStreamStatus status, void *userData)
 {
 	float* inBuf = (float*)inBuffer;
 	float* outBuf = (float*)outBuffer;
 	Scene* scene = (Scene*)userData;
-	RtAudio::DeviceInfo deviceInfo;
-	if (scene)
-		deviceInfo = scene->AudioDeviceInfo();
+	RtAudio::DeviceInfo inDeviceInfo;
+	RtAudio::DeviceInfo outDeviceInfo;
 
-	auto numChannels = deviceInfo.outputChannels;
+	if (scene)
+		outDeviceInfo = scene->AudioOutputDeviceInfo();
+
+	auto numChannels = outDeviceInfo.outputChannels;
 
 	for (unsigned int samp = 0; samp < numSamps; samp++)
 	{
@@ -163,7 +173,7 @@ int Scene::OnAudio(void *outBuffer, void *inBuffer, unsigned int numSamps, doubl
 		}
 	}
 
-	scene->Play(outBuf, deviceInfo.outputChannels, numSamps);
+	scene->Play(outBuf, outDeviceInfo.outputChannels, numSamps);
 
 	return 0;
 }

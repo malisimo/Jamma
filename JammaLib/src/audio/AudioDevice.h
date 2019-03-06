@@ -14,15 +14,20 @@ class AudioDevice
 {
 public:
 	AudioDevice();
-	AudioDevice(std::unique_ptr<RtAudio> stream);
+	AudioDevice(RtAudio::DeviceInfo inDeviceInfo,
+		RtAudio::DeviceInfo outDeviceInfo,
+		std::unique_ptr<RtAudio> stream);
 	~AudioDevice();
 
 public:
 	void SetDevice(std::unique_ptr<RtAudio> device);
 	void Start();
-	RtAudio::DeviceInfo GetStreamInfo();
+	RtAudio::DeviceInfo GetInputStreamInfo();
+	RtAudio::DeviceInfo GetOutputStreamInfo();
 
 private:
+	RtAudio::DeviceInfo _inDeviceInfo;
+	RtAudio::DeviceInfo _outDeviceInfo;
 	std::unique_ptr<RtAudio> _stream;
 
 public:
