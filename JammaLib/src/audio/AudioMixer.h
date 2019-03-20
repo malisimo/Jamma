@@ -1,6 +1,9 @@
 #pragma once
 
 #include <vector>
+#include <memory>
+#include "Audible.h"
+#include "AudioBuffer.h"
 
 class AudioMixer
 {
@@ -9,13 +12,11 @@ public:
 	~AudioMixer();
 
 public:
-	void AddAudio(std::vector<float> source,
-		std::vector<float> scale,
-		float* dest,
-		unsigned int numSamps,
-		unsigned int numChannels);
+	void Tick(unsigned int numSamps);
+
 
 protected:
-	unsigned int _channel;
+	std::vector<std::shared_ptr<Audible>> _inputs;
+	std::vector<std::shared_ptr<AudioBuffer>> _outputs;
 };
 

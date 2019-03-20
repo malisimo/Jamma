@@ -43,7 +43,7 @@ bool Loop::ReleaseResources()
 	return true;
 }
 
-void Loop::Play(float* buf, unsigned int numChans, unsigned int numSamps)
+void Loop::Play(std::shared_ptr<AudioBuffer> buf, unsigned int numSamps)
 {
 	if (nullptr == buf)
 		return;
@@ -52,14 +52,15 @@ void Loop::Play(float* buf, unsigned int numChans, unsigned int numSamps)
 
 	if (!wav)
 		return;
-
+	
+	auto bufLength = buf->BufSize();
 	auto wavLength = wav->Length();
 	auto wavBuf = wav->Buffer();
 	auto index = _index;
 
 	for (unsigned int i = 0; i < numSamps; i++)
 	{
-		buf[i*numChans] += wavBuf[index++];
+		buf->PushMix(wavBuf[index++]);
 
 		if (index >= wavLength)
 			index -= wavLength;

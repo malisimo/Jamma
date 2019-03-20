@@ -1,7 +1,8 @@
 #include "AudioMixer.h"
 
 AudioMixer::AudioMixer() :
-	_channel(0)
+	_inputs({}),
+	_outputs({})
 {
 }
 
@@ -9,11 +10,7 @@ AudioMixer::~AudioMixer()
 {
 }
 
-void AudioMixer::AddAudio(std::vector<float> source,
-	std::vector<float> scale,
-	float* dest,
-	unsigned int numSamps,
-	unsigned int numChannels)
+void AudioMixer::Tick(unsigned int numSamps)
 {
 
 }

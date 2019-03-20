@@ -1,12 +1,19 @@
 #include "AudioFader.h"
 
 AudioFader::AudioFader() :
+	Audible(AudibleParams{}),
 	_target(0.0f)
 {
 }
 
 AudioFader::~AudioFader()
 {
+}
+
+void AudioFader::Play(std::shared_ptr<AudioBuffer> buf, unsigned int numSamps)
+{
+	if (_input)
+		_input->Play(buf, numSamps);
 }
 
 void AudioFader::SetTarget(float target)
@@ -205,7 +212,7 @@ std::function<AudioFader::ExponentialState(
 	};
 }
 
-std::vector<float> AudioFader::OnAudio(unsigned int numSamps)
+/*std::vector<float> AudioFader::OnAudio(unsigned int numSamps)
 {
 	auto out = std::vector<float>(numSamps);
 
@@ -215,4 +222,4 @@ std::vector<float> AudioFader::OnAudio(unsigned int numSamps)
 	}
 
 	return out;
-}
+}*/

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Audible.h"
 #include "AudioFader.h"
 
 class AudioFaderExp :
@@ -10,7 +11,7 @@ public:
 	~AudioFaderExp();
 
 public:
-	virtual std::vector<float> OnAudio(unsigned int numSamps) override;
+	virtual void Play(std::shared_ptr<AudioBuffer> buf, unsigned int numSamps) override;
 
 protected:
 	float _current;

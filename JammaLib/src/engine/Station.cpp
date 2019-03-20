@@ -1,7 +1,8 @@
 #include "Station.h"
 
 Station::Station() :
-	Audible(AudibleParams{})
+	MultiAudible(MultiAudibleParams{}),
+	_loopTakes({})
 {
 }
 

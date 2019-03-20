@@ -205,6 +205,10 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\audio\ChannelMixer.h" />
+    <ClInclude Include="src\engine\LoopTake.h" />
+    <ClInclude Include="src\base\MultiAudible.h" />
+    <ClInclude Include="src\audio\AudioBuffer.h" />
     <ClInclude Include="src\audio\AudioMixer.h" />
     <ClInclude Include="src\audio\AudioFaderExp.h" />
     <ClInclude Include="lib\rtaudio\include\asio.h" />
@@ -246,7 +250,7 @@
     <ClInclude Include="lib\opengl\gl\glxew.h" />
     <ClInclude Include="lib\opengl\gl\wglew.h" />
     <ClInclude Include="lib\opengl\gl\wglext.h" />
-    <ClInclude Include="src\graphics\Scene.h" />
+    <ClInclude Include="src\engine\Scene.h" />
     <ClInclude Include="src\graphics\Shader.h" />
     <ClInclude Include="src\graphics\Image.h" />
     <ClInclude Include="src\base\ActionSender.h" />
@@ -278,6 +282,10 @@
     <ClInclude Include="lib\rtaudio\RtAudio.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\audio\ChannelMixer.cpp" />
+    <ClCompile Include="src\engine\LoopTake.cpp" />
+    <ClCompile Include="src\base\MultiAudible.cpp" />
+    <ClCompile Include="src\audio\AudioBuffer.cpp" />
     <ClCompile Include="src\audio\AudioMixer.cpp" />
     <ClCompile Include="src\audio\AudioFaderExp.cpp" />
     <ClCompile Include="lib\rtaudio\include\asio.cpp" />
@@ -303,7 +311,7 @@
     <ClCompile Include="src\utils\GlUtils.cpp" />
     <ClCompile Include="src\graphics\GlDrawContext.cpp" />
     <ClCompile Include="src\base\DrawContext.cpp" />
-    <ClCompile Include="src\graphics\Scene.cpp" />
+    <ClCompile Include="src\engine\Scene.cpp" />
     <ClCompile Include="src\graphics\Shader.cpp" />
     <ClCompile Include="src\graphics\Image.cpp" />
     <ClCompile Include="src\base\ActionSender.cpp" />

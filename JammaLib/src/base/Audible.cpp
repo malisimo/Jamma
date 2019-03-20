@@ -9,6 +9,6 @@ Audible::~Audible()
 {
 }
 
-void Audible::Play(float* buf, unsigned int numChans, unsigned int numSamps)
+void Audible::Play(std::shared_ptr<AudioBuffer> buf, unsigned int numSamps)
 {
 }

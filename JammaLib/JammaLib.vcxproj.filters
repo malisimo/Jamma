@@ -131,9 +131,6 @@
     <ClInclude Include="src\graphics\Image.h">
       <Filter>src\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphics\Scene.h">
-      <Filter>src\graphics</Filter>
-    </ClInclude>
     <ClInclude Include="src\base\DrawContext.h">
       <Filter>src\base</Filter>
     </ClInclude>
@@ -263,6 +260,21 @@
     <ClInclude Include="src\audio\AudioMixer.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="src\audio\AudioBuffer.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\MultiAudible.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\LoopTake.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\audio\ChannelMixer.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\Scene.h">
+      <Filter>src\graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\stdafx.cpp">
@@ -320,9 +332,6 @@
       <Filter>src\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\graphics\Image.cpp">
-      <Filter>src\graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\graphics\Scene.cpp">
       <Filter>src\graphics</Filter>
     </ClCompile>
     <ClCompile Include="src\graphics\GlDrawContext.cpp">
@@ -420,6 +429,21 @@
     </ClCompile>
     <ClCompile Include="src\audio\AudioMixer.cpp">
       <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\audio\AudioBuffer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\base\MultiAudible.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\LoopTake.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\audio\ChannelMixer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\Scene.cpp">
+      <Filter>src\graphics</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

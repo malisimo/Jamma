@@ -18,7 +18,7 @@
 #include "gl/gl.h"
 #include "gl/glext.h"
 #include "gl/wglext.h"
-#include "Scene.h"
+#include "../engine/Scene.h"
 #include "Action.h"
 #include "ActionReceiver.h"
 #include "CommonTypes.h"

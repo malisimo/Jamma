@@ -1,15 +1,21 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 #include <functional>
+#include "Audible.h"
+#include "AudioBuffer.h"
 
-class AudioFader
+class AudioFader : Audible
 {
 public:
 	AudioFader();
 	~AudioFader();
 
 public:
+	void Play(std::shared_ptr<AudioBuffer> buf, unsigned int samps) override;
+
+	void SetTarget(float target);
 
 	// Base
 	class AudioFaderState
@@ -71,10 +77,8 @@ public:
 		ExponentialParams params,
 		ExponentialState state)> Exponential();
 
-	void SetTarget(float target);
-	virtual std::vector<float> OnAudio(unsigned int numSamps);
-
 protected:
 	float _target;
+	std::shared_ptr<Audible> _input;
 };
 

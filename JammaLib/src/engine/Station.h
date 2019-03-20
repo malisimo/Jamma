@@ -1,11 +1,15 @@
 #pragma once
-#include "Audible.h"
 
-class Station :
-	public Audible
+#include "MultiAudible.h"
+#include "LoopTake.h"
+
+class Station :	public MultiAudible
 {
 public:
 	Station();
 	~Station();
+
+protected:
+	std::vector<LoopTake> _loopTakes;
 };
 

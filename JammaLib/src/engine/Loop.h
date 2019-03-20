@@ -5,6 +5,7 @@
 #include "Audible.h"
 #include "ActionReceiver.h"
 #include "ResourceUser.h"
+#include "../audio/AudioMixer.h"
 #include "../resources/WavResource.h"
 
 class LoopParams
@@ -24,7 +25,7 @@ public:
 
 	virtual bool InitResources(ResourceLib& resourceLib) override;
 	virtual bool ReleaseResources() override;
-	virtual void Play(float* buf, unsigned int numChans, unsigned int numSamps) override;
+	virtual void Play(std::shared_ptr<AudioBuffer> buf, unsigned int numSamps) override;
 
 private:
 	unsigned int _index;

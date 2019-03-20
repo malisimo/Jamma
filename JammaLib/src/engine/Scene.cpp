@@ -3,12 +3,16 @@
 Scene::Scene(SceneParams params) :
 	Drawable(params),
 	Sizeable(params),
-	Audible(params),
 	_viewProj(glm::mat4()),
 	_overlayViewProj(glm::mat4()),
+	_audioMixer(ChannelMixerParams{}),
 	_label(std::unique_ptr<GuiLabel>()),
 	_slider(std::unique_ptr<GuiSlider>()),
-	_image(std::make_unique<Image>(ImageParams(DrawableParams{ "grid" }, SizeableParams{ 450, 450 }, "texture"))),
+	_image(std::make_unique<Image>(
+		ImageParams(
+			DrawableParams{ "grid" },
+			SizeableParams{ 450, 450 },
+			"texture"))),
 	_audioDevice(std::unique_ptr<AudioDevice>())
 {
 	GuiLabelParams labelParams(GuiElementParams(
@@ -118,11 +122,6 @@ void Scene::OnAction(KeyAction keyAction)
 	//_slider->OnAction(keyAction);
 }
 
-void Scene::Play(float* buf, unsigned int numChans, unsigned int numSamps)
-{
-	_loop->Play(buf, numChans, numSamps);
-}
-
 void Scene::InitAudio()
 {
 	auto dev = AudioDevice::Open(Scene::OnAudio,
@@ -134,6 +133,11 @@ void Scene::InitAudio()
 		_audioDevice = std::move(dev.value());
 		_audioDevice->Start();
 	}
+}
+
+ChannelMixer & Scene::GetMixer()
+{
+	return _audioMixer;
 }
 
 RtAudio::DeviceInfo Scene::AudioInputDeviceInfo()
@@ -152,28 +156,31 @@ RtAudio::DeviceInfo Scene::AudioOutputDeviceInfo()
 	return RtAudio::DeviceInfo();
 }
 
-int Scene::OnAudio(void *outBuffer, void *inBuffer, unsigned int numSamps, double streamTime, RtAudioStreamStatus status, void *userData)
+int Scene::OnAudio(void* outBuffer,
+	void* inBuffer,
+	unsigned int numSamps,
+	double streamTime,
+	RtAudioStreamStatus status,
+	void* userData)
 {
 	float* inBuf = (float*)inBuffer;
 	float* outBuf = (float*)outBuffer;
 	Scene* scene = (Scene*)userData;
-	RtAudio::DeviceInfo inDeviceInfo;
-	RtAudio::DeviceInfo outDeviceInfo;
+	
+	if ((nullptr == inBuf) || (nullptr == outBuf))
+		return 0;
 
-	if (scene)
-		outDeviceInfo = scene->AudioOutputDeviceInfo();
+	if (nullptr == scene)
+		return 0;
 
-	auto numChannels = outDeviceInfo.outputChannels;
+	auto channelMixer = scene->GetMixer();
 
-	for (unsigned int samp = 0; samp < numSamps; samp++)
-	{
-		for (unsigned int chan = 0; chan < numChannels; chan++)
-		{
-			outBuf[samp * numChannels + chan] = 0.0f;
-		}
-	}
+	auto inDeviceInfo = scene->AudioInputDeviceInfo();
+	channelMixer.FromAdc(inBuf, inDeviceInfo.inputChannels, numSamps);
 
-	scene->Play(outBuf, outDeviceInfo.outputChannels, numSamps);
+	auto outDeviceInfo = scene->AudioOutputDeviceInfo();
+	std::fill(outBuf, outBuf + numSamps * outDeviceInfo.outputChannels, 0.0f);
+	channelMixer.ToDac(outBuf, outDeviceInfo.outputChannels, numSamps);
 
 	return 0;
 }

@@ -1,5 +1,9 @@
 #pragma once
 
+#include <vector>
+#include <memory>
+
+class AudioBuffer;
 class AudibleParams
 {
 };
@@ -11,7 +15,7 @@ public:
 	~Audible();
 
 public:
-	virtual void Play(float* buf, unsigned int numChans, unsigned int numSamps);
+	virtual void Play(std::shared_ptr<AudioBuffer> buf, unsigned int numSamps);
 
 protected:
 	AudibleParams _audibleParams;

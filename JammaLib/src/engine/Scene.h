@@ -1,18 +1,20 @@
 #pragma once
 #include <memory>
+#include <algorithm>
 #include "glm/glm.hpp"
 #include "glm/ext.hpp"
 #include "Drawable.h"
 #include "../resources/ResourceLib.h"
 #include "../audio/AudioDevice.h"
-#include "../engine/Loop.h"
-#include "Image.h"
+#include "../audio/ChannelMixer.h"
+#include "Loop.h"
+#include "../graphics/Image.h"
 #include "../gui/GuiLabel.h"
 #include "../gui/GuiSlider.h"
 #include "ActionReceiver.h"
 #include "Audible.h"
 #include "Sizeable.h"
-#include "GlDrawContext.h"
+#include "../graphics/GlDrawContext.h"
 
 class SceneParams :
 	public DrawableParams,
@@ -33,7 +35,6 @@ class Scene :
 	public std::enable_shared_from_this<Scene>,
 	public Drawable,
 	public Sizeable,
-	public Audible,
 	public ActionReceiver
 {
 public:
@@ -48,9 +49,9 @@ public:
 	Scene(Scene &&other) :
 		Drawable(std::move(other)),
 		Sizeable(std::move(other)),
-		Audible(std::move(other)),
 		_viewProj(other._viewProj),
 		_overlayViewProj(other._overlayViewProj),
+		_audioMixer(std::move(other._audioMixer)),
 		_audioDevice(std::move(other._audioDevice)),
 		_loop(std::move(other._loop)),
 		_image(std::move(other._image)),
@@ -59,8 +60,22 @@ public:
 	{
 		other._audioDevice = std::make_unique<AudioDevice>();
 		other._loop = std::make_unique<Loop>(LoopParams());
-		other._image = std::make_unique<Image>(ImageParams(DrawableParams{ "" }, SizeableParams{ 1, 1 }, "texture"));
-		other._label = std::make_unique<GuiLabel>(GuiLabelParams(GuiElementParams(DrawableParams{ "" }, MoveableParams{ 0,0 }, SizeableParams{ 1,1 }, "", "", "", {}), ""));
+		other._image = std::make_unique<Image>(
+			ImageParams(
+				DrawableParams{ "" },
+				SizeableParams{ 1, 1 },
+				"texture"));
+		other._label = std::make_unique<GuiLabel>(
+			GuiLabelParams(
+				GuiElementParams(
+					DrawableParams{ "" },
+					MoveableParams{ 0,0 },
+					SizeableParams{ 1,1 },
+					"",
+					"",
+					"",
+					{}),
+				""));
 		other._slider = std::make_unique<GuiSlider>(GuiSliderParams());
 		other._viewProj = glm::mat4();
 		other._overlayViewProj = glm::mat4();
@@ -73,7 +88,6 @@ public:
 			ReleaseResources();
 			std::swap(_drawParams, other._drawParams),
 			std::swap(_sizeParams, other._sizeParams),
-			std::swap(_audibleParams, other._audibleParams),
 			std::swap(_texture, other._texture),
 			std::swap(_resizing, other._resizing),
 			std::swap(_viewProj, other._viewProj);
@@ -100,9 +114,8 @@ public:
 	virtual void OnAction(TouchMoveAction touchAction) override;
 	virtual void OnAction(KeyAction keyAction) override;
 
-	virtual void Play(float* buf, unsigned int numChans, unsigned int numSamps) override;
-
 	void InitAudio();
+	ChannelMixer& GetMixer();
 	RtAudio::DeviceInfo AudioInputDeviceInfo();
 	RtAudio::DeviceInfo AudioOutputDeviceInfo();
 
@@ -114,9 +127,10 @@ private:
 private:
 	glm::mat4 _viewProj;
 	glm::mat4 _overlayViewProj;
+	ChannelMixer _audioMixer;
+	std::unique_ptr<AudioDevice> _audioDevice;
 	std::unique_ptr<GuiLabel> _label;
 	std::unique_ptr<GuiSlider> _slider;
 	std::unique_ptr<Image> _image;
 	std::unique_ptr<Loop> _loop;
-	std::unique_ptr<AudioDevice> _audioDevice;
 };
