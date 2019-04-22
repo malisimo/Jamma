@@ -7,15 +7,18 @@
 #include "../actions/TouchMoveAction.h"
 #include "../actions/KeyAction.h"
 
-class ActionReceiver
+namespace base
 {
-public:
-	ActionReceiver();
-	~ActionReceiver();
+	class ActionReceiver
+	{
+	public:
+		ActionReceiver();
+		~ActionReceiver();
 
-public:
-	virtual void OnAction(WindowAction action);
-	virtual void OnAction(TouchAction action);
-	virtual void OnAction(TouchMoveAction action);
-	virtual void OnAction(KeyAction action);
-};
+	public:
+		virtual void OnAction(actions::WindowAction action);
+		virtual void OnAction(actions::TouchAction action);
+		virtual void OnAction(actions::TouchMoveAction action);
+		virtual void OnAction(actions::KeyAction action);
+	};
+}

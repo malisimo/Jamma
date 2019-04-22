@@ -1,24 +1,26 @@
 #pragma once
 
-class TouchableParams
+namespace base
 {
-};
-
-class Touchable
-{
-public:
-	Touchable(TouchableParams params);
-	~Touchable();
-
-	enum TouchType
+	class TouchableParams
 	{
-		MOUSE,
-		FINGER
 	};
 
-public:
-	virtual void OnTouchBegin(TouchType touchType, int num);
-	virtual void OnTouchEnd(TouchType touchType, int num);
-	virtual void OnDrag(TouchType touchType, int num);
-};
+	class Touchable
+	{
+	public:
+		Touchable(TouchableParams params);
+		~Touchable();
 
+		enum TouchType
+		{
+			MOUSE,
+			FINGER
+		};
+
+	public:
+		virtual void OnTouchBegin(TouchType touchType, int num);
+		virtual void OnTouchEnd(TouchType touchType, int num);
+		virtual void OnDrag(TouchType touchType, int num);
+	};
+}

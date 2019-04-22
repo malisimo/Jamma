@@ -9,57 +9,60 @@
 #include "../graphics/Shader.h"
 #include "Resource.h"
 
-class ShaderResource : public Resource
+namespace resources
 {
-public:
-	ShaderResource(std::string name, GLuint shaderProgram, std::vector<std::string> uniforms);
-	~ShaderResource();
-
-	// Delete the copy constructor/assignment
-	ShaderResource(const ShaderResource &) = delete;
-	ShaderResource& operator=(const ShaderResource &) = delete;
-
-	ShaderResource(ShaderResource &&other) :
-		Resource(other._name),
-		_shaderProgram(other._shaderProgram),
-		_uniforms(other._uniforms)
+	class ShaderResource : public Resource
 	{
-		other._name = "";
-		other._shaderProgram = 0;
-		other._uniforms = {};
+	public:
+		ShaderResource(std::string name, GLuint shaderProgram, std::vector<std::string> uniforms);
+		~ShaderResource();
 
-		std::cout << "Moving ShaderResource" << std::endl;
-	}
+		// Delete the copy constructor/assignment
+		ShaderResource(const ShaderResource&) = delete;
+		ShaderResource& operator=(const ShaderResource&) = delete;
 
-	ShaderResource& operator=(ShaderResource &&other)
-	{
-		if (this != &other)
+		ShaderResource(ShaderResource&& other) :
+			Resource(other._name),
+			_shaderProgram(other._shaderProgram),
+			_uniforms(other._uniforms)
 		{
-			std::cout << "Swapping ShaderResource" << std::endl;
+			other._name = "";
+			other._shaderProgram = 0;
+			other._uniforms = {};
 
-			Release();
-			std::swap(_name, other._name);
-			std::swap(_shaderProgram, other._shaderProgram);
-			std::swap(_uniforms, other._uniforms);
+			std::cout << "Moving ShaderResource" << std::endl;
 		}
 
-		return *this;
-	}
+		ShaderResource& operator=(ShaderResource&& other)
+		{
+			if (this != &other)
+			{
+				std::cout << "Swapping ShaderResource" << std::endl;
 
-	virtual Resources::Type GetType() const override { return Resources::SHADER; }
-	virtual GLuint GetId() const override { return _shaderProgram; }
-	virtual void Release() override;
-	
-	void SetUniforms(GlDrawContext& ctx);
+				Release();
+				std::swap(_name, other._name);
+				std::swap(_shaderProgram, other._shaderProgram);
+				std::swap(_uniforms, other._uniforms);
+			}
 
-	static std::optional<GLuint> Load(const std::string& vertFilePath, const std::string& fragFilePath);
+			return *this;
+		}
 
-private:
-	void InitUniforms(std::vector<std::string> uniforms);
+		virtual Type GetType() const override { return SHADER; }
+		virtual GLuint GetId() const override { return _shaderProgram; }
+		virtual void Release() override;
 
-	static bool AddStageFromFile(GLuint shaderProgram, const std::string& filePath, GLenum shaderType);
+		void SetUniforms(graphics::GlDrawContext& ctx);
 
-private:
-	GLuint _shaderProgram;
-	std::map<std::string, GLint> _uniforms;
-};
+		static std::optional<GLuint> Load(const std::string& vertFilePath, const std::string& fragFilePath);
+
+	private:
+		void InitUniforms(std::vector<std::string> uniforms);
+
+		static bool AddStageFromFile(GLuint shaderProgram, const std::string& filePath, GLenum shaderType);
+
+	private:
+		GLuint _shaderProgram;
+		std::map<std::string, GLint> _uniforms;
+	};
+}

@@ -3,14 +3,18 @@
 #include "Action.h"
 #include "TouchAction.h"
 
-class TouchMoveAction : public Action
+namespace actions
 {
-public:
-	TouchMoveAction();
-	~TouchMoveAction();
+	class TouchMoveAction :
+		public base::Action
+	{
+	public:
+		TouchMoveAction();
+		~TouchMoveAction();
 
-public:
-	TouchAction::TouchType Touch;
-	int Index;
-	Position2d Position;
-};
+	public:
+		TouchAction::TouchType Touch;
+		int Index;
+		utils::Position2d Position;
+	};
+}

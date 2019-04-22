@@ -1,5 +1,17 @@
 #include "Loop.h"
 
+using namespace base;
+using namespace engine;
+using namespace resources;
+using audio::AudioBuffer;
+
+Loop::Loop():
+	Audible(AudibleParams{}),
+	ResourceUser()
+{
+}
+
+
 Loop::Loop(LoopParams loopParams) :
 	Audible(AudibleParams{}),
 	ResourceUser(),
@@ -25,7 +37,7 @@ bool Loop::InitResources(ResourceLib& resourceLib)
 	if (!resource)
 		return false;
 
-	if (Resources::WAV != resource->GetType())
+	if (WAV != resource->GetType())
 		return false;
 
 	_wav = std::dynamic_pointer_cast<WavResource>(resource);

@@ -1,5 +1,8 @@
 #include "Drawable.h"
 
+using namespace base;
+using resources::TextureResource;
+
 Drawable::Drawable(DrawableParams params) :
 	ResourceUser(),
 	_drawParams(params),

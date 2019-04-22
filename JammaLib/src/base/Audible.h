@@ -3,21 +3,27 @@
 #include <vector>
 #include <memory>
 
-class AudioBuffer;
-class AudibleParams
+namespace audio
 {
-};
+	class AudioBuffer;
+}
 
-class Audible
+namespace base
 {
-public:
-	Audible(AudibleParams params);
-	~Audible();
+	class AudibleParams
+	{
+	};
 
-public:
-	virtual void Play(std::shared_ptr<AudioBuffer> buf, unsigned int numSamps);
+	class Audible
+	{
+	public:
+		Audible(AudibleParams params);
+		~Audible();
 
-protected:
-	AudibleParams _audibleParams;
-};
+	public:
+		virtual void Play(std::shared_ptr<audio::AudioBuffer> buf, unsigned int numSamps);
 
+	protected:
+		AudibleParams _audibleParams;
+	};
+}

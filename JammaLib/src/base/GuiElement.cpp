@@ -1,5 +1,11 @@
 #include "GuiElement.h"
 
+using namespace base;
+using namespace utils;
+using graphics::GlDrawContext;
+using graphics::ImageParams;
+using resources::ResourceLib;
+
 GuiElement::GuiElement(GuiElementParams params) :
 	Drawable(params),
 	Moveable(params),
@@ -92,7 +98,7 @@ bool GuiElement::ReleaseResources()
 	return true;
 }
 
-Position2d GuiElement::ToLocal(Position2d pos)
+utils::Position2d GuiElement::ToLocal(utils::Position2d pos)
 {
 	return pos - _moveParams.Position;
 }

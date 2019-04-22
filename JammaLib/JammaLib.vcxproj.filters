@@ -107,9 +107,6 @@
     <ClInclude Include="src\base\Drawable.h">
       <Filter>src\base</Filter>
     </ClInclude>
-    <ClInclude Include="src\audio\AudioFader.h">
-      <Filter>src\audio</Filter>
-    </ClInclude>
     <ClInclude Include="lib\opengl\gl\eglew.h">
       <Filter>lib\opengl\gl</Filter>
     </ClInclude>
@@ -254,9 +251,6 @@
     <ClInclude Include="src\base\ResourceUser.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="src\audio\AudioFaderExp.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="src\audio\AudioMixer.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -275,13 +269,13 @@
     <ClInclude Include="src\engine\Scene.h">
       <Filter>src\graphics</Filter>
     </ClInclude>
+    <ClInclude Include="src\audio\InterpolatedValue.h">
+      <Filter>src\audio</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\stdafx.cpp">
       <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\audio\AudioFader.cpp">
-      <Filter>src\audio</Filter>
     </ClCompile>
     <ClCompile Include="src\base\Audible.cpp">
       <Filter>src\base</Filter>
@@ -424,9 +418,6 @@
     <ClCompile Include="src\base\ResourceUser.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\audio\AudioFaderExp.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\audio\AudioMixer.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -444,6 +435,9 @@
     </ClCompile>
     <ClCompile Include="src\engine\Scene.cpp">
       <Filter>src\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\audio\InterpolatedValue.cpp">
+      <Filter>src\audio</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

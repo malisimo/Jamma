@@ -1,5 +1,7 @@
 #include "LoopFile.h"
 
+using namespace io;
+
 LoopFile::LoopFile()
 {
 }

@@ -1,5 +1,10 @@
 #include "GuiLabel.h"
 
+using namespace base;
+using namespace gui;
+using namespace graphics;
+using namespace resources;
+
 GuiLabel::GuiLabel(GuiLabelParams guiParams) :
 	GuiElement(guiParams),
 	_str(guiParams.String),
@@ -32,7 +37,7 @@ void GuiLabel::Draw(DrawContext& ctx)
 
 bool GuiLabel::InitResources(ResourceLib& resourceLib)
 {
-	auto fontOpt = resourceLib.GetFont(FontOptions::FONT_LARGE);
+	auto fontOpt = resourceLib.GetFont(graphics::FontOptions::FONT_LARGE);
 
 	if (!fontOpt.has_value())
 		return false;
@@ -41,7 +46,7 @@ bool GuiLabel::InitResources(ResourceLib& resourceLib)
 
 	auto validated = InitVertexArray();
 
-	return validated && GlUtils::CheckError("GuiLabel::Init()");
+	return validated && utils::GlUtils::CheckError("GuiLabel::Init()");
 }
 
 bool GuiLabel::ReleaseResources()

@@ -2,20 +2,23 @@
 
 #include "GuiElement.h"
 
-class GuiModelParams : public GuiElementParams
+namespace gui
 {
-};
+	class GuiModelParams : public base::GuiElementParams
+	{
+	};
 
-class GuiModel :
-	public GuiElement
-{
-public:
-	GuiModel(GuiModelParams params);
-	~GuiModel();
+	class GuiModel :
+		public base::GuiElement
+	{
+	public:
+		GuiModel(GuiModelParams params);
+		~GuiModel();
 
-public:
-	void Draw(DrawContext& ctx) override;
+	public:
+		void Draw(base::DrawContext& ctx) override;
 
-protected:
-	GuiModelParams _modelParams;
-};
+	protected:
+		GuiModelParams _modelParams;
+	};
+}

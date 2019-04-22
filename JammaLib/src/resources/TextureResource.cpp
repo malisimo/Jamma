@@ -1,5 +1,6 @@
 #include "TextureResource.h"
 
+using namespace resources;
 
 TextureResource::TextureResource(std::string name,
 	GLuint texture,
@@ -25,7 +26,7 @@ void TextureResource::Release()
 
 std::optional<std::tuple<GLuint,unsigned int,unsigned int>> TextureResource::Load(std::string fileName)
 {
-	auto imageLoaded = ImageUtils::LoadTga(fileName);
+	auto imageLoaded = utils::ImageUtils::LoadTga(fileName);
 
 	if (!imageLoaded.has_value())
 		return std::nullopt;

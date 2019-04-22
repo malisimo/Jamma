@@ -1,8 +1,10 @@
 #pragma once
-class LoopFile
-{
-public:
-	LoopFile();
-	~LoopFile();
-};
 
+namespace io {
+	class LoopFile
+	{
+	public:
+		LoopFile();
+		~LoopFile();
+	};
+}

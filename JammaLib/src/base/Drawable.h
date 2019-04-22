@@ -6,22 +6,25 @@
 #include "../resources/ResourceLib.h"
 #include "../resources/TextureResource.h"
 
-class DrawableParams
+namespace base
 {
-public:
-	std::string Texture;
-};
+	class DrawableParams
+	{
+	public:
+		std::string Texture;
+	};
 
-class Drawable : public ResourceUser
-{
-public:
-	Drawable(DrawableParams params);
-	~Drawable();
+	class Drawable : public ResourceUser
+	{
+	public:
+		Drawable(DrawableParams params);
+		~Drawable();
 
-public:
-	virtual void Draw(DrawContext& ctx);
+	public:
+		virtual void Draw(DrawContext& ctx);
 
-protected:
-	DrawableParams _drawParams;
-	std::weak_ptr<TextureResource> _texture;
-};
+	protected:
+		DrawableParams _drawParams;
+		std::weak_ptr<resources::TextureResource> _texture;
+	};
+}

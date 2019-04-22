@@ -1,28 +1,32 @@
 #pragma once
+
 #include "CommonTypes.h"
 
-class SizeableParams
+namespace base
 {
-public:
-	Size2d Size;
-	Size2d MinSize;
-};
+	class SizeableParams
+	{
+	public:
+		utils::Size2d Size;
+		utils::Size2d MinSize;
+	};
 
-class Sizeable
-{
-public:
-	Sizeable(SizeableParams params);
-	~Sizeable();
+	class Sizeable
+	{
+	public:
+		Sizeable(SizeableParams params);
+		~Sizeable();
 
-public:
-	virtual void SetSize(Size2d size);
-	virtual Size2d GetSize() const;
-	virtual void SetMinSize(Size2d size);
-	virtual Size2d GetMinSize() const;
-	virtual bool IsResizing() const;
-	virtual void SetResizing(bool resizing);
+	public:
+		virtual void SetSize(utils::Size2d size);
+		virtual utils::Size2d GetSize() const;
+		virtual void SetMinSize(utils::Size2d size);
+		virtual utils::Size2d GetMinSize() const;
+		virtual bool IsResizing() const;
+		virtual void SetResizing(bool resizing);
 
-protected:
-	SizeableParams _sizeParams;
-	bool _resizing;
-};
+	protected:
+		SizeableParams _sizeParams;
+		bool _resizing;
+	};
+}

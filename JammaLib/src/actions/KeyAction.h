@@ -2,22 +2,25 @@
 
 #include "Action.h"
 
-class KeyAction : public Action
+namespace actions
 {
-public:
-	KeyAction();
-	~KeyAction();
-
-public:
-	enum KeyActionType
+	class KeyAction :
+		public base::Action
 	{
-		KEY_DOWN,
-		KEY_UP
+	public:
+		KeyAction();
+		~KeyAction();
+
+	public:
+		enum KeyActionType
+		{
+			KEY_DOWN,
+			KEY_UP
+		};
+
+	public:
+		KeyActionType KeyActionType;
+		unsigned int KeyChar;
+		bool IsSystem;
 	};
-
-public:
-	KeyActionType KeyActionType;
-	unsigned int KeyChar;
-	bool IsSystem;
-};
-
+}

@@ -9,4 +9,7 @@
 
 #include <windows.h>
 
-LPCWSTR CharsToUnicodeString(const char * str);
+namespace utils
+{
+	LPCWSTR CharsToUnicodeString(const char* str);
+}

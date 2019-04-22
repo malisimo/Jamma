@@ -8,58 +8,60 @@
 #include "Resource.h"
 #include "../utils/ImageUtils.h"
 
-class TextureResource : public Resource
+namespace resources
 {
-public:
-	TextureResource(std::string name, GLuint texture, unsigned int width, unsigned int height);
-	~TextureResource();
-
-	// Delete the copy constructor/assignment
-	TextureResource(const TextureResource &) = delete;
-	TextureResource& operator=(const TextureResource &) = delete;
-
-	TextureResource(TextureResource &&other) :
-		Resource(other._name),
-		_width(other._width),
-		_height(other._height),
-		_texture(other._texture)
+	class TextureResource : public Resource
 	{
-		std::cout << "Moving TextureResource" << std::endl;
+	public:
+		TextureResource(std::string name, GLuint texture, unsigned int width, unsigned int height);
+		~TextureResource();
 
-		other._name = "";
-		other._width = 0;
-		other._height = 0;
-		other._texture = 0;
-	}
+		// Delete the copy constructor/assignment
+		TextureResource(const TextureResource&) = delete;
+		TextureResource& operator=(const TextureResource&) = delete;
 
-	TextureResource& operator=(TextureResource &&other)
-	{
-		if (this != &other)
+		TextureResource(TextureResource&& other) :
+			Resource(other._name),
+			_width(other._width),
+			_height(other._height),
+			_texture(other._texture)
 		{
-			std::cout << "Swapping TextureResource" << std::endl;
+			std::cout << "Moving TextureResource" << std::endl;
 
-			Release();
-			std::swap(_name, other._name);
-			std::swap(_width, other._width);
-			std::swap(_height, other._height);
-			std::swap(_texture, other._texture);
+			other._name = "";
+			other._width = 0;
+			other._height = 0;
+			other._texture = 0;
 		}
 
-		return *this;
-	}
+		TextureResource& operator=(TextureResource&& other)
+		{
+			if (this != &other)
+			{
+				std::cout << "Swapping TextureResource" << std::endl;
 
-	virtual Resources::Type GetType() const override { return Resources::TEXTURE; }
-	virtual GLuint GetId() const override { return _texture; }
-	virtual void Release() override;
+				Release();
+				std::swap(_name, other._name);
+				std::swap(_width, other._width);
+				std::swap(_height, other._height);
+				std::swap(_texture, other._texture);
+			}
 
-	unsigned int Width() { return _width; }
-	unsigned int Height() { return _height; }
+			return *this;
+		}
 
-	static std::optional<std::tuple<GLuint, unsigned int, unsigned int>> Load(std::string fileName);
+		virtual Type GetType() const override { return TEXTURE; }
+		virtual GLuint GetId() const override { return _texture; }
+		virtual void Release() override;
 
-private:
-	unsigned int _width;
-	unsigned int _height;
-	GLuint _texture;
-};
+		unsigned int Width() { return _width; }
+		unsigned int Height() { return _height; }
 
+		static std::optional<std::tuple<GLuint, unsigned int, unsigned int>> Load(std::string fileName);
+
+	private:
+		unsigned int _width;
+		unsigned int _height;
+		GLuint _texture;
+	};
+}

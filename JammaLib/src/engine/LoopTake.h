@@ -3,13 +3,15 @@
 #include <vector>
 #include "Loop.h"
 
-class LoopTake
+namespace engine
 {
-public:
-	LoopTake();
-	~LoopTake();
+	class LoopTake
+	{
+	public:
+		LoopTake();
+		~LoopTake();
 
-protected:
-	std::vector<Loop> _loops;
-};
-
+	protected:
+		std::vector<Loop> _loops;
+	};
+}

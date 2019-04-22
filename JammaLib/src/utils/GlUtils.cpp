@@ -1,5 +1,6 @@
 #include "GlUtils.h"
 
+using namespace utils;
 
 bool GlUtils::CheckError(const std::string& log)
 {

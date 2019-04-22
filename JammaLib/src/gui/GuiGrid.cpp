@@ -1,5 +1,6 @@
 #include "GuiGrid.h"
 
+using namespace gui;
 
 GuiGrid::GuiGrid(GuiGridParams guiParams) :
 	GuiElement(guiParams)

@@ -1,5 +1,7 @@
 #include "WavReadWriter.h"
 
+using namespace audio;
+
 std::optional<std::tuple<std::vector<float>, unsigned int, unsigned int>>
 	WavReadWriter::ReadWavFile(const std::string& fname, unsigned int maxsamps)
 {

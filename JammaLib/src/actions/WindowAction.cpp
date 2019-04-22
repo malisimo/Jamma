@@ -1,5 +1,6 @@
 #include "WindowAction.h"
-#include "Sizeable.h"
+
+using namespace actions;
 
 WindowAction::WindowAction()
 {

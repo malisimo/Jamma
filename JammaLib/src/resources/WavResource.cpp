@@ -1,5 +1,8 @@
 #include "WavResource.h"
 
+using namespace resources;
+using audio::WavReadWriter;
+
 WavResource::WavResource(std::string name, std::vector<float> audioBuf, unsigned int numSamps, unsigned int sampleRate) :
 	Resource(name),
 	_numSamps(numSamps),

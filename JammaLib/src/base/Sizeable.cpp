@@ -1,5 +1,7 @@
 #include "Sizeable.h"
 
+using namespace base;
+
 Sizeable::Sizeable(SizeableParams params) :
 	_sizeParams(params),
 	_resizing(false)
@@ -10,17 +12,17 @@ Sizeable::~Sizeable()
 {
 }
 
-void Sizeable::SetSize(Size2d size)
+void Sizeable::SetSize(utils::Size2d size)
 {
 	_sizeParams.Size = size;
 }
 
-Size2d Sizeable::GetSize() const
+utils::Size2d Sizeable::GetSize() const
 {
 	return _sizeParams.Size;
 }
 
-void Sizeable::SetMinSize(Size2d size)
+void Sizeable::SetMinSize(utils::Size2d size)
 {
 	_sizeParams.MinSize = size;
 
@@ -31,7 +33,7 @@ void Sizeable::SetMinSize(Size2d size)
 		_sizeParams.Size.Height = _sizeParams.MinSize.Height;
 }
 
-Size2d Sizeable::GetMinSize() const
+utils::Size2d Sizeable::GetMinSize() const
 {
 	return _sizeParams.MinSize;
 }

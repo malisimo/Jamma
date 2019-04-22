@@ -1,5 +1,8 @@
 #include "Moveable.h"
 
+using namespace base;
+using namespace utils;
+
 Moveable::Moveable(MoveableParams params) :
 	_moveParams(params)
 {

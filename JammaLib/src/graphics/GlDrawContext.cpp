@@ -1,5 +1,7 @@
 #include "GlDrawContext.h"
 
+using namespace graphics;
+
 GlDrawContext::GlDrawContext()
 {
 }

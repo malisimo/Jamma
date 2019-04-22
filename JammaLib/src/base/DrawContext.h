@@ -1,21 +1,24 @@
 #pragma once
+
 #include <string>
 
-class DrawContext
+namespace base
 {
-public:
-	DrawContext();
-	~DrawContext();
-
-public:
-	enum ContextType { DEFAULT, OPENGL };
-	virtual auto GetContextType() -> ContextType
+	class DrawContext
 	{
-		return DEFAULT;
-	}
+	public:
+		DrawContext();
+		~DrawContext();
 
-public:
-	unsigned int Width;
-	unsigned int Height;
-};
+	public:
+		enum ContextType { DEFAULT, OPENGL };
+		virtual auto GetContextType() -> ContextType
+		{
+			return DEFAULT;
+		}
 
+	public:
+		unsigned int Width;
+		unsigned int Height;
+	};
+}

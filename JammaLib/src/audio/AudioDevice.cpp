@@ -1,5 +1,7 @@
 #include "AudioDevice.h"
 
+using namespace audio;
+
 AudioDevice::AudioDevice() :
 	_inDeviceInfo(RtAudio::DeviceInfo()),
 	_outDeviceInfo(RtAudio::DeviceInfo()),

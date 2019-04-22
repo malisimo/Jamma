@@ -1,5 +1,7 @@
 #include "Touchable.h"
 
+using namespace base;
+
 Touchable::Touchable(TouchableParams params)
 {
 }

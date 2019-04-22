@@ -1,5 +1,7 @@
 #include "ImageUtils.h"
 
+using namespace utils;
+
 std::optional<std::tuple<std::vector<unsigned char>, unsigned int, unsigned int>> ImageUtils::LoadTga(const std::string& fileName)
 {
 	FILE* file;

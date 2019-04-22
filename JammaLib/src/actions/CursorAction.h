@@ -2,20 +2,22 @@
 
 #include "Action.h"
 
-class CursorAction :
-	public Action
+namespace actions
 {
-public:
-	CursorAction();
-	~CursorAction();
-
-public:
-	enum CursorActionType
+	class CursorAction :
+		public base::Action
 	{
-		CAPTURE_CHANGED,
-		SET_CURSOR
+	public:
+		CursorAction();
+		~CursorAction();
+
+	public:
+		enum CursorActionType
+		{
+			CAPTURE_CHANGED,
+			SET_CURSOR
+		};
+
+		unsigned int Cursor;
 	};
-
-	unsigned int Cursor;
-};
-
+}

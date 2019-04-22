@@ -1,23 +1,25 @@
 #pragma once
 #include "CommonTypes.h"
 
-class MoveableParams
+namespace base
 {
-public:
-	Position2d Position;
-};
+	class MoveableParams
+	{
+	public:
+		utils::Position2d Position;
+	};
 
-class Moveable
-{
-public:
-	Moveable(MoveableParams params);
-	~Moveable();
+	class Moveable
+	{
+	public:
+		Moveable(MoveableParams params);
+		~Moveable();
 
-public:
-	virtual Position2d Position() const;
-	virtual void SetPosition(Position2d pos);
+	public:
+		virtual utils::Position2d Position() const;
+		virtual void SetPosition(utils::Position2d pos);
 
-protected:
-	MoveableParams _moveParams;
-};
-
+	protected:
+		MoveableParams _moveParams;
+	};
+}

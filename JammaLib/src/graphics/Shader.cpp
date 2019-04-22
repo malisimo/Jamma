@@ -1,5 +1,7 @@
 #include "Shader.h"
 
+using namespace graphics;
+using utils::GlUtils;
 
 Shader::Shader() :
 	_state(EMPTY),

@@ -8,6 +8,12 @@
 #include "Window.h"
 #include "StringUtils.h"
 
+using namespace actions;
+using namespace engine;
+using namespace graphics;
+using namespace utils;
+using namespace resources;
+
 Window::Window(Scene& scene,
 	ResourceLib& resourceLib) :
 	_scene(scene),
@@ -55,7 +61,7 @@ void Window::LoadResources()
 					args.push_back(arg);
 				}
 
-				_resourceLib.LoadResource((Resources::Type)resourceType, name, args);
+				_resourceLib.LoadResource((Type)resourceType, name, args);
 			}
 		}
 	}

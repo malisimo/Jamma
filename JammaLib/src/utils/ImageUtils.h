@@ -4,9 +4,11 @@
 #include <vector>
 #include <optional>
 
-class ImageUtils
+namespace utils
 {
-public:
-	static std::optional<std::tuple<std::vector<unsigned char>, unsigned int, unsigned int>> LoadTga(const std::string& fileName);
-};
-
+	class ImageUtils
+	{
+	public:
+		static std::optional<std::tuple<std::vector<unsigned char>, unsigned int, unsigned int>> LoadTga(const std::string& fileName);
+	};
+}

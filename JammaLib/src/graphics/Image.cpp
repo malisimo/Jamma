@@ -1,5 +1,10 @@
 ﻿#include "Image.h"
 
+using namespace base;
+using namespace graphics;
+using namespace utils;
+using namespace resources;
+
 Image::Image(ImageParams params) :
 	Drawable(params),
 	Sizeable(params),
@@ -81,7 +86,7 @@ bool Image::InitTexture(ResourceLib& resourceLib)
 	if (!resource)
 		return false;
 
-	if (Resources::TEXTURE != resource->GetType())
+	if (TEXTURE != resource->GetType())
 		return false;
 	
 	_texture = std::dynamic_pointer_cast<TextureResource>(resource);
@@ -101,7 +106,7 @@ bool Image::InitShader(ResourceLib& resourceLib)
 	if (!resource)
 		return false;
 
-	if (Resources::SHADER != resource->GetType())
+	if (SHADER != resource->GetType())
 		return false;
 
 	_shader = std::dynamic_pointer_cast<ShaderResource>(resource);

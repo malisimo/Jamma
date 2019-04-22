@@ -1,8 +1,11 @@
 #pragma once
-class ActionSender
-{
-public:
-	ActionSender();
-	~ActionSender();
-};
 
+namespace base
+{
+	class ActionSender
+	{
+	public:
+		ActionSender();
+		~ActionSender();
+	};
+}

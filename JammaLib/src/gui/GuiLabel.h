@@ -6,38 +6,41 @@
 #include "../graphics/Font.h"
 #include "../resources/ResourceLib.h"
 
-class GuiLabelParams : public GuiElementParams
+namespace gui
 {
-public:
-	GuiLabelParams(GuiElementParams params,
-		std::string string) :
-		GuiElementParams(params),
-		String(string)
-	{}
+	class GuiLabelParams : public base::GuiElementParams
+	{
+	public:
+		GuiLabelParams(base::GuiElementParams params,
+			std::string string) :
+			base::GuiElementParams(params),
+			String(string)
+		{}
 
-public:
-	std::string String;
-};
+	public:
+		std::string String;
+	};
 
-class GuiLabel :
-	public GuiElement
-{
-public:
-	GuiLabel(GuiLabelParams guiParams);
-	~GuiLabel() { ReleaseResources(); }
+	class GuiLabel :
+		public base::GuiElement
+	{
+	public:
+		GuiLabel(GuiLabelParams guiParams);
+		~GuiLabel() { ReleaseResources(); }
 
-public:
-	virtual void Draw(DrawContext& ctx) override;
-	virtual bool InitResources(ResourceLib& resourceLib) override;
-	virtual bool ReleaseResources() override;
+	public:
+		virtual void Draw(base::DrawContext& ctx) override;
+		virtual bool InitResources(resources::ResourceLib& resourceLib) override;
+		virtual bool ReleaseResources() override;
 
-private:
-	bool InitVertexArray();
+	private:
+		bool InitVertexArray();
 
-private:
-	std::string _str;
-	GLuint _vertexArray;
-	std::weak_ptr<TextureResource> _texture;
-	std::weak_ptr<ShaderResource> _shader;
-	std::weak_ptr<Font> _font;
-};
+	private:
+		std::string _str;
+		GLuint _vertexArray;
+		std::weak_ptr<resources::TextureResource> _texture;
+		std::weak_ptr<resources::ShaderResource> _shader;
+		std::weak_ptr<graphics::Font> _font;
+	};
+}

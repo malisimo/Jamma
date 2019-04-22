@@ -4,14 +4,16 @@
 #include "../resources/Resource.h"
 #include "../resources/ResourceLib.h"
 
-class ResourceUser
+namespace base
 {
-public:
-	ResourceUser();
-	~ResourceUser();
+	class ResourceUser
+	{
+	public:
+		ResourceUser();
+		~ResourceUser();
 
-public:
-	virtual bool InitResources(ResourceLib& resourceLib);
-	virtual bool ReleaseResources();
-};
-
+	public:
+		virtual bool InitResources(resources::ResourceLib& resourceLib);
+		virtual bool ReleaseResources();
+	};
+}

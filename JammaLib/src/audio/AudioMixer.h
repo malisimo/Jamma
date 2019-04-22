@@ -4,19 +4,22 @@
 #include <memory>
 #include "Audible.h"
 #include "AudioBuffer.h"
+#include "../gui/GuiSlider.h"
 
-class AudioMixer
+namespace audio
 {
-public:
-	AudioMixer();
-	~AudioMixer();
+	class AudioMixer
+	{
+	public:
+		AudioMixer();
+		~AudioMixer();
 
-public:
-	void Tick(unsigned int numSamps);
+	public:
+		void Tick(unsigned int numSamps);
 
-
-protected:
-	std::vector<std::shared_ptr<Audible>> _inputs;
-	std::vector<std::shared_ptr<AudioBuffer>> _outputs;
-};
-
+	protected:
+		gui::GuiSlider _slider;
+		std::vector<std::shared_ptr<base::Audible>> _inputs;
+		std::vector<std::shared_ptr<AudioBuffer>> _outputs;
+	};
+}

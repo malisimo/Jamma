@@ -1,5 +1,12 @@
 #include "GuiSlider.h"
 
+using namespace gui;
+using namespace utils;
+using namespace base;
+using namespace actions;
+using graphics::GlDrawContext;
+using resources::ResourceLib;
+
 GuiSlider::GuiSlider(GuiSliderParams params) :
 	GuiElement(params),
 	_isDragging(false),

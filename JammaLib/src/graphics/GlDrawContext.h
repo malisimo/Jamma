@@ -8,30 +8,32 @@
 #include <vector>
 #include "DrawContext.h"
 
-class GlDrawContext :
-	public DrawContext
+namespace graphics
 {
-public:
-	GlDrawContext();
-	~GlDrawContext();
-
-public:
-	auto GetContextType() -> DrawContext::ContextType
+	class GlDrawContext :
+		public base::DrawContext
 	{
-		return ContextType::OPENGL;
-	}
+	public:
+		GlDrawContext();
+		~GlDrawContext();
 
-	std::optional<std::any> GetUniform(std::string name);
-	void SetUniform(const std::string& name, std::any val);
+	public:
+		auto GetContextType() -> base::DrawContext::ContextType
+		{
+			return ContextType::OPENGL;
+		}
 
-	void PushMvp(const glm::mat4 mat) noexcept;
-	void PopMvp() noexcept;
-	void ClearMvp() noexcept;
-	
-private:
-	const std::string _MvpUniformName = "MVP";
+		std::optional<std::any> GetUniform(std::string name);
+		void SetUniform(const std::string& name, std::any val);
 
-	std::map<std::string, std::any> _uniforms;
-	std::vector<glm::mat4> _mvp;
-};
+		void PushMvp(const glm::mat4 mat) noexcept;
+		void PopMvp() noexcept;
+		void ClearMvp() noexcept;
 
+	private:
+		const std::string _MvpUniformName = "MVP";
+
+		std::map<std::string, std::any> _uniforms;
+		std::vector<glm::mat4> _mvp;
+	};
+}

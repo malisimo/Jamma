@@ -12,67 +12,70 @@
 #include "../graphics/Image.h"
 #include "ActionReceiver.h"
 
-class GuiElementParams :
-	public DrawableParams,
-	public MoveableParams,
-	public SizeableParams
+namespace base
 {
-public:
-	GuiElementParams(DrawableParams drawParams,
-		MoveableParams moveParams,
-		SizeableParams sizeParams,
-		std::string overTexture,
-		std::string downTexture,
-		std::string outTexture,
-		std::vector<GuiElementParams> childParams) :
-		DrawableParams(drawParams),
-		MoveableParams(moveParams),
-		SizeableParams(sizeParams),
-		OverTexture(overTexture),
-		DownTexture(downTexture),
-		OutTexture(outTexture),
-		ChildParams(childParams)
+	class GuiElementParams :
+		public DrawableParams,
+		public MoveableParams,
+		public SizeableParams
 	{
-	}
+	public:
+		GuiElementParams(DrawableParams drawParams,
+			MoveableParams moveParams,
+			SizeableParams sizeParams,
+			std::string overTexture,
+			std::string downTexture,
+			std::string outTexture,
+			std::vector<GuiElementParams> childParams) :
+			DrawableParams(drawParams),
+			MoveableParams(moveParams),
+			SizeableParams(sizeParams),
+			OverTexture(overTexture),
+			DownTexture(downTexture),
+			OutTexture(outTexture),
+			ChildParams(childParams)
+		{
+		}
 
-public:
-	std::string OverTexture;
-	std::string DownTexture;
-	std::string OutTexture;
-	std::vector<GuiElementParams> ChildParams;
-};
-
-class GuiElement : public Drawable, public Sizeable, public Moveable, public ActionReceiver
-{
-public:
-	GuiElement(GuiElementParams params);
-	~GuiElement();
-
-public:
-	enum GuiElementState
-	{
-		STATE_NORMAL,
-		STATE_OVER,
-		STATE_DOWN,
-		STATE_OUT
+	public:
+		std::string OverTexture;
+		std::string DownTexture;
+		std::string OutTexture;
+		std::vector<GuiElementParams> ChildParams;
 	};
 
-public:
-	virtual void SetSize(Size2d size) override;
-	virtual void Draw(DrawContext& ctx) override;
-	virtual bool HitTest(Position2d pos);
-	virtual bool InitResources(ResourceLib& resourceLib) override;
-	virtual bool ReleaseResources() override;
+	class GuiElement : public Drawable, public Sizeable, public Moveable, public ActionReceiver
+	{
+	public:
+		GuiElement(GuiElementParams params);
+		~GuiElement();
 
-protected:
-	Position2d ToLocal(Position2d pos);
+	public:
+		enum GuiElementState
+		{
+			STATE_NORMAL,
+			STATE_OVER,
+			STATE_DOWN,
+			STATE_OUT
+		};
 
-protected:
-	GuiElementParams _guiParams;
-	GuiElementState _state;
-	Image _texture;
-	Image _overTexture;
-	Image _downTexture;
-	Image _outTexture;
-	std::vector<GuiElement> _children;
-};
+	public:
+		virtual void SetSize(utils::Size2d size) override;
+		virtual void Draw(DrawContext& ctx) override;
+		virtual bool HitTest(utils::Position2d pos);
+		virtual bool InitResources(resources::ResourceLib& resourceLib) override;
+		virtual bool ReleaseResources() override;
+
+	protected:
+		utils::Position2d ToLocal(utils::Position2d pos);
+
+	protected:
+		GuiElementParams _guiParams;
+		GuiElementState _state;
+		graphics::Image _texture;
+		graphics::Image _overTexture;
+		graphics::Image _downTexture;
+		graphics::Image _outTexture;
+		std::vector<GuiElement> _children;
+	};
+}

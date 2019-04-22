@@ -1,6 +1,10 @@
 #include "AudioMixer.h"
 
+using namespace audio;
+using gui::GuiSliderParams;
+
 AudioMixer::AudioMixer() :
+	_slider(GuiSliderParams()),
 	_inputs({}),
 	_outputs({})
 {

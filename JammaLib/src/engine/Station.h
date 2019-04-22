@@ -3,13 +3,15 @@
 #include "MultiAudible.h"
 #include "LoopTake.h"
 
-class Station :	public MultiAudible
+namespace engine
 {
-public:
-	Station();
-	~Station();
+	class Station : public base::MultiAudible
+	{
+	public:
+		Station();
+		~Station();
 
-protected:
-	std::vector<LoopTake> _loopTakes;
-};
-
+	protected:
+		std::vector<LoopTake> _loopTakes;
+	};
+}

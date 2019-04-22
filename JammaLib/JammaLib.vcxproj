@@ -23,32 +23,32 @@
     <ProjectGuid>{92321565-166E-4317-B9C2-E4722E519F0E}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>JammaLib</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -210,7 +210,6 @@
     <ClInclude Include="src\base\MultiAudible.h" />
     <ClInclude Include="src\audio\AudioBuffer.h" />
     <ClInclude Include="src\audio\AudioMixer.h" />
-    <ClInclude Include="src\audio\AudioFaderExp.h" />
     <ClInclude Include="lib\rtaudio\include\asio.h" />
     <ClInclude Include="lib\rtaudio\include\asiodrivers.h" />
     <ClInclude Include="lib\rtaudio\include\asiodrvr.h" />
@@ -255,7 +254,7 @@
     <ClInclude Include="src\graphics\Image.h" />
     <ClInclude Include="src\base\ActionSender.h" />
     <ClInclude Include="src\io\LoopFile.h" />
-    <ClInclude Include="src\audio\AudioFader.h" />
+    <ClInclude Include="src\audio\InterpolatedValue.h" />
     <ClInclude Include="src\gui\GuiButton.h" />
     <ClInclude Include="src\gui\GuiModel.h" />
     <ClInclude Include="src\base\ActionReceiver.h" />
@@ -287,7 +286,6 @@
     <ClCompile Include="src\base\MultiAudible.cpp" />
     <ClCompile Include="src\audio\AudioBuffer.cpp" />
     <ClCompile Include="src\audio\AudioMixer.cpp" />
-    <ClCompile Include="src\audio\AudioFaderExp.cpp" />
     <ClCompile Include="lib\rtaudio\include\asio.cpp" />
     <ClCompile Include="lib\rtaudio\include\asiodrivers.cpp" />
     <ClCompile Include="lib\rtaudio\include\asiolist.cpp" />
@@ -316,7 +314,7 @@
     <ClCompile Include="src\graphics\Image.cpp" />
     <ClCompile Include="src\base\ActionSender.cpp" />
     <ClCompile Include="src\io\LoopFile.cpp" />
-    <ClCompile Include="src\audio\AudioFader.cpp" />
+    <ClCompile Include="src\audio\InterpolatedValue.cpp" />
     <ClCompile Include="src\gui\GuiButton.cpp" />
     <ClCompile Include="src\gui\GuiModel.cpp" />
     <ClCompile Include="src\base\ActionReceiver.cpp" />

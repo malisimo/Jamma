@@ -1,80 +1,83 @@
 #pragma once
 
-struct Position2d
+namespace utils
 {
-	int X;
-	int Y;
-
-	Position2d operator+(const Position2d& a) const
+	struct Position2d
 	{
-		return { X + a.X, Y + a.Y };
-	}
+		int X;
+		int Y;
 
-	Position2d operator-(const Position2d& a) const
+		Position2d operator+(const Position2d& a) const
+		{
+			return { X + a.X, Y + a.Y };
+		}
+
+		Position2d operator-(const Position2d& a) const
+		{
+			return { X - a.X, Y - a.Y };
+		}
+
+		Position2d operator*(const Position2d& a) const
+		{
+			return { X * a.X, Y * a.Y };
+		}
+
+		bool operator==(const Position2d& a) const
+		{
+			return (a.X == X && a.Y == Y);
+		}
+
+		static Position2d Clamp(Position2d v, Position2d vMin, Position2d vMax)
+		{
+			return Position2d{
+				v.X < vMin.X ? vMin.X : v.X > vMax.X ? vMax.X : v.X,
+				v.Y < vMin.Y ? vMin.Y : v.Y > vMax.Y ? vMax.Y : v.Y
+			};
+		}
+	};
+
+	struct Size2d
 	{
-		return { X - a.X, Y - a.Y };
-	}
+		unsigned int Width;
+		unsigned int Height;
 
-	Position2d operator*(const Position2d& a) const
-	{
-		return { X * a.X, Y * a.Y };
-	}
+		Size2d operator+(const Size2d& a) const
+		{
+			return { Width + a.Width, Height + a.Height };
+		}
 
-	bool operator==(const Position2d& a) const
-	{
-		return (a.X == X && a.Y == Y);
-	}
+		Size2d operator-(const Size2d& a) const
+		{
+			auto w = Width <= a.Width ? (Width - a.Width) : 0;
+			auto h = Height <= a.Height ? (Height - a.Height) : 0;
 
-	static Position2d Clamp(Position2d v, Position2d vMin, Position2d vMax)
-	{
-		return Position2d{
-			v.X < vMin.X ? vMin.X : v.X > vMax.X ? vMax.X : v.X,
-			v.Y < vMin.Y ? vMin.Y : v.Y > vMax.Y ? vMax.Y : v.Y
-		};
-	}
-};
+			return { w, h };
+		}
 
-struct Size2d
-{
-	unsigned int Width;
-	unsigned int Height;
+		Size2d operator*(const Size2d & a) const
+		{
+			return { Width * a.Width, Height * a.Height };
+		}
 
-	Size2d operator+(const Size2d& a) const
-	{
-		return { Width + a.Width, Height + a.Height };
-	}
+		bool operator==(const Size2d & a) const
+		{
+			return (a.Width == Width && a.Height == Height);
+		}
 
-	Size2d operator-(const Size2d& a) const
-	{
-		auto w = Width <= a.Width ? (Width - a.Width) : 0;
-		auto h = Height <= a.Height ? (Height - a.Height) : 0;
+		static Size2d Clamp(Size2d v, Size2d vMin, Size2d vMax)
+		{
+			auto newSize = v;
 
-		return { w, h };
-	}
+			if (v.Width < vMin.Width)
+				newSize.Width = vMin.Width;
+			if (v.Width > vMax.Width)
+				newSize.Width = vMax.Width;
+			if (v.Height < vMin.Height)
+				newSize.Height = vMin.Height;
+			if (v.Height > vMax.Height)
+				newSize.Height = vMax.Height;
 
-	Size2d operator*(const Size2d& a) const
-	{
-		return { Width * a.Width, Height * a.Height };
-	}
-
-	bool operator==(const Size2d& a) const
-	{
-		return (a.Width == Width && a.Height == Height);
-	}
-
-	static Size2d Clamp(Size2d v, Size2d vMin, Size2d vMax)
-	{
-		auto newSize = v;
-
-		if (v.Width < vMin.Width)
-			newSize.Width = vMin.Width;
-		if (v.Width > vMax.Width)
-			newSize.Width = vMax.Width;
-		if (v.Height < vMin.Height)
-			newSize.Height = vMin.Height;
-		if (v.Height > vMax.Height)
-			newSize.Height = vMax.Height;
-
-		return newSize;
-	}
-};
+			return newSize;
+		}
+	};
+}

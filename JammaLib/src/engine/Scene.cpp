@@ -1,5 +1,14 @@
 #include "Scene.h"
 
+using namespace base;
+using namespace actions;
+using namespace audio;
+using namespace engine;
+using namespace gui;
+using namespace graphics;
+using namespace resources;
+using namespace utils;
+
 Scene::Scene(SceneParams params) :
 	Drawable(params),
 	Sizeable(params),

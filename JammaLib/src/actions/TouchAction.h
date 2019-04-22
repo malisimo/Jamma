@@ -3,30 +3,33 @@
 #include "Action.h"
 #include "CommonTypes.h"
 
-class TouchAction : public Action
+namespace actions
 {
-public:
-	TouchAction();
-	~TouchAction();
-
-public:
-	enum TouchState
+	class TouchAction :
+		public base::Action
 	{
-		TOUCH_DOWN,
-		TOUCH_UP
+	public:
+		TouchAction();
+		~TouchAction();
+
+	public:
+		enum TouchState
+		{
+			TOUCH_DOWN,
+			TOUCH_UP
+		};
+
+		enum TouchType
+		{
+			TOUCH_MOUSE,
+			TOUCH_FINGER
+		};
+
+	public:
+		TouchState State;
+		TouchType Touch;
+		int Index;
+		int Value;
+		utils::Position2d Position;
 	};
-
-	enum TouchType
-	{
-		TOUCH_MOUSE,
-		TOUCH_FINGER
-	};
-
-public:
-	TouchState State;
-	TouchType Touch;
-	int Index;
-	int Value;
-	Position2d Position;
-};
-
+}

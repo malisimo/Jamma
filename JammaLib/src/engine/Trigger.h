@@ -1,8 +1,11 @@
 #pragma once
-class Trigger
-{
-public:
-	Trigger();
-	~Trigger();
-};
 
+namespace engine
+{
+	class Trigger
+	{
+	public:
+		Trigger();
+		~Trigger();
+	};
+}

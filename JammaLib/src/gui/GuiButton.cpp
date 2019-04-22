@@ -1,5 +1,9 @@
 #include "GuiButton.h"
 
+using namespace base;
+using namespace gui;
+using base::Touchable;
+
 GuiButton::GuiButton(GuiButtonParams params) :
 	_buttonParams(params),
 	Touchable(params),

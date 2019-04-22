@@ -13,80 +13,83 @@
 #include "../resources/ResourceLib.h"
 #include "GlUtils.h"
 
-class ImageParams : public DrawableParams, public SizeableParams
+namespace graphics
 {
-public:
-	ImageParams(DrawableParams drawParams,
-		SizeableParams sizeParams,
-		std::string shader) :
-		DrawableParams(drawParams),
-		SizeableParams(sizeParams),
-		Shader(shader)
-	{}
-
-public:
-	std::string Shader;
-};
-
-class Image :
-	public Drawable,
-	public Sizeable
-{
-public:
-	Image(ImageParams drawParams);
-	~Image() { ReleaseResources(); }
-
-	// Copy
-	Image(const Image &) = delete;
-	Image& operator=(const Image &) = delete;
-
-	// Move
-	Image(Image &&other) :
-		Drawable(other._drawParams),
-		Sizeable(other._sizeParams),
-		_vertexArray(other._vertexArray),
-		_vertexBuffer{ other._vertexBuffer[0], other._vertexBuffer[1] },
-		_texture(std::move(other._texture)),
-		_shader(std::move(other._shader))
+	class ImageParams : public base::DrawableParams, public base::SizeableParams
 	{
-		other._vertexArray = 0;
-		other._vertexBuffer[0] = 0;
-		other._vertexBuffer[1] = 0;
-		other._texture = std::weak_ptr<TextureResource>();
-		other._shader = std::weak_ptr<ShaderResource>();
-	}
+	public:
+		ImageParams(base::DrawableParams drawParams,
+			base::SizeableParams sizeParams,
+			std::string shader) :
+			base::DrawableParams(drawParams),
+			base::SizeableParams(sizeParams),
+			Shader(shader)
+		{}
 
-	Image& operator=(Image &&other)
+	public:
+		std::string Shader;
+	};
+
+	class Image :
+		public base::Drawable,
+		public base::Sizeable
 	{
-		if (this != &other)
+	public:
+		Image(ImageParams drawParams);
+		~Image() { ReleaseResources(); }
+
+		// Copy
+		Image(const Image&) = delete;
+		Image& operator=(const Image&) = delete;
+
+		// Move
+		Image(Image&& other) :
+			base::Drawable(other._drawParams),
+			base::Sizeable(other._sizeParams),
+			_vertexArray(other._vertexArray),
+			_vertexBuffer{ other._vertexBuffer[0], other._vertexBuffer[1] },
+			_texture(std::move(other._texture)),
+			_shader(std::move(other._shader))
 		{
-			ReleaseResources();
-			std::swap(_vertexArray, other._vertexArray);
-			std::swap(_vertexBuffer, other._vertexBuffer);
-			_texture.swap(other._texture);
-			_shader.swap(other._shader);
+			other._vertexArray = 0;
+			other._vertexBuffer[0] = 0;
+			other._vertexBuffer[1] = 0;
+			other._texture = std::weak_ptr<resources::TextureResource>();
+			other._shader = std::weak_ptr<resources::ShaderResource>();
 		}
 
-		return *this;
-	}
+		Image& operator=(Image&& other)
+		{
+			if (this != &other)
+			{
+				ReleaseResources();
+				std::swap(_vertexArray, other._vertexArray);
+				std::swap(_vertexBuffer, other._vertexBuffer);
+				_texture.swap(other._texture);
+				_shader.swap(other._shader);
+			}
 
-public:
-	virtual void SetSize(Size2d size) override;
-	virtual void Draw(DrawContext& ctx) override;
-	virtual bool InitResources(ResourceLib& resourceLib) override;
-	virtual bool ReleaseResources() override;
-	
-private:
-	const int VertexCount = 6;
+			return *this;
+		}
 
-	GLuint _vertexArray;
-	GLuint _vertexBuffer[2];
-	std::string _shaderName;
-	std::weak_ptr<TextureResource> _texture;
-	std::weak_ptr<ShaderResource> _shader;
+	public:
+		virtual void SetSize(utils::Size2d size) override;
+		virtual void Draw(base::DrawContext& ctx) override;
+		virtual bool InitResources(resources::ResourceLib& resourceLib) override;
+		virtual bool ReleaseResources() override;
 
-private:
-	bool InitTexture(ResourceLib& resourceLib);
-	bool InitShader(ResourceLib& resourceLib);
-	bool InitVertexArray();
-};
+	private:
+		const int VertexCount = 6;
+
+		GLuint _vertexArray;
+		GLuint _vertexBuffer[2];
+		std::string _shaderName;
+		std::weak_ptr<resources::TextureResource> _texture;
+		std::weak_ptr<resources::ShaderResource> _shader;
+
+	private:
+		bool InitTexture(resources::ResourceLib& resourceLib);
+		bool InitShader(resources::ResourceLib& resourceLib);
+		bool InitVertexArray();
+	};
+}

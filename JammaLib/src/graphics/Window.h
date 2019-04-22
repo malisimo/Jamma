@@ -30,76 +30,79 @@
 #include "../actions/CursorAction.h"
 #include "../actions/WindowAction.h"
 
-class Window : public ActionReceiver
+namespace graphics
 {
-public:
-	enum WindowState
+	class Window : public base::ActionReceiver
 	{
-		WINDOWED,
-		MINIMISED,
-		MAXIMISED,
-		FULLSCREEN
+	public:
+		enum WindowState
+		{
+			WINDOWED,
+			MINIMISED,
+			MAXIMISED,
+			FULLSCREEN
+		};
+
+		struct Config
+		{
+			utils::Size2d Size;
+			utils::Position2d Position;
+			WindowState State;
+		};
+
+	public:
+		Window(engine::Scene& scene,
+			resources::ResourceLib& resourceLib);
+		~Window();
+
+	private:
+		LPTSTR _windowClass;	// Window Class
+		HGLRC _rc;			// Rendering Context
+		HDC	_dc;				// Device Context
+		HWND _wnd;			// Window
+		DWORD _style;
+		Config _config;
+		bool _resizing;
+		bool _trackingMouse;
+		unsigned int _buttonsDown;
+
+		GlDrawContext _drawContext;
+		engine::Scene& _scene;
+		resources::ResourceLib& _resourceLib;
+
+	public:
+		void SetWindowHandle(HWND wnd);
+		void ShowMessage(LPCWSTR message);
+		int Create(HINSTANCE hInstance, int nCmdShow);
+		Config GetConfig() const;
+		utils::Size2d GetMinSize() const;
+		bool IsFullscreen() const;
+		bool IsResizing() const;
+		void SetResizing(bool resizing);
+		bool IsTrackingMouse() const;
+		void SetTrackingMouse(bool resizing);
+		void Resize(utils::Size2d size, WindowState state);
+		void SetWindowState(WindowState state);
+		utils::Size2d GetSize();
+		void Render();
+		void Swap();
+		void Release();
+
+		virtual void OnAction(actions::WindowAction winAction) override;
+		virtual void OnAction(actions::TouchAction touchAction) override;
+		virtual void OnAction(actions::TouchMoveAction touchAction) override;
+		virtual void OnAction(actions::KeyAction touchAction) override;
+
+		static utils::Size2d AdjustSize(utils::Size2d size, DWORD style);
+		static utils::Position2d Center(utils::Size2d size);
+		static ATOM Register(HINSTANCE hInstance);
+		static LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) noexcept;
+
+	private:
+		void LoadResources();
+		void InitScene();
+
+		static void InitStyle(WNDCLASSEX& wcex) noexcept;
+		static void APIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
 	};
-
-	struct Config
-	{
-		Size2d Size;
-		Position2d Position;
-		WindowState State;
-	};
-
-public:
-	Window(Scene& scene,
-		ResourceLib& resourceLib);
-	~Window();
-
-private:
-	LPTSTR _windowClass;	// Window Class
-	HGLRC _rc;			// Rendering Context
-	HDC	_dc;				// Device Context
-	HWND _wnd;			// Window
-	DWORD _style;
-	Config _config;
-	bool _resizing;
-	bool _trackingMouse;
-	unsigned int _buttonsDown;
-
-	GlDrawContext _drawContext;
-	Scene& _scene;
-	ResourceLib& _resourceLib;
-
-public:
-	void SetWindowHandle(HWND wnd);
-	void ShowMessage(LPCWSTR message);
-	int Create(HINSTANCE hInstance, int nCmdShow);
-	Config GetConfig() const;
-	Size2d GetMinSize() const;
-	bool IsFullscreen() const;
-	bool IsResizing() const;
-	void SetResizing(bool resizing);
-	bool IsTrackingMouse() const;
-	void SetTrackingMouse(bool resizing);
-	void Resize(Size2d size, WindowState state);
-	void SetWindowState(WindowState state);
-	Size2d GetSize();
-	void Render();
-	void Swap();
-	void Release();
-
-	virtual void OnAction(WindowAction winAction) override;
-	virtual void OnAction(TouchAction touchAction) override;
-	virtual void OnAction(TouchMoveAction touchAction) override;
-	virtual void OnAction(KeyAction touchAction) override;
-
-	static Size2d AdjustSize(Size2d size, DWORD style);
-	static Position2d Center(Size2d size);
-	static ATOM Register(HINSTANCE hInstance);
-	static LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) noexcept;
-
-private:
-	void LoadResources();
-	void InitScene();
-
-	static void InitStyle(WNDCLASSEX& wcex) noexcept;
-	static void APIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar * message, const void * userParam);
-};
+}

@@ -1,5 +1,7 @@
 #include "AudioBuffer.h"
 
+using namespace audio;
+
 AudioBuffer::AudioBuffer() :
 	Audible({}),
 	_buffer(std::vector<float>(0, 0.0f))

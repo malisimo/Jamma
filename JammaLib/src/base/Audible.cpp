@@ -1,5 +1,8 @@
 #include "Audible.h"
 
+using namespace base;
+using audio::AudioBuffer;
+
 Audible::Audible(AudibleParams params) :
 	_audibleParams(params)
 {

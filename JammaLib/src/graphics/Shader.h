@@ -17,27 +17,28 @@
 #include "../resources/Resource.h"
 #include "GlDrawContext.h"
 
-
-class Shader
+namespace graphics
 {
-public:
-	Shader();
-	Shader(GLuint shader);
-	~Shader();
+	class Shader
+	{
+	public:
+		Shader();
+		Shader(GLuint shader);
+		~Shader();
 
-	static std::optional<Shader> FromFile(const std::string& filePath, GLenum shaderType);
+		static std::optional<Shader> FromFile(const std::string& filePath, GLenum shaderType);
 
-	bool Init(GLuint program, std::vector<std::string> uniforms);
-	void Activate(GlDrawContext& ctx);
-	void Release();
-	GLuint Name() const;
+		bool Init(GLuint program, std::vector<std::string> uniforms);
+		void Activate(GlDrawContext& ctx);
+		void Release();
+		GLuint Name() const;
 
-private:
-	enum ShaderState { EMPTY, COMPILED, READY };
+	private:
+		enum ShaderState { EMPTY, COMPILED, READY };
 
-	ShaderState _state;
-	GLuint _shader;
-	
-	std::map<std::string, GLint> _uniforms;
-};
+		ShaderState _state;
+		GLuint _shader;
 
+		std::map<std::string, GLint> _uniforms;
+	};
+}

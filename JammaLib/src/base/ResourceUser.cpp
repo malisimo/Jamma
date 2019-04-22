@@ -1,5 +1,8 @@
 #include "ResourceUser.h"
 
+using namespace base;
+using resources::ResourceLib;
+
 ResourceUser::ResourceUser()
 {
 }

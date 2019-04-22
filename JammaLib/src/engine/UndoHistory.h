@@ -1,8 +1,11 @@
 #pragma once
-class UndoHistory
-{
-public:
-	UndoHistory();
-	~UndoHistory();
-};
 
+namespace engine
+{
+	class UndoHistory
+	{
+	public:
+		UndoHistory();
+		~UndoHistory();
+	};
+}

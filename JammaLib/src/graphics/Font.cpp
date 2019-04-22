@@ -1,7 +1,10 @@
 #include "Font.h"
 
-// Font class represents an individual font of a particular size
+using namespace graphics;
+using resources::TextureResource;
+using resources::ShaderResource;
 
+// Font instance represents an individual font of a particular size
 Font::Font()
 {
 }
@@ -192,7 +195,7 @@ GLuint Font::InitVertexArray(const std::string& str, GLenum usage)
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
-	GlUtils::CheckError("Font::InitVertexArray");
+	utils::GlUtils::CheckError("Font::InitVertexArray");
 
 	return vao;
 }

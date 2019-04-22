@@ -1,11 +1,14 @@
 #pragma once
+
 #include "Audible.h"
 
-class Vst :
-	public Audible
+namespace vst
 {
-public:
-	Vst();
-	~Vst();
-};
-
+	class Vst :
+		public base::Audible
+	{
+	public:
+		Vst();
+		~Vst();
+	};
+}

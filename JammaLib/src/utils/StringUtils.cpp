@@ -8,6 +8,8 @@
 #include <windows.h>
 #include "StringUtils.h"
 
+using namespace utils;
+
 LPCWSTR CharsToUnicodeString(const char* str)
 {
 	size_t size = strlen(str) + 1;

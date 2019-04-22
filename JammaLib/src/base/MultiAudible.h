@@ -3,24 +3,26 @@
 #include <vector>
 #include "../audio/AudioBuffer.h"
 
-class MultiAudibleParams
+namespace base
 {
-public:
-	unsigned int OutputBufferSize;
-	unsigned int NumOutputChannels;
-};
+	class MultiAudibleParams
+	{
+	public:
+		unsigned int OutputBufferSize;
+		unsigned int NumOutputChannels;
+	};
 
-class MultiAudible
-{
-public:
-	MultiAudible(MultiAudibleParams params);
-	~MultiAudible();
+	class MultiAudible
+	{
+	public:
+		MultiAudible(MultiAudibleParams params);
+		~MultiAudible();
 
-public:
-	virtual void Play(std::vector<AudioBuffer>& buf, unsigned int numSamps);
+	public:
+		virtual void Play(std::vector<audio::AudioBuffer>& buf, unsigned int numSamps);
 
-protected:
-	MultiAudibleParams _multiAudibleParams;
-	std::vector<AudioBuffer> _outputBuffers;
-};
-
+	protected:
+		MultiAudibleParams _multiAudibleParams;
+		std::vector<audio::AudioBuffer> _outputBuffers;
+	};
+}

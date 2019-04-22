@@ -12,22 +12,24 @@
 #include "WavResource.h"
 #include "../graphics/Font.h"
 
-class ResourceLib
+namespace resources
 {
-public:
-	ResourceLib();
+	class ResourceLib
+	{
+	public:
+		ResourceLib();
 
-public:
-	int NumResources() const;
-	void ClearResources();
-	bool LoadResource(Resources::Type type, std::string name, std::vector<std::string> args);
-	std::optional<std::weak_ptr<Resource>> GetResource(const std::string& name);
-	bool LoadFonts();
-	std::optional<std::weak_ptr<Font>> GetFont(FontOptions::FontSize size);
+	public:
+		int NumResources() const;
+		void ClearResources();
+		bool LoadResource(Type type, std::string name, std::vector<std::string> args);
+		std::optional<std::weak_ptr<Resource>> GetResource(const std::string& name);
+		bool LoadFonts();
+		std::optional<std::weak_ptr<graphics::Font>> GetFont(graphics::FontOptions::FontSize size);
 
-private:
+	private:
 
-	std::map<std::string, std::shared_ptr<Resource>> _resources;
-	std::map<FontOptions::FontSize, std::shared_ptr<Font>> _fonts;
-};
-
+		std::map<std::string, std::shared_ptr<Resource>> _resources;
+		std::map<graphics::FontOptions::FontSize, std::shared_ptr<graphics::Font>> _fonts;
+	};
+}

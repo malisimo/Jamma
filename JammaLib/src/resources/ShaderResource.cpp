@@ -1,5 +1,7 @@
 #include "ShaderResource.h"
 
+using namespace resources;
+using namespace graphics;
 
 ShaderResource::ShaderResource(std::string name,
 	GLuint shaderProgram,
@@ -141,7 +143,7 @@ bool ShaderResource::AddStageFromFile(GLuint shaderProgram, const std::string& f
 		return false;
 	}
 
-	GlUtils::CheckError("ShaderResource::AddStageFromFile");
+	utils::GlUtils::CheckError("ShaderResource::AddStageFromFile");
 
 	glAttachShader(shaderProgram, shader);
 	glDeleteShader(shader);

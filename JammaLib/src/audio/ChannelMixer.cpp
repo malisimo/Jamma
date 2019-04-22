@@ -1,5 +1,8 @@
 #include "ChannelMixer.h"
 
+using namespace audio;
+using namespace base;
+
 ChannelMixer::ChannelMixer(ChannelMixerParams chanMixParams) :
 	MultiAudible(MultiAudibleParams{}),
 	_inputBuffers({})

@@ -8,9 +8,11 @@
 #include "gl/wglext.h"
 #include "glm/glm.hpp"
 
-class GlUtils
+namespace utils
 {
-public:
-	static bool CheckError(const std::string& log);
-};
-
+	class GlUtils
+	{
+	public:
+		static bool CheckError(const std::string& log);
+	};
+}

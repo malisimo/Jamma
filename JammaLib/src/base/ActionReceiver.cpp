@@ -1,5 +1,8 @@
 #include "ActionReceiver.h"
 
+using namespace base;
+using namespace actions;
+
 ActionReceiver::ActionReceiver()
 {
 }
