@@ -11,6 +11,12 @@
 #include <fstream>
 #include <sstream>
 
+using namespace engine;
+using namespace base;
+using namespace resources;
+using namespace graphics;
+using namespace utils;
+
 int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
 	AllocConsole();

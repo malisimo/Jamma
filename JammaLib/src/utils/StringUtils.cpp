@@ -8,9 +8,7 @@
 #include <windows.h>
 #include "StringUtils.h"
 
-using namespace utils;
-
-LPCWSTR CharsToUnicodeString(const char* str)
+LPCWSTR utils::CharsToUnicodeString(const char* str)
 {
 	size_t size = strlen(str) + 1;
 	wchar_t* wideStr = new wchar_t[size];
