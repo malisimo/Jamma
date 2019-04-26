@@ -54,7 +54,7 @@ RtAudio::DeviceInfo AudioDevice::GetOutputStreamInfo()
 std::optional<std::unique_ptr<AudioDevice>> AudioDevice::Open(
 	std::function<int(void*,void*,unsigned int,double,RtAudioStreamStatus,void*)> onAudio,
 	std::function<void(RtAudioError::Type,const std::string&)> onError,
-	void* audioReceiver)
+	void* AudioSink)
 {
 	std::unique_ptr<RtAudio> rtAudio;
 
@@ -104,7 +104,7 @@ std::optional<std::unique_ptr<AudioDevice>> AudioDevice::Open(
 			44100,
 			&bufFrames,
 			*onAudio.target<RtAudioCallback>(),
-			(void*)audioReceiver,
+			(void*)AudioSink,
 			&streamOptions,
 			nullptr);
 			//*onError.target<RtAudioErrorCallback>());

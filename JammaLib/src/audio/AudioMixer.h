@@ -2,12 +2,34 @@
 
 #include <vector>
 #include <memory>
-#include "Audible.h"
-#include "AudioBuffer.h"
+#include "AudioSource.h"
+#include "AudioSink.h"
 #include "../gui/GuiSlider.h"
 
 namespace audio
 {
+	class MixBehaviour
+	{
+	public:
+		virtual void Apply(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, bool mix) {}
+	};
+
+	class WireMixBehaviour : public MixBehaviour
+	{
+	public:
+		virtual void Apply(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, bool mix) override;
+
+		std::vector<unsigned int> _channels;
+	};
+
+	class PanMixBehaviour : public MixBehaviour
+	{
+	public:
+		virtual void Apply(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, bool mix) override;
+
+		std::vector<float> _channelLevels;
+	};
+
 	class AudioMixer
 	{
 	public:
@@ -15,11 +37,10 @@ namespace audio
 		~AudioMixer();
 
 	public:
-		void Tick(unsigned int numSamps);
+		void Play(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, bool mix);
 
 	protected:
+		MixBehaviour _behaviour;
 		gui::GuiSlider _slider;
-		std::vector<std::shared_ptr<base::Audible>> _inputs;
-		std::vector<std::shared_ptr<AudioBuffer>> _outputs;
 	};
 }

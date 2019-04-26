@@ -1,4 +1,5 @@
 #include "ShaderResource.h"
+#include "glm/gtc/type_ptr.hpp"
 
 using namespace resources;
 using namespace graphics;

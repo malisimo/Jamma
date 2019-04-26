@@ -17,11 +17,15 @@ namespace base
 	class Drawable : public ResourceUser
 	{
 	public:
-		Drawable(DrawableParams params);
-		~Drawable();
+		Drawable(DrawableParams params) :
+			ResourceUser(),
+			_drawParams(params),
+			_texture(std::weak_ptr<resources::TextureResource>())
+		{
+		};
 
 	public:
-		virtual void Draw(DrawContext& ctx);
+		virtual void Draw(DrawContext& ctx) {};
 
 	protected:
 		DrawableParams _drawParams;

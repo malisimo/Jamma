@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Audible.h"
+#include "AudioSource.h"
 
 namespace vst
 {
 	class Vst :
-		public base::Audible
+		public base::AudioSource
 	{
 	public:
 		Vst();

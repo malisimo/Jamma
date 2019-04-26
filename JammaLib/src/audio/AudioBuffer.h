@@ -3,11 +3,13 @@
 #include <vector>
 #include <memory>
 #include <iostream>
-#include "Audible.h"
+#include "AudioSource.h"
 
 namespace audio
 {
-	class AudioBuffer : public base::Audible
+	class AudioBuffer :
+		public base::AudioSink,
+		public base::AudioSource
 	{
 	public:
 		AudioBuffer();
@@ -15,14 +17,14 @@ namespace audio
 		~AudioBuffer();
 
 	public:
-		virtual void Play(std::shared_ptr<AudioBuffer> buf, unsigned int numSamps) override;
-
+		virtual void Play(std::shared_ptr<AudioSink> dest, unsigned int numSamps);
+		virtual void Push(const float& samp);
+		virtual void PushMix(const float& samp);
+		
 		void SetSize(unsigned int size);
 		void SetIndex(unsigned int index);
 		unsigned int NumSamps() const;
 		unsigned int BufSize() const;
-		void Push(const float& samp);
-		void PushMix(const float& samp);
 
 		std::vector<float>::iterator Start();
 		std::vector<float>::iterator End();

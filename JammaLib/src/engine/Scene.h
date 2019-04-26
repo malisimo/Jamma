@@ -1,8 +1,6 @@
 #pragma once
 #include <memory>
 #include <algorithm>
-#include "glm/glm.hpp"
-#include "glm/ext.hpp"
 #include "../resources/ResourceLib.h"
 #include "../audio/AudioDevice.h"
 #include "../audio/ChannelMixer.h"
@@ -12,24 +10,24 @@
 #include "../gui/GuiSlider.h"
 #include "Drawable.h"
 #include "ActionReceiver.h"
-#include "Audible.h"
+#include "AudioSource.h"
 #include "Sizeable.h"
-#include "Loop.h"
+#include "Station.h"
 
 namespace engine
 {
 	class SceneParams :
 		public base::DrawableParams,
 		public base::SizeableParams,
-		public base::AudibleParams
+		public base::AudioSourceParams
 	{
 	public:
 		SceneParams(base::DrawableParams drawParams,
 			base::SizeableParams sizeParams,
-			base::AudibleParams audibleParams) :
+			base::AudioSourceParams AudioSourceParams) :
 			base::DrawableParams(drawParams),
 			base::SizeableParams(sizeParams),
-			base::AudibleParams(audibleParams)
+			base::AudioSourceParams(AudioSourceParams)
 		{}
 	};
 
@@ -53,15 +51,15 @@ namespace engine
 			base::Sizeable(std::move(other)),
 			_viewProj(other._viewProj),
 			_overlayViewProj(other._overlayViewProj),
-			_audioMixer(std::move(other._audioMixer)),
+			_channelMixer(std::move(other._channelMixer)),
 			_audioDevice(std::move(other._audioDevice)),
-			_loop(std::move(other._loop)),
+			_stations(std::move(other._stations)),
 			_image(std::move(other._image)),
 			_label(std::move(other._label)),
 			_slider(std::move(other._slider))
 		{
 			other._audioDevice = std::make_unique<audio::AudioDevice>();
-			other._loop = std::make_unique<Loop>(LoopParams());
+			other._stations = std::vector<std::unique_ptr<Station>>();
 			other._image = std::make_unique<graphics::Image>(
 				graphics::ImageParams(
 					base::DrawableParams{ "" },
@@ -88,16 +86,17 @@ namespace engine
 			if (this != &other)
 			{
 				ReleaseResources();
+
 				std::swap(_drawParams, other._drawParams),
-					std::swap(_sizeParams, other._sizeParams),
-					std::swap(_texture, other._texture),
-					std::swap(_resizing, other._resizing),
-					std::swap(_viewProj, other._viewProj);
+				std::swap(_sizeParams, other._sizeParams),
+				std::swap(_texture, other._texture),
+				std::swap(_resizing, other._resizing),
+				std::swap(_viewProj, other._viewProj);
 				std::swap(_overlayViewProj, other._overlayViewProj);
 				_label.swap(other._label);
 				_slider.swap(other._slider);
 				_image.swap(other._image);
-				_loop.swap(other._loop);
+				_stations.swap(other._stations);
 				_audioDevice.swap(other._audioDevice);
 			}
 
@@ -129,11 +128,11 @@ namespace engine
 	private:
 		glm::mat4 _viewProj;
 		glm::mat4 _overlayViewProj;
-		audio::ChannelMixer _audioMixer;
+		audio::ChannelMixer _channelMixer;
 		std::unique_ptr<audio::AudioDevice> _audioDevice;
 		std::unique_ptr<gui::GuiLabel> _label;
 		std::unique_ptr<gui::GuiSlider> _slider;
 		std::unique_ptr<graphics::Image> _image;
-		std::unique_ptr<Loop> _loop;
+		std::vector<std::unique_ptr<Station>> _stations;
 	};
 }

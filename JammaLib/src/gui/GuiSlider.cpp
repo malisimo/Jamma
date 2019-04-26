@@ -1,4 +1,5 @@
 #include "GuiSlider.h"
+#include "glm/ext.hpp"
 
 using namespace gui;
 using namespace utils;

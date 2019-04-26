@@ -1,4 +1,9 @@
 ﻿#include "Image.h"
+#include <gl/glew.h>
+#include <gl/gl.h>
+#include "gl/glext.h"
+#include "gl/wglext.h"
+#include "glm/glm.hpp"
 
 using namespace base;
 using namespace graphics;

@@ -1,10 +1,10 @@
 #include "Vst.h"
 
 using namespace vst;
-using base::AudibleParams;
+using base::AudioSourceParams;
 
 Vst::Vst() :
-	Audible(AudibleParams{})
+	AudioSource(AudioSourceParams{})
 {
 }
 

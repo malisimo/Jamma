@@ -1,17 +1,20 @@
 #pragma once
 
-#include "MultiAudible.h"
+#include "MultiAudioSource.h"
+#include "AudioBuffer.h"
 
 namespace audio
 {
-	class ChannelMixerParams : public base::MultiAudibleParams
+	class ChannelMixerParams
 	{
 	public:
 		unsigned int InputBufferSize;
+		unsigned int OutputBufferSize;
 		unsigned int NumInputChannels;
+		unsigned int NumOutputChannels;
 	};
 
-	class ChannelMixer : public base::MultiAudible
+	class ChannelMixer : public base::MultiAudioSource
 	{
 	public:
 		ChannelMixer(ChannelMixerParams chanMixParams);
@@ -24,5 +27,6 @@ namespace audio
 
 	protected:
 		std::vector<AudioBuffer> _inputBuffers;
+		std::vector<AudioBuffer> _outputBuffers;
 	};
 }

@@ -1,4 +1,5 @@
 #include "Scene.h"
+#include "glm/ext.hpp"
 
 using namespace base;
 using namespace actions;
@@ -14,7 +15,7 @@ Scene::Scene(SceneParams params) :
 	Sizeable(params),
 	_viewProj(glm::mat4()),
 	_overlayViewProj(glm::mat4()),
-	_audioMixer(ChannelMixerParams{}),
+	_channelMixer(ChannelMixerParams{}),
 	_label(std::unique_ptr<GuiLabel>()),
 	_slider(std::unique_ptr<GuiSlider>()),
 	_image(std::make_unique<Image>(
@@ -22,7 +23,8 @@ Scene::Scene(SceneParams params) :
 			DrawableParams{ "grid" },
 			SizeableParams{ 450, 450 },
 			"texture"))),
-	_audioDevice(std::unique_ptr<AudioDevice>())
+	_audioDevice(std::unique_ptr<AudioDevice>()),
+	_stations()
 {
 	GuiLabelParams labelParams(GuiElementParams(
 		DrawableParams{ "" },
@@ -49,7 +51,13 @@ Scene::Scene(SceneParams params) :
 
 	LoopParams loopParams;
 	loopParams.Wav = "hh";
-	_loop = std::make_unique<Loop>(loopParams);
+	auto take = std::make_unique<LoopTake>(DrawableParams());
+	take->AddLoop(std::make_unique<Loop>(loopParams));
+	
+	auto station = std::make_unique<Station>(DrawableParams());
+	station->AddTake(std::move(take));
+
+	_stations.push_back(std::move(station));
 
 	_audioDevice = std::make_unique<AudioDevice>();
 }
@@ -79,7 +87,9 @@ bool Scene::InitResources(ResourceLib& resourceLib)
 	_label->InitResources(resourceLib);
 	_slider->InitResources(resourceLib);
 	_image->InitResources(resourceLib);
-	_loop->InitResources(resourceLib);
+
+	for (auto& station : _stations)
+		station->InitResources(resourceLib);
 
 	InitSize();
 
@@ -91,7 +101,9 @@ bool Scene::ReleaseResources()
 	_label->ReleaseResources();
 	_slider->ReleaseResources();
 	_image->ReleaseResources();
-	_loop->ReleaseResources();
+
+	for (auto& station : _stations)
+		station->ReleaseResources();
 
 	return Drawable::ReleaseResources();
 }
@@ -146,7 +158,7 @@ void Scene::InitAudio()
 
 ChannelMixer & Scene::GetMixer()
 {
-	return _audioMixer;
+	return _channelMixer;
 }
 
 RtAudio::DeviceInfo Scene::AudioInputDeviceInfo()
@@ -172,24 +184,27 @@ int Scene::OnAudio(void* outBuffer,
 	RtAudioStreamStatus status,
 	void* userData)
 {
-	float* inBuf = (float*)inBuffer;
-	float* outBuf = (float*)outBuffer;
 	Scene* scene = (Scene*)userData;
 	
-	if ((nullptr == inBuf) || (nullptr == outBuf))
-		return 0;
-
 	if (nullptr == scene)
 		return 0;
 
 	auto channelMixer = scene->GetMixer();
 
-	auto inDeviceInfo = scene->AudioInputDeviceInfo();
-	channelMixer.FromAdc(inBuf, inDeviceInfo.inputChannels, numSamps);
+	float* inBuf = (float*)inBuffer;
+	if (nullptr != inBuf)
+	{
+		auto inDeviceInfo = scene->AudioInputDeviceInfo();
+		channelMixer.FromAdc(inBuf, inDeviceInfo.inputChannels, numSamps);
+	}
 
-	auto outDeviceInfo = scene->AudioOutputDeviceInfo();
-	std::fill(outBuf, outBuf + numSamps * outDeviceInfo.outputChannels, 0.0f);
-	channelMixer.ToDac(outBuf, outDeviceInfo.outputChannels, numSamps);
+	float* outBuf = (float*)outBuffer;
+	if (nullptr != outBuf)
+	{
+		auto outDeviceInfo = scene->AudioOutputDeviceInfo();
+		std::fill(outBuf, outBuf + numSamps * outDeviceInfo.outputChannels, 0.0f);
+		channelMixer.ToDac(outBuf, outDeviceInfo.outputChannels, numSamps);
+	}
 
 	return 0;
 }

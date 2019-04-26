@@ -4,8 +4,8 @@ using namespace audio;
 using namespace base;
 
 ChannelMixer::ChannelMixer(ChannelMixerParams chanMixParams) :
-	MultiAudible(MultiAudibleParams{}),
-	_inputBuffers({})
+	_inputBuffers({}),
+	_outputBuffers({})
 {
 	SetParams(chanMixParams);
 }
@@ -20,7 +20,7 @@ void ChannelMixer::SetParams(ChannelMixerParams chanMixParams)
 
 	if (chanMixParams.NumInputChannels > numInputs)
 	{
-		for (auto i = 0U; i < chanMixParams.NumInputChannels - numInputs; i++)
+		for (auto i = 0u; i < chanMixParams.NumInputChannels - numInputs; i++)
 		{
 			_inputBuffers.push_back(AudioBuffer(chanMixParams.InputBufferSize));
 		}
@@ -33,7 +33,7 @@ void ChannelMixer::SetParams(ChannelMixerParams chanMixParams)
 
 	if (chanMixParams.NumOutputChannels > numOutputs)
 	{
-		for (auto i = 0U; i < chanMixParams.NumOutputChannels - numOutputs; i++)
+		for (auto i = 0u; i < chanMixParams.NumOutputChannels - numOutputs; i++)
 		{
 			_outputBuffers.push_back(AudioBuffer(chanMixParams.OutputBufferSize));
 		}
@@ -54,14 +54,14 @@ void ChannelMixer::FromAdc(float* inBuf, unsigned int numChannels, unsigned int 
 	if (numSamps < 1 || numChannels < 1)
 		return;
 
-	auto chan = 0U;
+	auto chan = 0u;
 	for (auto buf : _inputBuffers)
 	{
 		chan++;
 
 		if (numChannels > chan)
 		{
-			for (auto samp = 0U; samp < numSamps; samp++)
+			for (auto samp = 0u; samp < numSamps; samp++)
 			{
 				buf.Push(inBuf[samp*numChannels + chan]);
 			}
@@ -74,7 +74,7 @@ void ChannelMixer::ToDac(float* outBuf, unsigned int numChannels, unsigned int n
 	if (numSamps < 1 || numChannels < 1)
 		return;
 
-	auto chan = 0U;
+	auto chan = 0u;
 	for (auto buf : _outputBuffers)
 	{
 		chan++;
@@ -82,7 +82,7 @@ void ChannelMixer::ToDac(float* outBuf, unsigned int numChannels, unsigned int n
 		if ((numChannels > chan) && (buf.BufSize() > 0))
 		{
 			auto bufIter = buf.Delay(numSamps);
-			for (auto samp = 0U; samp < numSamps; samp++)
+			for (auto samp = 0u; samp < numSamps; samp++)
 			{
 				if (bufIter == buf.End())
 					bufIter = buf.Start();

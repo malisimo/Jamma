@@ -3,25 +3,24 @@
 using namespace base;
 using namespace engine;
 using namespace resources;
-using audio::AudioBuffer;
+using base::AudioSink;
+using audio::AudioMixer;
 
 Loop::Loop():
-	Audible(AudibleParams{}),
-	ResourceUser()
+	ResourceUser(),
+	_index(0),
+	_loopParams({}),
+	_wav(std::weak_ptr<WavResource>()),
+	_mixer(std::make_unique<AudioMixer>())
 {
 }
 
-
 Loop::Loop(LoopParams loopParams) :
-	Audible(AudibleParams{}),
 	ResourceUser(),
 	_index(0),
 	_loopParams(loopParams),
-	_wav(std::weak_ptr<WavResource>())
-{
-}
-
-Loop::~Loop()
+	_wav(std::weak_ptr<WavResource>()),
+	_mixer(std::make_unique<AudioMixer>())
 {
 }
 
@@ -55,25 +54,24 @@ bool Loop::ReleaseResources()
 	return true;
 }
 
-void Loop::Play(std::shared_ptr<AudioBuffer> buf, unsigned int numSamps)
+void Loop::Play(const std::vector<std::shared_ptr<AudioSink>>& dest, unsigned int numSamps)
 {
-	if (nullptr == buf)
-		return;
-
+	// Mixer will stereo spread the mono wav
+	// and adjust level
 	auto wav = _wav.lock();
 
 	if (!wav)
 		return;
 	
-	auto bufLength = buf->BufSize();
 	auto wavLength = wav->Length();
 	auto wavBuf = wav->Buffer();
 	auto index = _index;
 
-	for (unsigned int i = 0; i < numSamps; i++)
+	for (auto i = 0u; i < numSamps; i++)
 	{
-		buf->PushMix(wavBuf[index++]);
-
+		_mixer->Play(dest, wavBuf[index], true);
+		
+		index++;
 		if (index >= wavLength)
 			index -= wavLength;
 	}

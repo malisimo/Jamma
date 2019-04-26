@@ -206,8 +206,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\audio\ChannelMixer.h" />
+    <ClInclude Include="src\base\AudioSink.h" />
     <ClInclude Include="src\engine\LoopTake.h" />
-    <ClInclude Include="src\base\MultiAudible.h" />
+    <ClInclude Include="src\base\MultiAudioSource.h" />
     <ClInclude Include="src\audio\AudioBuffer.h" />
     <ClInclude Include="src\audio\AudioMixer.h" />
     <ClInclude Include="lib\rtaudio\include\asio.h" />
@@ -260,7 +261,7 @@
     <ClInclude Include="src\base\ActionReceiver.h" />
     <ClInclude Include="src\engine\Loop.h" />
     <ClInclude Include="src\base\Action.h" />
-    <ClInclude Include="src\base\Audible.h" />
+    <ClInclude Include="src\base\AudioSource.h" />
     <ClInclude Include="src\base\Drawable.h" />
     <ClInclude Include="include\stdafx.h" />
     <ClInclude Include="include\targetver.h" />
@@ -283,18 +284,14 @@
   <ItemGroup>
     <ClCompile Include="src\audio\ChannelMixer.cpp" />
     <ClCompile Include="src\engine\LoopTake.cpp" />
-    <ClCompile Include="src\base\MultiAudible.cpp" />
     <ClCompile Include="src\audio\AudioBuffer.cpp" />
     <ClCompile Include="src\audio\AudioMixer.cpp" />
     <ClCompile Include="lib\rtaudio\include\asio.cpp" />
     <ClCompile Include="lib\rtaudio\include\asiodrivers.cpp" />
     <ClCompile Include="lib\rtaudio\include\asiolist.cpp" />
     <ClCompile Include="lib\rtaudio\include\iasiothiscallresolver.cpp" />
-    <ClCompile Include="src\base\ResourceUser.cpp" />
     <ClCompile Include="src\audio\AudioDevice.cpp" />
     <ClCompile Include="src\gui\GuiSlider.cpp" />
-    <ClCompile Include="src\base\Moveable.cpp" />
-    <ClCompile Include="src\base\Sizeable.cpp" />
     <ClCompile Include="src\actions\CursorAction.cpp" />
     <ClCompile Include="src\actions\KeyAction.cpp" />
     <ClCompile Include="src\actions\TouchAction.cpp" />
@@ -308,19 +305,14 @@
     <ClCompile Include="src\graphics\Font.cpp" />
     <ClCompile Include="src\utils\GlUtils.cpp" />
     <ClCompile Include="src\graphics\GlDrawContext.cpp" />
-    <ClCompile Include="src\base\DrawContext.cpp" />
     <ClCompile Include="src\engine\Scene.cpp" />
     <ClCompile Include="src\graphics\Shader.cpp" />
     <ClCompile Include="src\graphics\Image.cpp" />
-    <ClCompile Include="src\base\ActionSender.cpp" />
     <ClCompile Include="src\io\LoopFile.cpp" />
     <ClCompile Include="src\audio\InterpolatedValue.cpp" />
     <ClCompile Include="src\gui\GuiButton.cpp" />
     <ClCompile Include="src\gui\GuiModel.cpp" />
-    <ClCompile Include="src\base\ActionReceiver.cpp" />
     <ClCompile Include="src\engine\Loop.cpp" />
-    <ClCompile Include="src\base\Action.cpp" />
-    <ClCompile Include="src\base\Audible.cpp" />
     <ClCompile Include="lib\glew\glew.c" />
     <ClCompile Include="lib\rtaudio\RtAudio.cpp" />
     <ClCompile Include="src\engine\Station.cpp" />
@@ -329,7 +321,6 @@
     <ClCompile Include="src\engine\UndoHistory.cpp" />
     <ClCompile Include="src\audio\WavReadWriter.cpp" />
     <ClCompile Include="src\resources\TextureResource.cpp" />
-    <ClCompile Include="src\base\Touchable.cpp" />
     <ClCompile Include="src\actions\WindowAction.cpp" />
     <ClCompile Include="src\resources\WavResource.cpp" />
   </ItemGroup>
@@ -337,7 +328,6 @@
     <ClInclude Include="src\graphics\Window.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\base\Drawable.cpp" />
     <ClCompile Include="src\stdafx.cpp" />
     <ClCompile Include="src\utils\StringUtils.cpp" />
     <ClCompile Include="src\graphics\Window.cpp" />

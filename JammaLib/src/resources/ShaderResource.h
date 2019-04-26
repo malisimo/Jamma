@@ -3,9 +3,6 @@
 #include <string>
 #include <iostream>
 #include <optional>
-#include <gl/glew.h>
-#include <gl/gl.h>
-#include "glm/glm.hpp"
 #include "../graphics/Shader.h"
 #include "Resource.h"
 

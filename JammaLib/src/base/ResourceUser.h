@@ -9,11 +9,7 @@ namespace base
 	class ResourceUser
 	{
 	public:
-		ResourceUser();
-		~ResourceUser();
-
-	public:
-		virtual bool InitResources(resources::ResourceLib& resourceLib);
-		virtual bool ReleaseResources();
+		virtual bool InitResources(resources::ResourceLib& resourceLib) { return true; };
+		virtual bool ReleaseResources() { return true; };
 	};
 }

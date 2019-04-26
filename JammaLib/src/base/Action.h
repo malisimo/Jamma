@@ -10,8 +10,8 @@ namespace base
 	class Action
 	{
 	public:
-		Action();
-		~Action();
+		Action() {};
+		~Action() {};
 
 		// Copy
 		//Action(const Action &) = delete;

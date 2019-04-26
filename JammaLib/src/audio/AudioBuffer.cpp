@@ -3,24 +3,22 @@
 using namespace audio;
 
 AudioBuffer::AudioBuffer() :
-	Audible({}),
+	AudioSource({}),
 	_buffer(std::vector<float>(0, 0.0f))
 {
-	std::cout << "Default AudioBuffer ctor" << std::endl;
 }
 
 AudioBuffer::AudioBuffer(unsigned int size) :
-	Audible({}),
+	AudioSource({}),
 	_buffer(std::vector<float>(size, 0.0f))
 {
 }
-
 
 AudioBuffer::~AudioBuffer()
 {
 }
 
-void AudioBuffer::Play(std::shared_ptr<AudioBuffer> buf, unsigned int numSamps)
+void AudioBuffer::Play(std::shared_ptr<AudioSink> buf, unsigned int numSamps)
 {
 	// TODO: AudioBuffer should output its samples when played...
 }

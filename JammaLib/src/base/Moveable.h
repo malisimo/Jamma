@@ -12,12 +12,18 @@ namespace base
 	class Moveable
 	{
 	public:
-		Moveable(MoveableParams params);
-		~Moveable();
+		Moveable(MoveableParams params) : _moveParams(params) {};
 
 	public:
-		virtual utils::Position2d Position() const;
-		virtual void SetPosition(utils::Position2d pos);
+		virtual void SetPosition(utils::Position2d pos)
+		{
+			_moveParams.Position = pos;
+		};
+
+		virtual utils::Position2d Position() const
+		{
+			return _moveParams.Position;
+		};
 
 	protected:
 		MoveableParams _moveParams;

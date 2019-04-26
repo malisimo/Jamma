@@ -7,7 +7,7 @@
 #include <memory>
 #include <optional>
 #include <functional>
-#include "../base/Audible.h"
+#include "../base/AudioSource.h"
 #include "rtaudio/RtAudio.h"
 
 namespace audio
@@ -36,6 +36,6 @@ namespace audio
 		static std::optional<std::unique_ptr<AudioDevice>> Open(
 			std::function<int(void*, void*, unsigned int, double, RtAudioStreamStatus, void*)> onAudio,
 			std::function<void(RtAudioError::Type, const std::string&)> onError,
-			void* audioReceiver);
+			void* AudioSink);
 	};
 }

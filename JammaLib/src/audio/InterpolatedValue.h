@@ -3,7 +3,7 @@
 #include <vector>
 #include <memory>
 #include <functional>
-#include "Audible.h"
+#include "AudioSource.h"
 #include "AudioBuffer.h"
 
 namespace audio

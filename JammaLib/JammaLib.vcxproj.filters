@@ -101,9 +101,6 @@
     <ClInclude Include="src\base\ActionSender.h">
       <Filter>src\base</Filter>
     </ClInclude>
-    <ClInclude Include="src\base\Audible.h">
-      <Filter>src\base</Filter>
-    </ClInclude>
     <ClInclude Include="src\base\Drawable.h">
       <Filter>src\base</Filter>
     </ClInclude>
@@ -257,9 +254,6 @@
     <ClInclude Include="src\audio\AudioBuffer.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="src\base\MultiAudible.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="src\engine\LoopTake.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -272,25 +266,19 @@
     <ClInclude Include="src\audio\InterpolatedValue.h">
       <Filter>src\audio</Filter>
     </ClInclude>
+    <ClInclude Include="src\base\AudioSource.h">
+      <Filter>src\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\AudioSink.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\MultiAudioSource.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\stdafx.cpp">
       <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\base\Audible.cpp">
-      <Filter>src\base</Filter>
-    </ClCompile>
-    <ClCompile Include="src\base\Drawable.cpp">
-      <Filter>src\base</Filter>
-    </ClCompile>
-    <ClCompile Include="src\base\ActionReceiver.cpp">
-      <Filter>src\base</Filter>
-    </ClCompile>
-    <ClCompile Include="src\base\Action.cpp">
-      <Filter>src\base</Filter>
-    </ClCompile>
-    <ClCompile Include="src\base\ActionSender.cpp">
-      <Filter>src\base</Filter>
     </ClCompile>
     <ClCompile Include="lib\glew\glew.c">
       <Filter>lib\glew</Filter>
@@ -331,9 +319,6 @@
     <ClCompile Include="src\graphics\GlDrawContext.cpp">
       <Filter>src\graphics</Filter>
     </ClCompile>
-    <ClCompile Include="src\base\DrawContext.cpp">
-      <Filter>src\base</Filter>
-    </ClCompile>
     <ClCompile Include="src\utils\GlUtils.cpp">
       <Filter>src\utils</Filter>
     </ClCompile>
@@ -361,19 +346,10 @@
     <ClCompile Include="src\utils\ImageUtils.cpp">
       <Filter>src\utils</Filter>
     </ClCompile>
-    <ClCompile Include="src\base\Touchable.cpp">
-      <Filter>src\base</Filter>
-    </ClCompile>
     <ClCompile Include="src\base\GuiElement.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\GuiGrid.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\base\Sizeable.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\base\Moveable.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\actions\CursorAction.cpp">
@@ -415,16 +391,10 @@
     <ClCompile Include="lib\rtaudio\include\asio.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\base\ResourceUser.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\audio\AudioMixer.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\audio\AudioBuffer.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\base\MultiAudible.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\LoopTake.cpp">

@@ -7,12 +7,6 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-#include <gl/glew.h>
-#include <gl/gl.h>
-#include "gl/glext.h"
-#include "gl/wglext.h"
-#include "glm/glm.hpp"
-#include "glm/gtc/type_ptr.hpp"
 #include "GlUtils.h"
 #include "../resources/Resource.h"
 #include "GlDrawContext.h"

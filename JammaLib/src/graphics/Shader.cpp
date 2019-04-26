@@ -1,4 +1,5 @@
 #include "Shader.h"
+#include "glm/gtc/type_ptr.hpp"
 
 using namespace graphics;
 using utils::GlUtils;

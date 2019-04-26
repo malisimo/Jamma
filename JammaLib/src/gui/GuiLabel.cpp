@@ -1,4 +1,6 @@
 #include "GuiLabel.h"
+#include "glm/glm.hpp"
+#include "glm/ext.hpp"
 
 using namespace base;
 using namespace gui;
