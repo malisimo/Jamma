@@ -5,7 +5,7 @@ using base::AudioSink;
 using gui::GuiSliderParams;
 
 AudioMixer::AudioMixer() :
-	_behaviour(MixBehaviour()),
+	_behaviour(std::unique_ptr<MixBehaviour>()),
 	_slider(GuiSliderParams())
 {
 }
@@ -14,41 +14,44 @@ AudioMixer::~AudioMixer()
 {
 }
 
-void AudioMixer::Play(const std::vector<std::shared_ptr<AudioSink>>& dest, float samp, bool mix)
+void AudioMixer::SetBehaviour(std::unique_ptr<MixBehaviour> behaviour)
 {
-	_behaviour.Apply(dest, samp, mix);
+	_behaviour = std::move(behaviour);
 }
 
-void WireMixBehaviour::Apply(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, bool mix)
-{
-	std::function<void(std::shared_ptr<base::AudioSink>, float)> mixFun = [](std::shared_ptr<base::AudioSink> buf, float s) { buf->PushMix(s);	};
-	std::function<void(std::shared_ptr<base::AudioSink>, float)> replaceFun = [](std::shared_ptr<base::AudioSink> buf, float s) { buf->Push(s);		};
-	auto pushFun = mix ? mixFun : replaceFun;
 
+void AudioMixer::Play(const std::vector<std::shared_ptr<AudioSink>>& dest, float samp, unsigned int index)
+{
+	_behaviour->Apply(dest, samp, index);
+}
+
+void AudioMixer::Offset(const std::vector<std::shared_ptr<base::AudioSink>>& dest, unsigned int index)
+{
+	for (auto buf : dest)
+		buf->Offset(index);
+		
+}
+
+void WireMixBehaviour::Apply(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, unsigned int offset)
+{
 	unsigned int chan = 0;
 	for (auto buf : dest)
 	{
-		if (std::find(_channels.begin(), _channels.end(), chan) != _channels.end())
-			pushFun(buf, samp);
+		if (std::find(Channels.begin(), Channels.end(), chan) != Channels.end())
+			buf->WriteMix(samp, offset);
 
 		chan++;
 	}
 }
 
-void PanMixBehaviour::Apply(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, bool mix)
+void PanMixBehaviour::Apply(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, unsigned int offset)
 {
-	std::function<void(std::shared_ptr<base::AudioSink>, float)> mixFun = [](std::shared_ptr<base::AudioSink> buf, float s) { buf->PushMix(s);	};
-	std::function<void(std::shared_ptr<base::AudioSink>, float)> replaceFun = [](std::shared_ptr<base::AudioSink> buf, float s) { buf->Push(s);		};
-	auto pushFun = mix ? mixFun : replaceFun;
-
 	unsigned int chan = 0;
 	for (auto buf : dest)
 	{
-		if (_channelLevels.size() > chan)
-		{
-			if (_channelLevels[chan] > 0.f)
-				pushFun(buf, samp * _channelLevels.at(chan));
-		}
+		if (chan < ChannelLevels.size())
+			buf->WriteMix(samp * ChannelLevels.at(chan), offset);
+
 		chan++;
 	}
 }

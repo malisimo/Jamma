@@ -54,7 +54,7 @@ Scene::Scene(SceneParams params) :
 	auto take = std::make_unique<LoopTake>(DrawableParams());
 	take->AddLoop(std::make_unique<Loop>(loopParams));
 	
-	auto station = std::make_unique<Station>(DrawableParams());
+	auto station = std::make_shared<Station>(DrawableParams());
 	station->AddTake(std::move(take));
 
 	_stations.push_back(std::move(station));
@@ -108,23 +108,6 @@ bool Scene::ReleaseResources()
 	return Drawable::ReleaseResources();
 }
 
-void Scene::SetSize(Size2d size)
-{
-	_sizeParams.Size = size;
-
-	InitSize();
-}
-
-unsigned int Scene::Width() const
-{
-	return _sizeParams.Size.Width;
-}
-
-unsigned int Scene::Height() const
-{
-	return _sizeParams.Size.Height;
-}
-
 void Scene::OnAction(TouchAction touchAction)
 {
 	std::cout << "Touch action " << touchAction.Touch << " [" << touchAction.State << "] " << touchAction.Index << std::endl;
@@ -145,39 +128,28 @@ void Scene::OnAction(KeyAction keyAction)
 
 void Scene::InitAudio()
 {
-	auto dev = AudioDevice::Open(Scene::OnAudio,
+	auto dev = AudioDevice::Open(Scene::AudioCallback,
 		[](RtAudioError::Type type, const std::string& err) { std::cout << "[" << type << " RtAudio Error] " << err << std::endl; },
 		this);
 
 	if (dev.has_value())
 	{
 		_audioDevice = std::move(dev.value());
+
+		auto inParams = _audioDevice->GetInputStreamInfo();
+		auto outParams = _audioDevice->GetOutputStreamInfo();
+		
+		_channelMixer.SetParams(ChannelMixerParams({
+				ChannelMixer::DefaultBufferSize,
+				ChannelMixer::DefaultBufferSize,
+				inParams.inputChannels,
+				outParams.outputChannels}));
+
 		_audioDevice->Start();
 	}
 }
 
-ChannelMixer & Scene::GetMixer()
-{
-	return _channelMixer;
-}
-
-RtAudio::DeviceInfo Scene::AudioInputDeviceInfo()
-{
-	if (_audioDevice)
-		return _audioDevice->GetInputStreamInfo();
-
-	return RtAudio::DeviceInfo();
-}
-
-RtAudio::DeviceInfo Scene::AudioOutputDeviceInfo()
-{
-	if (_audioDevice)
-		return _audioDevice->GetOutputStreamInfo();
-
-	return RtAudio::DeviceInfo();
-}
-
-int Scene::OnAudio(void* outBuffer,
+int Scene::AudioCallback(void* outBuffer,
 	void* inBuffer,
 	unsigned int numSamps,
 	double streamTime,
@@ -185,28 +157,29 @@ int Scene::OnAudio(void* outBuffer,
 	void* userData)
 {
 	Scene* scene = (Scene*)userData;
-	
-	if (nullptr == scene)
-		return 0;
-
-	auto channelMixer = scene->GetMixer();
-
-	float* inBuf = (float*)inBuffer;
-	if (nullptr != inBuf)
-	{
-		auto inDeviceInfo = scene->AudioInputDeviceInfo();
-		channelMixer.FromAdc(inBuf, inDeviceInfo.inputChannels, numSamps);
-	}
-
-	float* outBuf = (float*)outBuffer;
-	if (nullptr != outBuf)
-	{
-		auto outDeviceInfo = scene->AudioOutputDeviceInfo();
-		std::fill(outBuf, outBuf + numSamps * outDeviceInfo.outputChannels, 0.0f);
-		channelMixer.ToDac(outBuf, outDeviceInfo.outputChannels, numSamps);
-	}
+	scene->OnAudio((float*)inBuffer, (float*)outBuffer, numSamps);
 
 	return 0;
+}
+
+void Scene::OnAudio(float* inBuf, float* outBuf, unsigned int numSamps)
+{
+	if (nullptr != inBuf)
+	{
+		auto inDeviceInfo = nullptr == _audioDevice ? RtAudio::DeviceInfo() : _audioDevice->GetInputStreamInfo();
+		_channelMixer.FromAdc(inBuf, inDeviceInfo.inputChannels, numSamps);
+	}
+
+	if (nullptr != outBuf)
+	{
+		auto outDeviceInfo = nullptr == _audioDevice ? RtAudio::DeviceInfo() : _audioDevice->GetOutputStreamInfo();
+		std::fill(outBuf, outBuf + numSamps * outDeviceInfo.outputChannels, 0.0f);
+
+		for (auto& station : _stations)
+			_channelMixer.Play(station, numSamps);
+
+		_channelMixer.ToDac(outBuf, outDeviceInfo.outputChannels, numSamps);
+	}
 }
 
 void Scene::InitSize()

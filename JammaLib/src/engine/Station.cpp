@@ -22,6 +22,7 @@ Station::~Station()
 
 void Station::Play(const std::vector<std::shared_ptr<base::AudioSink>>& dest, unsigned int numSamps)
 {
+	// Need to rewind buffer as we are pushing to the same place for multiple takes
 	for (auto& take : _loopTakes)
 		take->Play(dest, numSamps);
 }

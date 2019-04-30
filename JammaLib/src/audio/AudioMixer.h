@@ -11,23 +11,23 @@ namespace audio
 	class MixBehaviour
 	{
 	public:
-		virtual void Apply(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, bool mix) {}
+		virtual void Apply(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, unsigned int index) {}
 	};
 
 	class WireMixBehaviour : public MixBehaviour
 	{
 	public:
-		virtual void Apply(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, bool mix) override;
+		virtual void Apply(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, unsigned int index) override;
 
-		std::vector<unsigned int> _channels;
+		std::vector<unsigned int> Channels;
 	};
 
 	class PanMixBehaviour : public MixBehaviour
 	{
 	public:
-		virtual void Apply(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, bool mix) override;
+		virtual void Apply(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, unsigned int index) override;
 
-		std::vector<float> _channelLevels;
+		std::vector<float> ChannelLevels;
 	};
 
 	class AudioMixer
@@ -37,10 +37,12 @@ namespace audio
 		~AudioMixer();
 
 	public:
-		void Play(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, bool mix);
+		void SetBehaviour(std::unique_ptr<MixBehaviour> behaviour);
+		void Play(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, unsigned int index);
+		void Offset(const std::vector<std::shared_ptr<base::AudioSink>>& dest, unsigned int index);
 
 	protected:
-		MixBehaviour _behaviour;
+		std::unique_ptr<MixBehaviour> _behaviour;
 		gui::GuiSlider _slider;
 	};
 }

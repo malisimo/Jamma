@@ -23,6 +23,14 @@ void AudioBuffer::Play(std::shared_ptr<AudioSink> buf, unsigned int numSamps)
 	// TODO: AudioBuffer should output its samples when played...
 }
 
+void AudioBuffer::Zero(unsigned int numSamps)
+{
+	auto offset = 0;
+
+	for (auto i = 0u; i < numSamps; i++)
+		offset = Write(0.0f, offset);
+}
+
 void AudioBuffer::SetSize(unsigned int size)
 {
 	_buffer.resize(size);
@@ -30,7 +38,17 @@ void AudioBuffer::SetSize(unsigned int size)
 
 void AudioBuffer::SetIndex(unsigned int index)
 {
-	_index = index % _buffer.size();
+	auto bufSize = (unsigned int)_buffer.size();
+
+	auto numExtraSamps = index - _index;
+	_index = index;
+
+	if (bufSize <= _index)
+		_index = bufSize - 1;
+
+	_numSamps += numExtraSamps;
+	if (_numSamps > bufSize)
+		_numSamps = bufSize;
 }
 
 unsigned int AudioBuffer::NumSamps() const
@@ -41,36 +59,6 @@ unsigned int AudioBuffer::NumSamps() const
 unsigned int AudioBuffer::BufSize() const
 {
 	return (unsigned int)_buffer.size();
-}
-
-void AudioBuffer::Push(const float &samp)
-{
-	auto bufSize = (unsigned int)_buffer.size(); 
-
-	if (_index < bufSize)
-		_buffer[_index++] = samp;
-
-	if (_index >= bufSize)
-		_index -= (unsigned int)_buffer.size();
-
-	_numSamps++;
-	if (_numSamps > bufSize)
-		_numSamps = bufSize;
-}
-
-void AudioBuffer::PushMix(const float &samp)
-{
-	auto bufSize = (unsigned int)_buffer.size();
-
-	if (_index < bufSize)
-		_buffer[_index++]+= samp;
-
-	if (_index >= bufSize)
-		_index -= (unsigned int)_buffer.size();
-
-	_numSamps++;
-	if (_numSamps > bufSize)
-		_numSamps = bufSize;
 }
 
 std::vector<float>::iterator AudioBuffer::Start()
@@ -94,4 +82,3 @@ std::vector<float>::iterator AudioBuffer::Delay(unsigned int sampsDelay)
 	auto offset = sampsBehind > _index ? (_index + bufSize) - sampsBehind : _index - sampsBehind;
 	return (_buffer.begin() + offset);
 }
-

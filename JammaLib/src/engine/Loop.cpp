@@ -5,6 +5,7 @@ using namespace engine;
 using namespace resources;
 using base::AudioSink;
 using audio::AudioMixer;
+using audio::PanMixBehaviour;
 
 Loop::Loop():
 	ResourceUser(),
@@ -13,6 +14,7 @@ Loop::Loop():
 	_wav(std::weak_ptr<WavResource>()),
 	_mixer(std::make_unique<AudioMixer>())
 {
+	InitMixer();
 }
 
 Loop::Loop(LoopParams loopParams) :
@@ -22,6 +24,7 @@ Loop::Loop(LoopParams loopParams) :
 	_wav(std::weak_ptr<WavResource>()),
 	_mixer(std::make_unique<AudioMixer>())
 {
+	InitMixer();
 }
 
 bool Loop::InitResources(ResourceLib& resourceLib)
@@ -69,13 +72,23 @@ void Loop::Play(const std::vector<std::shared_ptr<AudioSink>>& dest, unsigned in
 
 	for (auto i = 0u; i < numSamps; i++)
 	{
-		_mixer->Play(dest, wavBuf[index], true);
+		_mixer->Play(dest, wavBuf[index], i);
 		
 		index++;
 		if (index >= wavLength)
 			index -= wavLength;
 	}
 
+	_mixer->Offset(dest, numSamps);
+
 	_index += numSamps;
 	_index %= wavLength;
+}
+
+void Loop::InitMixer()
+{
+	auto behaviour = std::make_unique<audio::PanMixBehaviour>();
+	behaviour->ChannelLevels = { 0.8f, 0.2f };
+
+	_mixer->SetBehaviour(std::move(behaviour));
 }

@@ -59,7 +59,7 @@ namespace engine
 			_slider(std::move(other._slider))
 		{
 			other._audioDevice = std::make_unique<audio::AudioDevice>();
-			other._stations = std::vector<std::unique_ptr<Station>>();
+			other._stations = std::vector<std::shared_ptr<Station>>();
 			other._image = std::make_unique<graphics::Image>(
 				graphics::ImageParams(
 					base::DrawableParams{ "" },
@@ -107,21 +107,23 @@ namespace engine
 		virtual bool InitResources(resources::ResourceLib& resourceLib) override;
 		virtual bool ReleaseResources() override;
 
-		virtual void SetSize(utils::Size2d size) override;
-		unsigned int Width() const;
-		unsigned int Height() const;
+		virtual void SetSize(utils::Size2d size) override
+		{
+			_sizeParams.Size = size;
+			InitSize();
+		}
+		unsigned int Width() const { return _sizeParams.Size.Width; }
+		unsigned int Height() const	{ return _sizeParams.Size.Height; }
 
 		virtual void OnAction(actions::TouchAction touchAction) override;
 		virtual void OnAction(actions::TouchMoveAction touchAction) override;
 		virtual void OnAction(actions::KeyAction keyAction) override;
 
 		void InitAudio();
-		audio::ChannelMixer& GetMixer();
-		RtAudio::DeviceInfo AudioInputDeviceInfo();
-		RtAudio::DeviceInfo AudioOutputDeviceInfo();
 
 	private:
-		static int OnAudio(void* outBuffer, void* inBuffer, unsigned int numSamps, double streamTime, RtAudioStreamStatus status, void* userData);
+		static int AudioCallback(void* outBuffer, void* inBuffer, unsigned int numSamps, double streamTime, RtAudioStreamStatus status, void* userData);
+		void OnAudio(float* inBuffer, float* outBuffer, unsigned int numSamps);
 		void InitSize();
 		glm::mat4 View();
 
@@ -133,6 +135,6 @@ namespace engine
 		std::unique_ptr<gui::GuiLabel> _label;
 		std::unique_ptr<gui::GuiSlider> _slider;
 		std::unique_ptr<graphics::Image> _image;
-		std::vector<std::unique_ptr<Station>> _stations;
+		std::vector<std::shared_ptr<Station>> _stations;
 	};
 }

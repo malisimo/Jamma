@@ -62,6 +62,8 @@ namespace engine
 		virtual bool ReleaseResources() override;
 		virtual void Play(const std::vector<std::shared_ptr<base::AudioSink>>& dest, unsigned int numSamps) override;
 
+		void InitMixer();
+
 	private:
 		unsigned int _index;
 		LoopParams _loopParams;
