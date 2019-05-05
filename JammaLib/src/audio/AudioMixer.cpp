@@ -2,15 +2,13 @@
 
 using namespace audio;
 using base::AudioSink;
+using base::GuiElement;
 using gui::GuiSliderParams;
 
-AudioMixer::AudioMixer() :
+AudioMixer::AudioMixer(AudioMixerParams params) :
+	GuiElement(params),
 	_behaviour(std::unique_ptr<MixBehaviour>()),
 	_slider(GuiSliderParams())
-{
-}
-
-AudioMixer::~AudioMixer()
 {
 }
 
@@ -27,15 +25,15 @@ void AudioMixer::Play(const std::vector<std::shared_ptr<AudioSink>>& dest, float
 
 void AudioMixer::Offset(const std::vector<std::shared_ptr<base::AudioSink>>& dest, unsigned int index)
 {
-	for (auto buf : dest)
+	for (auto& buf : dest)
 		buf->Offset(index);
 		
 }
 
-void WireMixBehaviour::Apply(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, unsigned int offset)
+void WireMixBehaviour::Apply(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, unsigned int offset) const
 {
 	unsigned int chan = 0;
-	for (auto buf : dest)
+	for (auto& buf : dest)
 	{
 		if (std::find(Channels.begin(), Channels.end(), chan) != Channels.end())
 			buf->WriteMix(samp, offset);
@@ -44,10 +42,10 @@ void WireMixBehaviour::Apply(const std::vector<std::shared_ptr<base::AudioSink>>
 	}
 }
 
-void PanMixBehaviour::Apply(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, unsigned int offset)
+void PanMixBehaviour::Apply(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, unsigned int offset) const
 {
 	unsigned int chan = 0;
-	for (auto buf : dest)
+	for (auto& buf : dest)
 	{
 		if (chan < ChannelLevels.size())
 			buf->WriteMix(samp * ChannelLevels.at(chan), offset);

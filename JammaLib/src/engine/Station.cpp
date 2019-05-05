@@ -3,13 +3,13 @@
 using namespace engine;
 using base::MultiAudioSource;
 using base::AudioSink;
-using base::Drawable;
-using base::DrawableParams;
+using base::GuiElement;
+using base::GuiElementParams;
 using base::DrawContext;
 using resources::ResourceLib;
 
-Station::Station(DrawableParams params) :
-	Drawable(params),
+Station::Station(GuiElementParams params) :
+	GuiElement(params),
 	MultiAudioSource(),
 	_loopTakes(),
 	_triggers({})
@@ -27,29 +27,13 @@ void Station::Play(const std::vector<std::shared_ptr<base::AudioSink>>& dest, un
 		take->Play(dest, numSamps);
 }
 
-void Station::Draw(DrawContext& ctx)
+void Station::AddTake(LoopTakeParams takeParams)
 {
-	for (auto& take : _loopTakes)
-		take->Draw(ctx);
-}
+	auto take = std::make_shared<LoopTake>(takeParams);
 
-bool Station::InitResources(ResourceLib & resourceLib)
-{
-	for (auto& take : _loopTakes)
-		take->InitResources(resourceLib);
+	for (auto loop : takeParams.Loops)
+		take->AddLoop(loop);
 
-	return true;
-}
-
-bool Station::ReleaseResources()
-{
-	for (auto& take : _loopTakes)
-		take->ReleaseResources();
-
-	return true;
-}
-
-void Station::AddTake(std::unique_ptr<LoopTake> take)
-{
-	_loopTakes.push_back(std::move(take));
+	_loopTakes.push_back(take);
+	_children.push_back(take);
 }

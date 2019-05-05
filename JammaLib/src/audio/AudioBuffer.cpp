@@ -18,7 +18,7 @@ AudioBuffer::~AudioBuffer()
 {
 }
 
-void AudioBuffer::Play(std::shared_ptr<AudioSink> buf, unsigned int numSamps)
+void AudioBuffer::Play(AudioSink& buf, unsigned int numSamps)
 {
 	// TODO: AudioBuffer should output its samples when played...
 }

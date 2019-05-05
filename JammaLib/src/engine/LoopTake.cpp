@@ -7,8 +7,8 @@ using base::Drawable;
 using base::DrawableParams;
 using resources::ResourceLib;
 
-LoopTake::LoopTake(DrawableParams params) :
-	Drawable(params),
+LoopTake::LoopTake(LoopTakeParams params) :
+	GuiElement(params),
 	MultiAudioSource(),
 	_loops()
 {
@@ -24,27 +24,9 @@ void LoopTake::Play(const std::vector<std::shared_ptr<AudioSink>>& dest, unsigne
 		loop->Play(dest, numSamps);
 }
 
-void LoopTake::Draw(DrawContext& ctx)
+void LoopTake::AddLoop(LoopParams loopParams)
 {
-}
-
-bool LoopTake::InitResources(ResourceLib & resourceLib)
-{
-	for (auto& loop : _loops)
-		loop->InitResources(resourceLib);
-
-	return true;
-}
-
-bool LoopTake::ReleaseResources()
-{
-	for (auto& loop : _loops)
-		loop->ReleaseResources();
-
-	return true;
-}
-
-void LoopTake::AddLoop(std::unique_ptr<Loop> loop)
-{
-	_loops.push_back(std::move(loop));
+	auto loop = std::make_shared<Loop>(loopParams);
+	_loops.push_back(loop);
+	_children.push_back(loop);
 }

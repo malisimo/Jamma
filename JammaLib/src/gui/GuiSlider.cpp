@@ -67,7 +67,7 @@ bool GuiSlider::HitTest(Position2d pos)
 
 	for (auto& child : _children)
 	{
-		if (child.HitTest(localPos))
+		if (child->HitTest(localPos))
 			return true;
 	}
 

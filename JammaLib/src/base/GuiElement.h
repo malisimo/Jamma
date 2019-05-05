@@ -46,7 +46,6 @@ namespace base
 	{
 	public:
 		GuiElement(GuiElementParams params);
-		~GuiElement();
 
 	public:
 		enum GuiElementState
@@ -74,6 +73,6 @@ namespace base
 		graphics::Image _overTexture;
 		graphics::Image _downTexture;
 		graphics::Image _outTexture;
-		std::vector<GuiElement> _children;
+		std::vector<std::shared_ptr<GuiElement>> _children;
 	};
 }

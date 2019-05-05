@@ -17,7 +17,7 @@ namespace audio
 		~AudioBuffer();
 
 	public:
-		virtual void Play(std::shared_ptr<AudioSink> dest, unsigned int numSamps) override;
+		virtual void Play(AudioSink& dest, unsigned int numSamps) override;
 		inline virtual int Write(float samp, int indexOffset) override
 		{
 			auto bufSize = (unsigned int)_buffer.size();

@@ -3,18 +3,44 @@
 #include <vector>
 #include <memory>
 #include "Loop.h"
-#include "Drawable.h"
+#include "GuiElement.h"
 #include "MultiAudioSource.h"
 #include "AudioSink.h"
 
 namespace engine
 {
+	class LoopTakeParams : public base::GuiElementParams
+	{
+	public:
+		LoopTakeParams() :
+			base::GuiElementParams(DrawableParams{ "" },
+				MoveableParams{ 0,0 },
+				SizeableParams{ 1,1 },
+				"",
+				"",
+				"",
+				{}),
+			Loops({})
+		{
+		}
+
+		LoopTakeParams(base::GuiElementParams params,
+			std::vector<LoopParams> loops) :
+			base::GuiElementParams(params),
+			Loops(loops)
+		{
+		}
+
+	public:
+		std::vector<LoopParams> Loops;
+	};
+
 	class LoopTake :
-		public base::Drawable,
+		public base::GuiElement,
 		public base::MultiAudioSource
 	{
 	public:
-		LoopTake(base::DrawableParams params);
+		LoopTake(LoopTakeParams params);
 		~LoopTake();
 
 		// Copy
@@ -23,13 +49,13 @@ namespace engine
 
 	public:
 		virtual void Play(const std::vector<std::shared_ptr<base::AudioSink>>& dest, unsigned int numSamps) override;
-		virtual void Draw(base::DrawContext& ctx) override;
-		virtual bool InitResources(resources::ResourceLib& resourceLib) override;
-		virtual bool ReleaseResources() override;
+		//virtual void Draw(base::DrawContext& ctx) override;
+		//virtual bool InitResources(resources::ResourceLib& resourceLib) override;
+		//virtual bool ReleaseResources() override;
 
-		void AddLoop(std::unique_ptr<Loop> loop);
+		void AddLoop(LoopParams loopParams);
 
 	protected:
-		std::vector<std::unique_ptr<Loop>> _loops;
+		std::vector<std::shared_ptr<Loop>> _loops;
 	};
 }

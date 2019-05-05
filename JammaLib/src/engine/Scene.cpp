@@ -49,14 +49,19 @@ Scene::Scene(SceneParams params) :
 	sliderParams.DragOverTexture = "fader_over";
 	_slider = std::make_unique<GuiSlider>(sliderParams);
 
+	auto station = std::make_shared<Station>(GuiElementParams(DrawableParams{ "" },
+		MoveableParams{ 0,0 },
+		SizeableParams{ 1,1 },
+		"",
+		"",
+		"",
+		{}));
+
 	LoopParams loopParams;
 	loopParams.Wav = "hh";
-	auto take = std::make_unique<LoopTake>(DrawableParams());
-	take->AddLoop(std::make_unique<Loop>(loopParams));
-	
-	auto station = std::make_shared<Station>(DrawableParams());
-	station->AddTake(std::move(take));
-
+	LoopTakeParams takeParams;
+	takeParams.Loops = { loopParams };
+	station->AddTake(takeParams);
 	_stations.push_back(std::move(station));
 
 	_audioDevice = std::make_unique<AudioDevice>();

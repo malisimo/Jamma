@@ -21,10 +21,6 @@ GuiElement::GuiElement(GuiElementParams params) :
 {
 }
 
-GuiElement::~GuiElement()
-{
-}
-
 void GuiElement::SetSize(Size2d size)
 {
 	Sizeable::SetSize(size);
@@ -57,7 +53,7 @@ void GuiElement::Draw(DrawContext& ctx)
 	}
 
 	for (auto& child : _children)
-		child.Draw(ctx);
+		child->Draw(ctx);
 
 	glCtx.PopMvp();
 }
@@ -68,7 +64,7 @@ bool GuiElement::HitTest(Position2d pos)
 
 	for (auto& child : _children)
 	{
-		if (child.HitTest(localPos))
+		if (child->HitTest(localPos))
 			return true;
 	}
 
@@ -87,11 +83,17 @@ bool GuiElement::InitResources(ResourceLib& resourceLib)
 	_downTexture.InitResources(resourceLib);
 	_outTexture.InitResources(resourceLib);
 
+	for (auto& child : _children)
+		child->InitResources(resourceLib);
+
 	return false;
 }
 
 bool GuiElement::ReleaseResources()
 {
+	for (auto& child : _children)
+		child->ReleaseResources();
+
 	_texture.ReleaseResources();
 	_overTexture.ReleaseResources();
 	_downTexture.ReleaseResources();

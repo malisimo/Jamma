@@ -63,6 +63,23 @@ namespace gui
 		{
 		}
 
+		GuiSliderParams(GuiElementParams params) :
+			base::GuiElementParams(params),
+			Orientation(SLIDER_VERTICAL),
+			Min(0.0),
+			Max(1.0),
+			DragLength(1),
+			Steps(0),
+			Quantised(false),
+			DragTexture(""),
+			DragOverTexture(""),
+			DragDownTexture(""),
+			DragOutTexture(""),
+			DragControlOffset({ 0,0 }),
+			DragControlSize({ 1,1 })
+		{
+		}
+
 		enum SliderOrientation
 		{
 			SLIDER_VERTICAL,

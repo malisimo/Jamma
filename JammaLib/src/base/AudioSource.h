@@ -17,7 +17,7 @@ namespace base
 		}
 
 	public:
-		virtual void Play(std::shared_ptr<AudioSink> buf, unsigned int numSamps) {};
+		virtual void Play(AudioSink& buf, unsigned int numSamps) {};
 
 	protected:
 		AudioSourceParams _sourceParams;
