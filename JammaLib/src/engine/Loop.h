@@ -11,7 +11,8 @@
 
 namespace engine
 {
-	class LoopParams : public base::GuiElementParams
+	class LoopParams :
+		public base::GuiElementParams
 	{
 	public:
 		LoopParams() :
@@ -22,19 +23,23 @@ namespace engine
 				"",
 				"",
 				{}),
-			Wav("")
+			Wav(""),
+			MixerParams(audio::AudioMixerParams())
 		{
 		}
 
 		LoopParams(base::GuiElementParams params,
-			std::string wav) :
+			std::string wav,
+			audio::AudioMixerParams mixerParams) :
 			base::GuiElementParams(params),
-			Wav(wav)
+			Wav(wav),
+			MixerParams(mixerParams)
 		{
 		}
 
 	public:
 		std::string Wav;
+		audio::AudioMixerParams MixerParams;
 	};
 
 	class Loop :
@@ -82,8 +87,6 @@ namespace engine
 		virtual bool InitResources(resources::ResourceLib& resourceLib) override;
 		virtual bool ReleaseResources() override;
 		virtual void Play(const std::vector<std::shared_ptr<base::AudioSink>>& dest, unsigned int numSamps) override;
-
-		void InitMixer();
 
 	private:
 		unsigned int _index;

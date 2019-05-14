@@ -88,10 +88,10 @@ namespace graphics
 		void Swap();
 		void Release();
 
-		virtual void OnAction(actions::WindowAction winAction) override;
-		virtual void OnAction(actions::TouchAction touchAction) override;
-		virtual void OnAction(actions::TouchMoveAction touchAction) override;
-		virtual void OnAction(actions::KeyAction touchAction) override;
+		virtual actions::ActionResult OnAction(actions::WindowAction winAction) override;
+		virtual actions::ActionResult OnAction(actions::TouchAction touchAction) override;
+		virtual actions::ActionResult OnAction(actions::TouchMoveAction touchAction) override;
+		virtual actions::ActionResult OnAction(actions::KeyAction touchAction) override;
 
 		static utils::Size2d AdjustSize(utils::Size2d size, DWORD style);
 		static utils::Position2d Center(utils::Size2d size);

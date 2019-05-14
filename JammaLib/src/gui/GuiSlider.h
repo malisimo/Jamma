@@ -14,15 +14,14 @@ namespace gui
 	{
 	public:
 		GuiSlider(GuiSliderParams guiParams);
-		~GuiSlider();
 
 	public:
 		double Value() const;
 
 		virtual bool HitTest(utils::Position2d pos) override;
 		virtual void Draw(base::DrawContext& ctx) override;
-		virtual void OnAction(actions::TouchAction action) override;
-		virtual void OnAction(actions::TouchMoveAction action) override;
+		virtual actions::ActionResult OnAction(actions::TouchAction action) override;
+		virtual actions::ActionResult OnAction(actions::TouchMoveAction action) override;
 		virtual bool InitResources(resources::ResourceLib& resourceLib) override;
 		virtual bool ReleaseResources() override;
 

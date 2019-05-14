@@ -4,6 +4,7 @@
 
 using namespace base;
 using namespace utils;
+using namespace actions;
 using graphics::GlDrawContext;
 using graphics::ImageParams;
 using resources::ResourceLib;
@@ -58,6 +59,52 @@ void GuiElement::Draw(DrawContext& ctx)
 	glCtx.PopMvp();
 }
 
+ActionResult GuiElement::OnAction(KeyAction action)
+{
+	for (auto& child : _children)
+	{
+		auto res = child->OnAction(action);
+
+		if (res.IsEaten)
+			return res;
+	}
+
+	return { false };
+}
+
+ActionResult GuiElement::OnAction(TouchAction action)
+{
+	action.Position = ToLocal(action.Position);
+
+	for (auto& child : _children)
+	{
+		auto res = child->OnAction(action);
+		
+		if (res.IsEaten)
+			return res;
+	}
+
+	if (Size2d::RectTest(_sizeParams.Size, action.Position))
+		return { true };
+
+	return { false };
+}
+
+ActionResult GuiElement::OnAction(TouchMoveAction action)
+{
+	action.Position = ToLocal(action.Position);
+
+	for (auto& child : _children)
+	{
+		auto res = child->OnAction(action);
+
+		if (res.IsEaten)
+			return res;
+	}
+
+	return { false };
+}
+
 bool GuiElement::HitTest(Position2d pos)
 {
 	auto localPos = ToLocal(pos);
@@ -68,10 +115,7 @@ bool GuiElement::HitTest(Position2d pos)
 			return true;
 	}
 
-	if (localPos.X > 0 && localPos.X < (int)_sizeParams.Size.Width)
-	{
-		return (localPos.Y > 0 && localPos.Y < (int)_sizeParams.Size.Height);
-	}
+	return Size2d::RectTest(_sizeParams.Size, localPos);
 
 	return false;
 }

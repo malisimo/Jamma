@@ -350,27 +350,34 @@ void Window::Release()
 		DestroyWindow(_wnd);
 }
 
-void Window::OnAction(WindowAction winAction)
+ActionResult Window::OnAction(WindowAction winAction)
 {
+	auto isEaten = false;
+
 	switch (winAction.WindowEventType)
 	{
 	case WindowAction::SIZE:
 		_config.Size = winAction.Size;
+		isEaten = true;
 		//AdjustSize();
 		break;
 	case WindowAction::SIZE_MINIMISE:
 		SetWindowState(Window::MINIMISED);
+		isEaten = true;
 		break;
 	case WindowAction::SIZE_MAXIMISE:
 		SetWindowState(Window::MAXIMISED);
 		_config.Size = winAction.Size;
+		isEaten = true;
 		//AdjustSize();
 	case WindowAction::DESTROY:
 		break;
 	}
+
+	return { isEaten };
 }
 
-void Window::OnAction(TouchAction touchAction)
+ActionResult Window::OnAction(TouchAction touchAction)
 {
 	switch (touchAction.Touch)
 	{
@@ -393,17 +400,17 @@ void Window::OnAction(TouchAction touchAction)
 		break;
 	}
 
-	_scene.OnAction(touchAction);
+	return _scene.OnAction(touchAction);
 }
 
-void Window::OnAction(TouchMoveAction touchAction)
+ActionResult Window::OnAction(TouchMoveAction touchAction)
 {
-	_scene.OnAction(touchAction);
+	return _scene.OnAction(touchAction);
 }
 
-void Window::OnAction(KeyAction keyAction)
+ActionResult Window::OnAction(KeyAction keyAction)
 {
-	_scene.OnAction(keyAction);
+	return _scene.OnAction(keyAction);
 }
 
 void APIENTRY Window::MessageCallback(GLenum source,

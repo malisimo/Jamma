@@ -6,15 +6,16 @@
 #include "../actions/TouchAction.h"
 #include "../actions/TouchMoveAction.h"
 #include "../actions/KeyAction.h"
+#include "../actions/ActionResult.h"
 
 namespace base
 {
 	class ActionReceiver
 	{
 	public:
-		virtual void OnAction(actions::WindowAction action) {};
-		virtual void OnAction(actions::TouchAction action) {};
-		virtual void OnAction(actions::TouchMoveAction action) {};
-		virtual void OnAction(actions::KeyAction action) {};
+		virtual actions::ActionResult OnAction(actions::WindowAction action) { return { false }; };
+		virtual actions::ActionResult OnAction(actions::TouchAction action) { return { false }; };
+		virtual actions::ActionResult OnAction(actions::TouchMoveAction action) { return { false }; };
+		virtual actions::ActionResult OnAction(actions::KeyAction action) { return { false }; };
 	};
 }

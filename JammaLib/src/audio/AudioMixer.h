@@ -43,19 +43,23 @@ namespace audio
 				"",
 				"",
 				{}),
-			Behaviour(MixBehaviour())
+			Behaviour(MixBehaviour()),
+			SliderParams(gui::GuiSliderParams())
 		{
 		}
 
 		AudioMixerParams(base::GuiElementParams params,
-			MixBehaviour behaviour) :
+			MixBehaviour behaviour,
+			gui::GuiSliderParams sliderParams) :
 			base::GuiElementParams(params),
-			Behaviour(behaviour)
+			Behaviour(behaviour),
+			SliderParams(sliderParams)
 		{
 		}
 
 	public:
 		MixBehaviour Behaviour;
+		gui::GuiSliderParams SliderParams;
 	};
 
 	class AudioMixer :
@@ -71,6 +75,6 @@ namespace audio
 
 	protected:
 		std::unique_ptr<MixBehaviour> _behaviour;
-		gui::GuiSlider _slider;
+		std::shared_ptr<gui::GuiSlider> _slider;
 	};
 }

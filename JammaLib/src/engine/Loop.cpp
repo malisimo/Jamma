@@ -13,9 +13,9 @@ Loop::Loop(LoopParams loopParams) :
 	_index(0),
 	_loopParams(loopParams),
 	_wav(std::weak_ptr<WavResource>()),
-	_mixer(std::make_unique<AudioMixer>(AudioMixerParams()))
+	_mixer(std::make_unique<AudioMixer>(loopParams.MixerParams))
 {
-	InitMixer();
+	_children.push_back(_mixer);
 }
 
 bool Loop::InitResources(ResourceLib& resourceLib)
@@ -35,7 +35,7 @@ bool Loop::InitResources(ResourceLib& resourceLib)
 
 	_wav = std::dynamic_pointer_cast<WavResource>(resource);
 
-	return true;
+	return GuiElement::InitResources(resourceLib);
 }
 
 bool Loop::ReleaseResources()
@@ -45,7 +45,7 @@ bool Loop::ReleaseResources()
 	if (wav)
 		wav->Release();
 
-	return true;
+	return GuiElement::ReleaseResources();
 }
 
 void Loop::Play(const std::vector<std::shared_ptr<AudioSink>>& dest, unsigned int numSamps)
@@ -74,13 +74,4 @@ void Loop::Play(const std::vector<std::shared_ptr<AudioSink>>& dest, unsigned in
 
 	_index += numSamps;
 	_index %= wavLength;
-}
-
-void Loop::InitMixer()
-{
-	auto behaviour = std::make_unique<PanMixBehaviour>();
-	behaviour->ChannelLevels = { 0.8f, 0.2f };
-
-	_mixer->SetBehaviour(std::move(behaviour));
-	_children.push_back(_mixer);
 }

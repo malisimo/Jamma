@@ -3,13 +3,15 @@
 using namespace audio;
 using base::AudioSink;
 using base::GuiElement;
+using gui::GuiSlider;
 using gui::GuiSliderParams;
 
 AudioMixer::AudioMixer(AudioMixerParams params) :
 	GuiElement(params),
-	_behaviour(std::unique_ptr<MixBehaviour>()),
-	_slider(GuiSliderParams())
+	_behaviour(std::make_unique<MixBehaviour>(params.Behaviour)),
+	_slider(std::make_shared<GuiSlider>(params.SliderParams))
 {
+	_children.push_back(_slider);
 }
 
 void AudioMixer::SetBehaviour(std::unique_ptr<MixBehaviour> behaviour)

@@ -275,6 +275,9 @@
     <ClInclude Include="src\base\MultiAudioSource.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="src\actions\ActionResult.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\stdafx.cpp">

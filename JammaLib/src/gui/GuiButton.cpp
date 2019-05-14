@@ -11,10 +11,6 @@ GuiButton::GuiButton(GuiButtonParams params) :
 {
 }
 
-GuiButton::~GuiButton()
-{
-}
-
 void GuiButton::SetReceiver(std::weak_ptr<ActionReceiver> receiver)
 {
 	_buttonParams.Receiver = receiver;

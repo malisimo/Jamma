@@ -79,5 +79,13 @@ namespace utils
 
 			return newSize;
 		}
+
+		static bool RectTest(Size2d rect, Position2d pos)
+		{
+			if (pos.X > 0 && pos.X < (int)rect.Width)
+				return (pos.Y > 0 && pos.Y < (int)rect.Height);
+
+			return false;
+		}
 	};
 }

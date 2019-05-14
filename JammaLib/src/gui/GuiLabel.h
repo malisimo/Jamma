@@ -26,7 +26,6 @@ namespace gui
 	{
 	public:
 		GuiLabel(GuiLabelParams guiParams);
-		~GuiLabel() { ReleaseResources(); }
 
 	public:
 		virtual void Draw(base::DrawContext& ctx) override;

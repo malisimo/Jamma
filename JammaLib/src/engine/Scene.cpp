@@ -38,28 +38,40 @@ Scene::Scene(SceneParams params) :
 
 	// Nicer with default constructor
 	GuiSliderParams sliderParams;
-	sliderParams.Position = { 50,50 };
-	sliderParams.Size = { 40,342 };
-	sliderParams.MinSize = { 40,342 };
-	sliderParams.DragLength = 300;
+	sliderParams.Position = { 2,4 };
+	sliderParams.Size = { 40,312 };
+	sliderParams.MinSize = { 40,312 };
+	sliderParams.DragLength = 270;
 	sliderParams.DragControlOffset = { 4,5 };
 	sliderParams.DragControlSize = { 32,32 };
 	sliderParams.Texture = "fader_back";
 	sliderParams.DragTexture = "fader";
 	sliderParams.DragOverTexture = "fader_over";
-	_slider = std::make_unique<GuiSlider>(sliderParams);
+	//_slider = std::make_unique<GuiSlider>(sliderParams);
 
-	auto station = std::make_shared<Station>(GuiElementParams(DrawableParams{ "" },
-		MoveableParams{ 0,0 },
-		SizeableParams{ 1,1 },
-		"",
-		"",
-		"",
-		{}));
+	PanMixBehaviour mixBehaviour;
+	mixBehaviour.ChannelLevels = { 0.8f, 0.2f };
+	AudioMixerParams mixerParams;
+	mixerParams.Size = { 160, 320 };
+	mixerParams.Position = { 6, 6 };
+	mixerParams.SliderParams = sliderParams;
+	mixerParams.Behaviour = mixBehaviour;
 
+	StationParams stationParams;
+	//stationParams.Texture = "grid";
+	stationParams.Size = { 240, 200 };
+	stationParams.Position = { 120, 45 };
+	auto station = std::make_shared<Station>(stationParams);
 	LoopParams loopParams;
 	loopParams.Wav = "hh";
+	//loopParams.Texture = "grid";
+	loopParams.Size = { 80, 80 };
+	loopParams.Position = { 10, 22 };
+	loopParams.MixerParams = mixerParams;
 	LoopTakeParams takeParams;
+	//takeParams.Texture = "grid";
+	takeParams.Size = { 140, 140 };
+	takeParams.Position = { 4, 4 };
 	takeParams.Loops = { loopParams };
 	station->AddTake(takeParams);
 	_stations.push_back(std::move(station));
@@ -81,8 +93,11 @@ void Scene::Draw(DrawContext& ctx)
 	glCtx.ClearMvp();
 	glCtx.PushMvp(_overlayViewProj);
 
-	_slider->Draw(ctx);
+	//_slider->Draw(ctx);
 	_label->Draw(ctx);
+
+	for (auto& station : _stations)
+		station->Draw(ctx);
 
 	glCtx.PopMvp();
 }
@@ -90,7 +105,7 @@ void Scene::Draw(DrawContext& ctx)
 bool Scene::InitResources(ResourceLib& resourceLib)
 {
 	_label->InitResources(resourceLib);
-	_slider->InitResources(resourceLib);
+	//_slider->InitResources(resourceLib);
 	_image->InitResources(resourceLib);
 
 	for (auto& station : _stations)
@@ -104,7 +119,7 @@ bool Scene::InitResources(ResourceLib& resourceLib)
 bool Scene::ReleaseResources()
 {
 	_label->ReleaseResources();
-	_slider->ReleaseResources();
+	//_slider->ReleaseResources();
 	_image->ReleaseResources();
 
 	for (auto& station : _stations)
@@ -113,22 +128,52 @@ bool Scene::ReleaseResources()
 	return Drawable::ReleaseResources();
 }
 
-void Scene::OnAction(TouchAction touchAction)
+ActionResult Scene::OnAction(TouchAction action)
 {
-	std::cout << "Touch action " << touchAction.Touch << " [" << touchAction.State << "] " << touchAction.Index << std::endl;
-	_slider->OnAction(touchAction);
+	std::cout << "Touch action " << action.Touch << " [" << action.State << "] " << action.Index << std::endl;
+	//_slider->OnAction(touchAction);
+
+	for (auto& station : _stations)
+	{
+		auto res = station->OnAction(action);
+
+		if (res.IsEaten)
+			return res;
+	}
+
+	return { false };
 }
 
-void Scene::OnAction(TouchMoveAction touchAction)
+ActionResult Scene::OnAction(TouchMoveAction action)
 {
-	std::cout << "Touch Move action " << touchAction.Touch << " [" << touchAction.Position.X << "," << touchAction.Position.Y << "] " << touchAction.Index << std::endl;
-	_slider->OnAction(touchAction);
+	std::cout << "Touch Move action " << action.Touch << " [" << action.Position.X << "," << action.Position.Y << "] " << action.Index << std::endl;
+	//_slider->OnAction(touchAction);
+
+	for (auto& station : _stations)
+	{
+		auto res = station->OnAction(action);
+
+		if (res.IsEaten)
+			return res;
+	}
+
+	return { false };
 }
 
-void Scene::OnAction(KeyAction keyAction)
+ActionResult Scene::OnAction(KeyAction action)
 {
-	std::cout << "Key action " << keyAction.KeyActionType << " [" << keyAction.KeyChar << "]" << std::endl;
+	std::cout << "Key action " << action.KeyActionType << " [" << action.KeyChar << "]" << std::endl;
 	//_slider->OnAction(keyAction);
+
+	for (auto& station : _stations)
+	{
+		auto res = station->OnAction(action);
+
+		if (res.IsEaten)
+			return res;
+	}
+
+	return { false };
 }
 
 void Scene::InitAudio()

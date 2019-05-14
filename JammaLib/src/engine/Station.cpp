@@ -8,7 +8,7 @@ using base::GuiElementParams;
 using base::DrawContext;
 using resources::ResourceLib;
 
-Station::Station(GuiElementParams params) :
+Station::Station(StationParams params) :
 	GuiElement(params),
 	MultiAudioSource(),
 	_loopTakes(),

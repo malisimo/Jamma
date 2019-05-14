@@ -13,7 +13,6 @@ namespace gui
 	{
 	public:
 		GuiModel(GuiModelParams params);
-		~GuiModel();
 
 	public:
 		void Draw(base::DrawContext& ctx) override;

@@ -115,9 +115,9 @@ namespace engine
 		unsigned int Width() const { return _sizeParams.Size.Width; }
 		unsigned int Height() const	{ return _sizeParams.Size.Height; }
 
-		virtual void OnAction(actions::TouchAction touchAction) override;
-		virtual void OnAction(actions::TouchMoveAction touchAction) override;
-		virtual void OnAction(actions::KeyAction keyAction) override;
+		virtual actions::ActionResult OnAction(actions::TouchAction action) override;
+		virtual actions::ActionResult OnAction(actions::TouchMoveAction action) override;
+		virtual actions::ActionResult OnAction(actions::KeyAction action) override;
 
 		void InitAudio();
 

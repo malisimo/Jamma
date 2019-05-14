@@ -7,10 +7,6 @@ GuiGrid::GuiGrid(GuiGridParams guiParams) :
 {
 }
 
-GuiGrid::~GuiGrid()
-{
-}
-
 std::vector<unsigned int> GetCellSizes(std::vector<Cell> cells)
 {
 	//auto numAutoSize = std::count(cells.begin(), cells.end(), [](Cell cell) {return cell.Resizeable; });

@@ -52,10 +52,6 @@ GuiSlider::GuiSlider(GuiSliderParams params) :
 	_dragElement.SetPosition(_calcDragPosFun(0.0f));
 }
 
-GuiSlider::~GuiSlider()
-{
-}
-
 double GuiSlider::Value() const
 {
 	return _calcValueFun(_dragElement.Position());
@@ -73,9 +69,8 @@ bool GuiSlider::HitTest(Position2d pos)
 
 	if (localPos.X > _dragElement.Position().X && localPos.X < _dragElement.Position().X + (int)_dragElement.GetSize().Width)
 	{
-		auto res = (localPos.Y > _dragElement.Position().Y && localPos.Y < _dragElement.Position().X + (int)_dragElement.GetSize().Height);
-
-		return res;
+		if (localPos.Y > _dragElement.Position().Y && localPos.Y < _dragElement.Position().X + (int)_dragElement.GetSize().Height)
+			return true;
 	}
 
 	return false;
@@ -91,7 +86,7 @@ void GuiSlider::Draw(DrawContext & ctx)
 	glCtx.PopMvp();
 }
 
-void GuiSlider::OnAction(TouchAction action)
+ActionResult GuiSlider::OnAction(TouchAction action)
 {
 	auto localPos = ToLocal(action.Position);
 
@@ -105,6 +100,8 @@ void GuiSlider::OnAction(TouchAction action)
 			{
 				std::cout << "Slider UP" << std::endl;
 				//_receiver.OnAction();
+
+				return { true };
 			}
 		}
 	}
@@ -118,21 +115,27 @@ void GuiSlider::OnAction(TouchAction action)
 				_isDragging = true;
 				_initClickPos = action.Position;
 				_initDragPos = _dragElement.Position();
+
+				return { true };
 			}
 		}
 	}
+
+	return GuiElement::OnAction(action);
 }
 
-void GuiSlider::OnAction(TouchMoveAction action)
+ActionResult GuiSlider::OnAction(TouchMoveAction action)
 {
 	if (!_isDragging)
-		return;
+		return { false };
 
 	auto dPos = action.Position - _initClickPos;
 	auto dragPos = _initDragPos + dPos;	
 	auto newValue = _calcValueFun(dragPos);
 
 	_dragElement.SetPosition(_calcDragPosFun(newValue));
+
+	return { true };
 }
 
 bool GuiSlider::InitResources(ResourceLib& resourceLib)

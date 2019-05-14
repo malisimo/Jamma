@@ -9,10 +9,6 @@ GuiModel::GuiModel(GuiModelParams params) :
 {
 }
 
-GuiModel::~GuiModel()
-{
-}
-
 void GuiModel::Draw(DrawContext& ctx)
 {
 }

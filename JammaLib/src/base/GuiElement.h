@@ -63,6 +63,10 @@ namespace base
 		virtual bool InitResources(resources::ResourceLib& resourceLib) override;
 		virtual bool ReleaseResources() override;
 
+		virtual actions::ActionResult OnAction(actions::KeyAction action) override;
+		virtual actions::ActionResult OnAction(actions::TouchAction action) override;
+		virtual actions::ActionResult OnAction(actions::TouchMoveAction action) override;
+
 	protected:
 		utils::Position2d ToLocal(utils::Position2d pos);
 

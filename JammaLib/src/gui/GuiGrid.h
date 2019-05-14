@@ -20,7 +20,6 @@ namespace gui
 	{
 	public:
 		GuiGrid(GuiGridParams guiParams);
-		~GuiGrid();
 
 		enum Orientation
 		{

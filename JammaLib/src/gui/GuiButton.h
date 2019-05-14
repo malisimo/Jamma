@@ -30,7 +30,6 @@ namespace gui
 	{
 	public:
 		GuiButton(GuiButtonParams guiParams);
-		~GuiButton();
 
 	public:
 		void SetReceiver(std::weak_ptr<base::ActionReceiver> receiver);
