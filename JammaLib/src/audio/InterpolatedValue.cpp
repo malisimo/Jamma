@@ -17,6 +17,12 @@ void InterpolatedValue::SetTarget(float target)
 	_target = target;
 }
 
+InterpolatedValueLinear::InterpolatedValueLinear() :
+	InterpolatedValue({}),
+	_params({})
+{
+}
+
 InterpolatedValueLinear::InterpolatedValueLinear(InterpolatedValueLinear::LinearParams linearParams) :
 	InterpolatedValue(linearParams),
 	_params(linearParams)
@@ -56,6 +62,12 @@ void InterpolatedValueLinear::SetTarget(float target)
 		_endVal = target;
 		_dVal = (_endVal - _lastVal) * _params.Rate;
 	}
+}
+
+InterpolatedValueExp::InterpolatedValueExp() :
+	InterpolatedValue({}),
+	_params({})
+{
 }
 
 InterpolatedValueExp::InterpolatedValueExp(InterpolatedValueExp::ExponentialParams expParams) :

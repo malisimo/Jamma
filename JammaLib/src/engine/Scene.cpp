@@ -102,7 +102,7 @@ void Scene::Draw(DrawContext& ctx)
 	glCtx.PopMvp();
 }
 
-bool Scene::InitResources(ResourceLib& resourceLib)
+bool Scene::_InitResources(ResourceLib& resourceLib)
 {
 	_label->InitResources(resourceLib);
 	//_slider->InitResources(resourceLib);
@@ -116,7 +116,7 @@ bool Scene::InitResources(ResourceLib& resourceLib)
 	return Drawable::InitResources(resourceLib);
 }
 
-bool Scene::ReleaseResources()
+bool Scene::_ReleaseResources()
 {
 	_label->ReleaseResources();
 	//_slider->ReleaseResources();

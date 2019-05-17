@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="src\graphics\Window_Tests.cpp" />
+    <ClCompile Include="src\utils\CommonTypes_Tests.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{b99c83ef-efcf-4283-a7d3-dde63a527bb2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\graphics">
+      <UniqueIdentifier>{886bae90-3ad7-4146-b07e-e26f7e5c322a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\utils">
+      <UniqueIdentifier>{c9136b91-b5f6-4cfd-8e17-3a1eebfd5ec5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

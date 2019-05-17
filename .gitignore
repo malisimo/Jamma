@@ -2,6 +2,8 @@
 
 [Bb]in/
 [Oo]bj/
+[Xx]64/
+[Ww]in32/
 *.suo
 *.sdf
 *.user

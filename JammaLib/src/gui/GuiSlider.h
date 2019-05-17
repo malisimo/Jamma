@@ -4,13 +4,16 @@
 #include <functional>
 #include "../utils/CommonTypes.h"
 #include "../base/GuiElement.h"
+#include "../base/ActionSender.h"
 #include "../resources/TextureResource.h"
 
 namespace gui
 {
 	class GuiSliderParams;
 
-	class GuiSlider : public base::GuiElement
+	class GuiSlider :
+		public base::GuiElement,
+		public base::ActionSender
 	{
 	public:
 		GuiSlider(GuiSliderParams guiParams);
@@ -22,8 +25,10 @@ namespace gui
 		virtual void Draw(base::DrawContext& ctx) override;
 		virtual actions::ActionResult OnAction(actions::TouchAction action) override;
 		virtual actions::ActionResult OnAction(actions::TouchMoveAction action) override;
-		virtual bool InitResources(resources::ResourceLib& resourceLib) override;
-		virtual bool ReleaseResources() override;
+
+	protected:
+		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
+		virtual bool _ReleaseResources() override;
 
 	private:
 		std::function<double(utils::Position2d)> _calcValueFun;

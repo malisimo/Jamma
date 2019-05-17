@@ -53,7 +53,7 @@ void Image::Draw(DrawContext& ctx)
 	glUseProgram(0);
 }
 
-bool Image::InitResources(ResourceLib& resourceLib)
+bool Image::_InitResources(ResourceLib& resourceLib)
 {
 	auto validated = true;
 
@@ -67,7 +67,7 @@ bool Image::InitResources(ResourceLib& resourceLib)
 	return validated && GlUtils::CheckError("Image::Init()");
 }
 
-bool Image::ReleaseResources()
+bool Image::_ReleaseResources()
 {
 	glDeleteBuffers(2, _vertexBuffer);
 	_vertexBuffer[0] = 0;

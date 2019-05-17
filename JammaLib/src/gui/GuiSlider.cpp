@@ -138,13 +138,13 @@ ActionResult GuiSlider::OnAction(TouchMoveAction action)
 	return { true };
 }
 
-bool GuiSlider::InitResources(ResourceLib& resourceLib)
+bool GuiSlider::_InitResources(ResourceLib& resourceLib)
 {
 	_dragElement.InitResources(resourceLib);
 	return GuiElement::InitResources(resourceLib);
 }
 
-bool GuiSlider::ReleaseResources()
+bool GuiSlider::_ReleaseResources()
 {
 	_dragElement.ReleaseResources();
 	return GuiElement::ReleaseResources();

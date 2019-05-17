@@ -1,11 +1,16 @@
 #pragma once
 
+#include <memory>
+
 namespace base
 {
 	class ActionSender
 	{
 	public:
-		ActionSender();
-		~ActionSender();
+		void SetReceiver(std::shared_ptr<ActionReceiver> receiver) { _receiver = receiver; }
+		const std::shared_ptr<ActionReceiver> GetReceiver() { return _receiver; }
+
+	private:
+		std::shared_ptr<ActionReceiver> _receiver;
 	};
 }

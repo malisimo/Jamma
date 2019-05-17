@@ -60,14 +60,15 @@ namespace base
 		virtual void SetSize(utils::Size2d size) override;
 		virtual void Draw(DrawContext& ctx) override;
 		virtual bool HitTest(utils::Position2d pos);
-		virtual bool InitResources(resources::ResourceLib& resourceLib) override;
-		virtual bool ReleaseResources() override;
 
 		virtual actions::ActionResult OnAction(actions::KeyAction action) override;
 		virtual actions::ActionResult OnAction(actions::TouchAction action) override;
 		virtual actions::ActionResult OnAction(actions::TouchMoveAction action) override;
 
 	protected:
+		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
+		virtual bool _ReleaseResources() override;
+
 		utils::Position2d ToLocal(utils::Position2d pos);
 
 	protected:

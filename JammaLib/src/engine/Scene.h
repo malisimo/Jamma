@@ -104,8 +104,6 @@ namespace engine
 		}
 
 		virtual void Draw(base::DrawContext& ctx) override;
-		virtual bool InitResources(resources::ResourceLib& resourceLib) override;
-		virtual bool ReleaseResources() override;
 
 		virtual void SetSize(utils::Size2d size) override
 		{
@@ -120,6 +118,10 @@ namespace engine
 		virtual actions::ActionResult OnAction(actions::KeyAction action) override;
 
 		void InitAudio();
+
+	protected:
+		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
+		virtual bool _ReleaseResources() override;
 
 	private:
 		static int AudioCallback(void* outBuffer, void* inBuffer, unsigned int numSamps, double streamTime, RtAudioStreamStatus status, void* userData);

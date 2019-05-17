@@ -34,6 +34,7 @@ namespace audio
 		};
 
 	public:
+		InterpolatedValueLinear();
 		InterpolatedValueLinear(LinearParams linearParams);
 
 	public:
@@ -57,6 +58,7 @@ namespace audio
 		};
 
 	public:
+		InterpolatedValueExp();
 		InterpolatedValueExp(ExponentialParams expParams);
 
 	public:

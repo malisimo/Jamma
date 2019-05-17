@@ -278,6 +278,9 @@
     <ClInclude Include="src\actions\ActionResult.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="src\actions\FloatAction.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\stdafx.cpp">
@@ -411,6 +414,9 @@
     </ClCompile>
     <ClCompile Include="src\audio\InterpolatedValue.cpp">
       <Filter>src\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="src\actions\FloatAction.cpp">
+      <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

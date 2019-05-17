@@ -69,8 +69,10 @@ namespace graphics
 	public:
 		virtual void SetSize(utils::Size2d size) override;
 		virtual void Draw(base::DrawContext& ctx) override;
-		virtual bool InitResources(resources::ResourceLib& resourceLib) override;
-		virtual bool ReleaseResources() override;
+
+	protected:
+		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
+		virtual bool _ReleaseResources() override;
 
 	private:
 		const int VertexCount = 6;

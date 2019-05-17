@@ -120,7 +120,7 @@ bool GuiElement::HitTest(Position2d pos)
 	return false;
 }
 
-bool GuiElement::InitResources(ResourceLib& resourceLib)
+bool GuiElement::_InitResources(ResourceLib& resourceLib)
 {
 	_texture.InitResources(resourceLib);
 	_overTexture.InitResources(resourceLib);
@@ -133,7 +133,7 @@ bool GuiElement::InitResources(ResourceLib& resourceLib)
 	return false;
 }
 
-bool GuiElement::ReleaseResources()
+bool GuiElement::_ReleaseResources()
 {
 	for (auto& child : _children)
 		child->ReleaseResources();

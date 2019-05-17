@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27428.2027
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28729.10
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Jamma", "Jamma\Jamma.vcxproj", "{0000000A-0000-0000-0000-000000000000}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -31,7 +31,7 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "documentation", "doc\", "{2
 		SlnRelativePath = "doc\"
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JammaLibTest", "test\JammaLibTest\JammaLibTest.vcxproj", "{F77304AC-BD3E-4912-B95B-A88A7023A86F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JammaLib.Tests", "test\JammaLib.Tests\JammaLib.Tests.vcxproj", "{E6B8BEEF-9241-48AD-9655-36E81C25D576}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,16 +75,16 @@ Global
 		{220FA475-5923-4ED6-BB39-10C95D3F74DA}.Release|x64.Build.0 = Debug|Any CPU
 		{220FA475-5923-4ED6-BB39-10C95D3F74DA}.Release|x86.ActiveCfg = Debug|Any CPU
 		{220FA475-5923-4ED6-BB39-10C95D3F74DA}.Release|x86.Build.0 = Debug|Any CPU
-		{F77304AC-BD3E-4912-B95B-A88A7023A86F}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{F77304AC-BD3E-4912-B95B-A88A7023A86F}.Debug|x64.ActiveCfg = Debug|x64
-		{F77304AC-BD3E-4912-B95B-A88A7023A86F}.Debug|x64.Build.0 = Debug|x64
-		{F77304AC-BD3E-4912-B95B-A88A7023A86F}.Debug|x86.ActiveCfg = Debug|Win32
-		{F77304AC-BD3E-4912-B95B-A88A7023A86F}.Debug|x86.Build.0 = Debug|Win32
-		{F77304AC-BD3E-4912-B95B-A88A7023A86F}.Release|Any CPU.ActiveCfg = Release|Win32
-		{F77304AC-BD3E-4912-B95B-A88A7023A86F}.Release|x64.ActiveCfg = Release|x64
-		{F77304AC-BD3E-4912-B95B-A88A7023A86F}.Release|x64.Build.0 = Release|x64
-		{F77304AC-BD3E-4912-B95B-A88A7023A86F}.Release|x86.ActiveCfg = Release|Win32
-		{F77304AC-BD3E-4912-B95B-A88A7023A86F}.Release|x86.Build.0 = Release|Win32
+		{E6B8BEEF-9241-48AD-9655-36E81C25D576}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{E6B8BEEF-9241-48AD-9655-36E81C25D576}.Debug|x64.ActiveCfg = Debug|x64
+		{E6B8BEEF-9241-48AD-9655-36E81C25D576}.Debug|x64.Build.0 = Debug|x64
+		{E6B8BEEF-9241-48AD-9655-36E81C25D576}.Debug|x86.ActiveCfg = Debug|Win32
+		{E6B8BEEF-9241-48AD-9655-36E81C25D576}.Debug|x86.Build.0 = Debug|Win32
+		{E6B8BEEF-9241-48AD-9655-36E81C25D576}.Release|Any CPU.ActiveCfg = Release|Win32
+		{E6B8BEEF-9241-48AD-9655-36E81C25D576}.Release|x64.ActiveCfg = Release|x64
+		{E6B8BEEF-9241-48AD-9655-36E81C25D576}.Release|x64.Build.0 = Release|x64
+		{E6B8BEEF-9241-48AD-9655-36E81C25D576}.Release|x86.ActiveCfg = Release|Win32
+		{E6B8BEEF-9241-48AD-9655-36E81C25D576}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -29,8 +29,10 @@ namespace gui
 
 	public:
 		virtual void Draw(base::DrawContext& ctx) override;
-		virtual bool InitResources(resources::ResourceLib& resourceLib) override;
-		virtual bool ReleaseResources() override;
+
+	protected:
+		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
+		virtual bool _ReleaseResources() override;
 
 	private:
 		bool InitVertexArray();

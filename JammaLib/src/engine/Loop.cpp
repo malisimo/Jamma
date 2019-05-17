@@ -18,7 +18,7 @@ Loop::Loop(LoopParams loopParams) :
 	_children.push_back(_mixer);
 }
 
-bool Loop::InitResources(ResourceLib& resourceLib)
+bool Loop::_InitResources(ResourceLib& resourceLib)
 {
 	auto resOpt = resourceLib.GetResource(_loopParams.Wav);
 
@@ -38,7 +38,7 @@ bool Loop::InitResources(ResourceLib& resourceLib)
 	return GuiElement::InitResources(resourceLib);
 }
 
-bool Loop::ReleaseResources()
+bool Loop::_ReleaseResources()
 {
 	auto wav = _wav.lock();
 

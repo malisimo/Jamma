@@ -4,7 +4,9 @@
 #include <memory>
 #include "AudioSource.h"
 #include "AudioSink.h"
+#include "InterpolatedValue.h"
 #include "GuiElement.h"
+#include "../actions/FloatAction.h"
 #include "../gui/GuiSlider.h"
 
 namespace audio
@@ -69,6 +71,8 @@ namespace audio
 		AudioMixer(AudioMixerParams params);
 
 	public:
+		virtual actions::ActionResult OnAction(actions::FloatAction val) override;
+
 		void SetBehaviour(std::unique_ptr<MixBehaviour> behaviour);
 		void Play(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, unsigned int index);
 		void Offset(const std::vector<std::shared_ptr<base::AudioSink>>& dest, unsigned int index);
@@ -76,5 +80,6 @@ namespace audio
 	protected:
 		std::unique_ptr<MixBehaviour> _behaviour;
 		std::shared_ptr<gui::GuiSlider> _slider;
+		std::unique_ptr<InterpolatedValue> _fade;
 	};
 }

@@ -37,7 +37,7 @@ void GuiLabel::Draw(DrawContext& ctx)
 		font->Draw(glCtx, _vertexArray, (unsigned int)_str.size());
 }
 
-bool GuiLabel::InitResources(ResourceLib& resourceLib)
+bool GuiLabel::_InitResources(ResourceLib& resourceLib)
 {
 	auto fontOpt = resourceLib.GetFont(graphics::FontOptions::FONT_LARGE);
 
@@ -51,7 +51,7 @@ bool GuiLabel::InitResources(ResourceLib& resourceLib)
 	return validated && utils::GlUtils::CheckError("GuiLabel::Init()");
 }
 
-bool GuiLabel::ReleaseResources()
+bool GuiLabel::_ReleaseResources()
 {
 	glDeleteVertexArrays(1, &_vertexArray);
 	return true;
