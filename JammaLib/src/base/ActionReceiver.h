@@ -20,5 +20,7 @@ namespace base
 		virtual actions::ActionResult OnAction(actions::TouchMoveAction action) { return { false }; };
 		virtual actions::ActionResult OnAction(actions::KeyAction action) { return { false }; };
 		virtual actions::ActionResult OnAction(actions::FloatAction action) { return { false }; };
+
+		virtual void InitReceivers() {};
 	};
 }

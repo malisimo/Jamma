@@ -10,7 +10,7 @@ namespace base
 		void SetReceiver(std::shared_ptr<ActionReceiver> receiver) { _receiver = receiver; }
 		const std::shared_ptr<ActionReceiver> GetReceiver() { return _receiver; }
 
-	private:
+	protected:
 		std::shared_ptr<ActionReceiver> _receiver;
 	};
 }

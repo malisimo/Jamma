@@ -66,12 +66,14 @@ void InterpolatedValueLinear::SetTarget(float target)
 
 InterpolatedValueExp::InterpolatedValueExp() :
 	InterpolatedValue({}),
+	_lastVal(0.0f),
 	_params({})
 {
 }
 
 InterpolatedValueExp::InterpolatedValueExp(InterpolatedValueExp::ExponentialParams expParams) :
 	InterpolatedValue(expParams),
+	_lastVal(0.0f),
 	_params(expParams)
 {
 }
@@ -79,7 +81,7 @@ InterpolatedValueExp::InterpolatedValueExp(InterpolatedValueExp::ExponentialPara
 float InterpolatedValueExp::Next()
 {
 	auto currentVal = _lastVal;
-	_lastVal = (_params.Damping * currentVal) + ((1.0f - _params.Damping) * _target);
+	_lastVal = currentVal + ((_target - currentVal) / _params.Damping);
 
 	return _lastVal;
 }

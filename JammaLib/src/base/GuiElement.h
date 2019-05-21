@@ -64,6 +64,7 @@ namespace base
 		virtual actions::ActionResult OnAction(actions::KeyAction action) override;
 		virtual actions::ActionResult OnAction(actions::TouchAction action) override;
 		virtual actions::ActionResult OnAction(actions::TouchMoveAction action) override;
+		virtual void InitReceivers() override;
 
 	protected:
 		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;

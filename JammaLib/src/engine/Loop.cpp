@@ -35,7 +35,7 @@ bool Loop::_InitResources(ResourceLib& resourceLib)
 
 	_wav = std::dynamic_pointer_cast<WavResource>(resource);
 
-	return GuiElement::InitResources(resourceLib);
+	return GuiElement::_InitResources(resourceLib);
 }
 
 bool Loop::_ReleaseResources()
@@ -45,7 +45,7 @@ bool Loop::_ReleaseResources()
 	if (wav)
 		wav->Release();
 
-	return GuiElement::ReleaseResources();
+	return GuiElement::_ReleaseResources();
 }
 
 void Loop::Play(const std::vector<std::shared_ptr<AudioSink>>& dest, unsigned int numSamps)

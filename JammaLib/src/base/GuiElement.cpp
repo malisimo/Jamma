@@ -105,6 +105,13 @@ ActionResult GuiElement::OnAction(TouchMoveAction action)
 	return { false };
 }
 
+void GuiElement::InitReceivers()
+{
+	for (auto& child : _children)
+		child->InitReceivers();
+}
+
+
 bool GuiElement::HitTest(Position2d pos)
 {
 	auto localPos = ToLocal(pos);

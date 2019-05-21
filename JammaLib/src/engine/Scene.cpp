@@ -49,7 +49,7 @@ Scene::Scene(SceneParams params) :
 	sliderParams.DragOverTexture = "fader_over";
 	//_slider = std::make_unique<GuiSlider>(sliderParams);
 
-	PanMixBehaviour mixBehaviour;
+	PanMixBehaviourParams mixBehaviour;
 	mixBehaviour.ChannelLevels = { 0.8f, 0.2f };
 	AudioMixerParams mixerParams;
 	mixerParams.Size = { 160, 320 };
@@ -77,6 +77,9 @@ Scene::Scene(SceneParams params) :
 	_stations.push_back(std::move(station));
 
 	_audioDevice = std::make_unique<AudioDevice>();
+
+	for (auto& station : _stations)
+		station->InitReceivers();
 }
 
 void Scene::Draw(DrawContext& ctx)
@@ -113,7 +116,7 @@ bool Scene::_InitResources(ResourceLib& resourceLib)
 
 	InitSize();
 
-	return Drawable::InitResources(resourceLib);
+	return Drawable::_InitResources(resourceLib);
 }
 
 bool Scene::_ReleaseResources()
@@ -125,7 +128,7 @@ bool Scene::_ReleaseResources()
 	for (auto& station : _stations)
 		station->ReleaseResources();
 
-	return Drawable::ReleaseResources();
+	return Drawable::_ReleaseResources();
 }
 
 ActionResult Scene::OnAction(TouchAction action)

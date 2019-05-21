@@ -20,6 +20,8 @@ namespace gui
 
 	public:
 		double Value() const;
+		void SetValue(double value);
+		void SetValue(double value, bool bypassUpdate);
 
 		virtual bool HitTest(utils::Position2d pos) override;
 		virtual void Draw(base::DrawContext& ctx) override;

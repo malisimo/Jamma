@@ -49,12 +49,29 @@ GuiSlider::GuiSlider(GuiSliderParams params) :
 			Position2d{ ((int)round(valFrac * params.DragLength)) + params.DragControlOffset.X, params.DragControlOffset.Y };
 	};
 
-	_dragElement.SetPosition(_calcDragPosFun(0.0f));
+	SetValue(0.0f); _dragElement.SetPosition(_calcDragPosFun(0.0f));
 }
 
 double GuiSlider::Value() const
 {
 	return _calcValueFun(_dragElement.Position());
+}
+
+void GuiSlider::SetValue(double value)
+{
+	SetValue(value, false);
+}
+
+void GuiSlider::SetValue(double value, bool bypassUpdates)
+{
+	_dragElement.SetPosition(_calcDragPosFun(value));
+
+	if (!bypassUpdates && _receiver)
+	{
+		FloatAction floatAction;
+		floatAction.Value = (float)value;
+		_receiver->OnAction(floatAction);
+	}
 }
 
 bool GuiSlider::HitTest(Position2d pos)
@@ -135,17 +152,21 @@ ActionResult GuiSlider::OnAction(TouchMoveAction action)
 
 	_dragElement.SetPosition(_calcDragPosFun(newValue));
 
+	FloatAction floatAction;
+	floatAction.Value = (float)newValue;
+	_receiver->OnAction(floatAction);
+
 	return { true };
 }
 
 bool GuiSlider::_InitResources(ResourceLib& resourceLib)
 {
 	_dragElement.InitResources(resourceLib);
-	return GuiElement::InitResources(resourceLib);
+	return GuiElement::_InitResources(resourceLib);
 }
 
 bool GuiSlider::_ReleaseResources()
 {
 	_dragElement.ReleaseResources();
-	return GuiElement::ReleaseResources();
+	return GuiElement::_ReleaseResources();
 }

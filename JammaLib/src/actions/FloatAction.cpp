@@ -2,7 +2,8 @@
 
 using namespace actions;
 
-FloatAction::FloatAction()
+FloatAction::FloatAction() :
+	Action()
 {
 }
 

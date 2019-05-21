@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <memory>
+#include <variant>
 #include "AudioSource.h"
 #include "AudioSink.h"
 #include "InterpolatedValue.h"
@@ -17,21 +18,53 @@ namespace audio
 		virtual void Apply(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, unsigned int index) const {}
 	};
 
+	class MixBehaviourParams {};
+
+	class WireMixBehaviourParams : public MixBehaviourParams
+	{
+	public:
+		std::vector<unsigned int> Channels;
+	};
+
 	class WireMixBehaviour : public MixBehaviour
 	{
 	public:
+		WireMixBehaviour(WireMixBehaviourParams mixParams) :
+			MixBehaviour()
+		{
+			_mixParams = mixParams;
+		}
+
+	public:
 		virtual void Apply(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, unsigned int index) const override;
 
-		std::vector<unsigned int> Channels;
+	protected:
+		WireMixBehaviourParams _mixParams;
+	};
+
+	class PanMixBehaviourParams : public MixBehaviourParams
+	{
+	public:
+		std::vector<float> ChannelLevels;
 	};
 
 	class PanMixBehaviour : public MixBehaviour
 	{
 	public:
+		PanMixBehaviour(PanMixBehaviourParams mixParams) :
+			MixBehaviour()
+		{
+			_mixParams = mixParams;
+		}
+
+	public:
 		virtual void Apply(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, unsigned int index) const override;
 
-		std::vector<float> ChannelLevels;
+	protected:
+		PanMixBehaviourParams _mixParams;
 	};
+
+	typedef std::variant<MixBehaviourParams, PanMixBehaviourParams, WireMixBehaviourParams> BehaviourParams;
 
 	class AudioMixerParams :
 		public base::GuiElementParams
@@ -45,13 +78,13 @@ namespace audio
 				"",
 				"",
 				{}),
-			Behaviour(MixBehaviour()),
+			Behaviour(MixBehaviourParams()),
 			SliderParams(gui::GuiSliderParams())
 		{
 		}
 
 		AudioMixerParams(base::GuiElementParams params,
-			MixBehaviour behaviour,
+			BehaviourParams behaviour,
 			gui::GuiSliderParams sliderParams) :
 			base::GuiElementParams(params),
 			Behaviour(behaviour),
@@ -60,8 +93,21 @@ namespace audio
 		}
 
 	public:
-		MixBehaviour Behaviour;
+		BehaviourParams Behaviour;
 		gui::GuiSliderParams SliderParams;
+	};
+	
+	struct MixerBehaviourFactory
+	{
+		std::unique_ptr<MixBehaviour> operator()(MixBehaviourParams mixParams) const {
+			return std::move(std::unique_ptr<MixBehaviour>());
+		}
+		std::unique_ptr<MixBehaviour> operator()(PanMixBehaviourParams panParams) const {
+			return std::move(std::make_unique<PanMixBehaviour>(panParams));
+		}
+		std::unique_ptr<MixBehaviour> operator()(WireMixBehaviourParams wireParams) const {
+			return std::move(std::make_unique<WireMixBehaviour>(wireParams));
+		}
 	};
 
 	class AudioMixer :
@@ -72,8 +118,8 @@ namespace audio
 
 	public:
 		virtual actions::ActionResult OnAction(actions::FloatAction val) override;
+		virtual void InitReceivers() override;
 
-		void SetBehaviour(std::unique_ptr<MixBehaviour> behaviour);
 		void Play(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, unsigned int index);
 		void Offset(const std::vector<std::shared_ptr<base::AudioSink>>& dest, unsigned int index);
 
