@@ -3,8 +3,9 @@
 #include <algorithm>
 #include <functional>
 #include "../utils/CommonTypes.h"
-#include "../base/GuiElement.h"
-#include "../base/ActionSender.h"
+#include "GuiElement.h"
+#include "ActionSender.h"
+#include "ActionUndo.h"
 #include "../resources/TextureResource.h"
 
 namespace gui
@@ -12,8 +13,7 @@ namespace gui
 	class GuiSliderParams;
 
 	class GuiSlider :
-		public base::GuiElement,
-		public base::ActionSender
+		public base::GuiElement
 	{
 	public:
 		GuiSlider(GuiSliderParams guiParams);
@@ -27,13 +27,15 @@ namespace gui
 		virtual void Draw(base::DrawContext& ctx) override;
 		virtual actions::ActionResult OnAction(actions::TouchAction action) override;
 		virtual actions::ActionResult OnAction(actions::TouchMoveAction action) override;
+		virtual bool Undo(std::shared_ptr<base::ActionUndo> undo) override;
+		virtual bool Redo(std::shared_ptr<base::ActionUndo> undo) override;
 
 	protected:
 		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
 		virtual bool _ReleaseResources() override;
 
-	private:
-		std::function<double(utils::Position2d)> _calcValueFun;
+		void OnValueChange(bool bypassUpdate);
+		std::function<double(utils::Position2d,utils::Position2d,double)> _calcValueOffsetFun;
 		std::function<utils::Position2d(double)> _calcDragPosFun;
 
 	private:
@@ -41,6 +43,8 @@ namespace gui
 		utils::Position2d _initClickPos;
 		utils::Position2d _initDragPos;
 		base::GuiElement _dragElement;
+		double _valueOffset;
+		double _initValue;
 	};
 
 	class GuiSliderParams : public base::GuiElementParams
@@ -59,7 +63,6 @@ namespace gui
 			Max(1.0),
 			DragLength(1),
 			Steps(0),
-			Quantised(false),
 			DragTexture(""),
 			DragOverTexture(""),
 			DragDownTexture(""),
@@ -76,7 +79,6 @@ namespace gui
 			Max(1.0),
 			DragLength(1),
 			Steps(0),
-			Quantised(false),
 			DragTexture(""),
 			DragOverTexture(""),
 			DragDownTexture(""),
@@ -98,7 +100,7 @@ namespace gui
 		double Max;
 		int DragLength;
 		int Steps;
-		bool Quantised;
+		double InitValue;
 		std::string DragTexture;
 		std::string DragOverTexture;
 		std::string DragDownTexture;

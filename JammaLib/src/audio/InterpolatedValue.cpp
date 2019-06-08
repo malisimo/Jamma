@@ -3,16 +3,16 @@
 using namespace audio;
 
 InterpolatedValue::InterpolatedValue(InterpolatedValueParams faderParams) :
-	_target(0.0f)
+	_target(0.0)
 {
 }
 
-float InterpolatedValue::Next()
+double InterpolatedValue::Next()
 {
 	return _target;
 }
 
-void InterpolatedValue::SetTarget(float target)
+void InterpolatedValue::SetTarget(double target)
 {
 	_target = target;
 }
@@ -29,24 +29,24 @@ InterpolatedValueLinear::InterpolatedValueLinear(InterpolatedValueLinear::Linear
 {
 }
 
-float InterpolatedValueLinear::Next()
+double InterpolatedValueLinear::Next()
 {
 	auto currentVal = _lastVal;
 
-	if (_dVal > 0.0f)
+	if (_dVal > 0.0)
 	{
 		if (currentVal >= _target)
 		{
 			currentVal = _target;
-			_dVal = 0.0f;
+			_dVal = 0.0;
 		}
 	}
-	else if (_dVal < 0.0f)
+	else if (_dVal < 0.0)
 	{
 		if (currentVal <= _target)
 		{
 			currentVal = _target;
-			_dVal = 0.0f;
+			_dVal = 0.0;
 		}
 	}
 
@@ -55,7 +55,7 @@ float InterpolatedValueLinear::Next()
 	return _lastVal;
 }
 
-void InterpolatedValueLinear::SetTarget(float target)
+void InterpolatedValueLinear::SetTarget(double target)
 {
 	if (_endVal != target)
 	{
@@ -66,19 +66,19 @@ void InterpolatedValueLinear::SetTarget(float target)
 
 InterpolatedValueExp::InterpolatedValueExp() :
 	InterpolatedValue({}),
-	_lastVal(0.0f),
+	_lastVal(0.0),
 	_params({})
 {
 }
 
 InterpolatedValueExp::InterpolatedValueExp(InterpolatedValueExp::ExponentialParams expParams) :
 	InterpolatedValue(expParams),
-	_lastVal(0.0f),
+	_lastVal(0.0),
 	_params(expParams)
 {
 }
 
-float InterpolatedValueExp::Next()
+double InterpolatedValueExp::Next()
 {
 	auto currentVal = _lastVal;
 	_lastVal = currentVal + ((_target - currentVal) / _params.Damping);

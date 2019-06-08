@@ -13,7 +13,9 @@ GuiSlider::GuiSlider(GuiSliderParams params) :
 	_isDragging(false),
 	_initClickPos({ 0,0 }),
 	_initDragPos({ 0,0 }),
-	_calcValueFun(),
+	_initValue(params.InitValue),
+	_valueOffset(0.0),
+	_calcValueOffsetFun(),
 	_calcDragPosFun(),
 	_dragElement(GuiElementParams(
 		DrawableParams{ params.DragTexture },
@@ -24,37 +26,68 @@ GuiSlider::GuiSlider(GuiSliderParams params) :
 		params.DragOutTexture,
 		{} ))
 {
-	_calcValueFun = [params](Position2d dragPos) {
-		auto valRange = params.Max - params.Min;
-		auto dragFrac = GuiSliderParams::SLIDER_VERTICAL == params.Orientation ?
-			std::clamp(dragPos.Y - params.DragControlOffset.Y, 0, params.DragLength) / (double)params.DragLength :
-			std::clamp(dragPos.X - params.DragControlOffset.X, 0, params.DragLength) / (double)params.DragLength;
-		
-		if (params.Quantised)
-		{
-			auto dStep = valRange / params.Steps;
-			auto stepNum = (int)round(dragFrac * params.Steps);
-			return params.Min + (stepNum * dStep);
-		}
-
-		return (valRange * dragFrac) + params.Min;
-	};
-
-	_calcDragPosFun = [params](double value) {
+	auto calcDragPosFun = [params](double value) {
 		auto valRange = params.Max - params.Min;
 		auto valFrac = (value - params.Min) / valRange;
 
 		return GuiSliderParams::SLIDER_VERTICAL == params.Orientation ?
-			Position2d{ params.DragControlOffset.X, ((int)round(valFrac * params.DragLength)) + params.DragControlOffset.Y } :
-			Position2d{ ((int)round(valFrac * params.DragLength)) + params.DragControlOffset.X, params.DragControlOffset.Y };
+			Position2d {
+				params.DragControlOffset.X, 
+				((int)round(valFrac * params.DragLength)) + params.DragControlOffset.Y
+			} :
+			Position2d {
+				((int)round(valFrac * params.DragLength)) + params.DragControlOffset.X,
+				params.DragControlOffset.Y
+			};
 	};
 
-	SetValue(0.0f); _dragElement.SetPosition(_calcDragPosFun(0.0f));
+	_calcValueOffsetFun = [params, calcDragPosFun](Position2d dragPos,
+		Position2d initDragPos,
+		double initValue) 
+	{
+		auto valRange = params.Max - params.Min;
+		auto dragFrac = GuiSliderParams::SLIDER_VERTICAL == params.Orientation ?
+			std::clamp(dragPos.Y - params.DragControlOffset.Y, 0, params.DragLength) / (double)params.DragLength :
+			std::clamp(dragPos.X - params.DragControlOffset.X, 0, params.DragLength) / (double)params.DragLength;
+
+		if (params.Steps > 0)
+		{
+			auto dStep = valRange / (double)params.Steps;
+			auto stepNum = (int)round(dragFrac * params.Steps);
+			auto newValue = params.Min + (stepNum * dStep);
+			return newValue - initValue;
+		}
+
+		auto initDrag = GuiSliderParams::SLIDER_VERTICAL == params.Orientation ?
+			initDragPos.Y :
+			initDragPos.X;
+
+		auto newDragPos = GuiSliderParams::SLIDER_VERTICAL == params.Orientation ?
+			Position2d {
+				params.DragControlOffset.X,
+				((int)round(dragFrac * params.DragLength)) + params.DragControlOffset.Y 
+			} :
+			Position2d {
+				((int)round(dragFrac * params.DragLength)) + params.DragControlOffset.X,
+				params.DragControlOffset.Y
+			};
+
+		auto dDragPos = newDragPos - initDragPos;
+		auto dDrag = GuiSliderParams::SLIDER_VERTICAL == params.Orientation ?
+			dDragPos.Y :
+			dDragPos.X;
+		auto dDragFrac = ((double)dDrag) / ((double)params.DragLength);
+
+		return valRange * dDragFrac;
+	};
+
+	_calcDragPosFun = calcDragPosFun;
+	SetValue(params.InitValue);
 }
 
 double GuiSlider::Value() const
 {
-	return _calcValueFun(_dragElement.Position());
+	return _initValue + _calcValueOffsetFun(_dragElement.Position(), _initDragPos, _initValue);
 }
 
 void GuiSlider::SetValue(double value)
@@ -64,14 +97,13 @@ void GuiSlider::SetValue(double value)
 
 void GuiSlider::SetValue(double value, bool bypassUpdates)
 {
-	_dragElement.SetPosition(_calcDragPosFun(value));
+	if (_isDragging)
+		return;
 
-	if (!bypassUpdates && _receiver)
-	{
-		FloatAction floatAction;
-		floatAction.Value = (float)value;
-		_receiver->OnAction(floatAction);
-	}
+	_initValue = value;
+	_valueOffset = 0.0;
+
+	OnValueChange(bypassUpdates);
 }
 
 bool GuiSlider::HitTest(Position2d pos)
@@ -84,9 +116,15 @@ bool GuiSlider::HitTest(Position2d pos)
 			return true;
 	}
 
-	if (localPos.X > _dragElement.Position().X && localPos.X < _dragElement.Position().X + (int)_dragElement.GetSize().Width)
+	auto left = _dragElement.Position().X;
+	auto right = _dragElement.Position().X + (int)_dragElement.GetSize().Width;
+
+	if (localPos.X > left && localPos.X < right)
 	{
-		if (localPos.Y > _dragElement.Position().Y && localPos.Y < _dragElement.Position().X + (int)_dragElement.GetSize().Height)
+		auto bottom = _dragElement.Position().Y;
+		auto top = _dragElement.Position().X + (int)_dragElement.GetSize().Height;
+
+		if (localPos.Y > bottom && localPos.Y < top)
 			return true;
 	}
 
@@ -113,13 +151,16 @@ ActionResult GuiSlider::OnAction(TouchAction action)
 		{
 			_isDragging = false;
 
-			if (_dragElement.HitTest(localPos))
-			{
-				std::cout << "Slider UP" << std::endl;
-				//_receiver.OnAction();
+			std::cout << "Slider UP" << std::endl;
 
-				return { true };
-			}
+			_initValue = _initValue + _valueOffset;
+			_valueOffset = 0.0;
+			std::cout << "InitValue: " << _initValue << ", ValueOffset: " << _valueOffset << " = " << (_initValue + _valueOffset) << std::endl;
+
+			ActionResult res;
+			res.IsEaten = true;
+			res.Undo = std::make_shared<DoubleActionUndo>(_initValue, GuiElement::shared_from_this());
+			return res;
 		}
 	}
 	else
@@ -132,8 +173,9 @@ ActionResult GuiSlider::OnAction(TouchAction action)
 				_isDragging = true;
 				_initClickPos = action.Position;
 				_initDragPos = _dragElement.Position();
+				_valueOffset = 0.0;
 
-				return { true };
+				return { true, nullptr, GuiElement::shared_from_this() };
 			}
 		}
 	}
@@ -147,16 +189,46 @@ ActionResult GuiSlider::OnAction(TouchMoveAction action)
 		return { false };
 
 	auto dPos = action.Position - _initClickPos;
-	auto dragPos = _initDragPos + dPos;	
-	auto newValue = _calcValueFun(dragPos);
+	auto dragPos = _initDragPos + dPos;
 
-	_dragElement.SetPosition(_calcDragPosFun(newValue));
+	_valueOffset = _calcValueOffsetFun(dragPos, _initDragPos, _initValue);
+	std::cout << "InitValue: " << _initValue << ", ValueOffset: " << _valueOffset << " = " << (_initValue + _valueOffset) << std::endl;
 
-	FloatAction floatAction;
-	floatAction.Value = (float)newValue;
-	_receiver->OnAction(floatAction);
+	OnValueChange(false);
 
-	return { true };
+	return { true, nullptr };
+}
+
+bool GuiSlider::Undo(std::shared_ptr<ActionUndo> undo)
+{
+	if (_isDragging)
+		return false;
+
+	auto doubleUndo = std::dynamic_pointer_cast<DoubleActionUndo>(undo);
+
+	if (doubleUndo)
+	{
+		SetValue(doubleUndo->Value());
+		return true;
+	}
+
+	return false;
+}
+
+bool GuiSlider::Redo(std::shared_ptr<ActionUndo> undo)
+{
+	if (_isDragging)
+		return false;
+
+	auto doubleUndo = std::dynamic_pointer_cast<DoubleActionUndo>(undo);
+
+	if (doubleUndo)
+	{
+		SetValue(doubleUndo->Value());
+		return true;
+	}
+
+	return false;
 }
 
 bool GuiSlider::_InitResources(ResourceLib& resourceLib)
@@ -169,4 +241,13 @@ bool GuiSlider::_ReleaseResources()
 {
 	_dragElement.ReleaseResources();
 	return GuiElement::_ReleaseResources();
+}
+
+void GuiSlider::OnValueChange(bool bypassUpdates)
+{
+	auto value = _initValue + _valueOffset;
+	_dragElement.SetPosition(_calcDragPosFun(value));
+
+	if (_receiver && !bypassUpdates)
+		_receiver->OnAction(DoubleAction(value));
 }

@@ -17,11 +17,11 @@ namespace audio
 		InterpolatedValue(InterpolatedValueParams faderParams);
 
 	public:
-		virtual float Next();
-		virtual void SetTarget(float target);
+		virtual double Next();
+		virtual void SetTarget(double target);
 
 	protected:
-		float _target;
+		double _target;
 	};
 
 	class InterpolatedValueLinear : public InterpolatedValue
@@ -30,7 +30,7 @@ namespace audio
 		class LinearParams : public InterpolatedValueParams
 		{
 		public:
-			float Rate;
+			double Rate;
 		};
 
 	public:
@@ -38,13 +38,13 @@ namespace audio
 		InterpolatedValueLinear(LinearParams linearParams);
 
 	public:
-		virtual float Next() override;
-		virtual void SetTarget(float target) override;
+		virtual double Next() override;
+		virtual void SetTarget(double target) override;
 
 	protected:
-		float _endVal;
-		float _dVal;
-		float _lastVal;
+		double _endVal;
+		double _dVal;
+		double _lastVal;
 		LinearParams _params;
 	};
 
@@ -54,7 +54,7 @@ namespace audio
 		class ExponentialParams : public InterpolatedValueParams
 		{
 		public:
-			float Damping;
+			double Damping;
 		};
 
 	public:
@@ -62,10 +62,10 @@ namespace audio
 		InterpolatedValueExp(ExponentialParams expParams);
 
 	public:
-		virtual float Next() override;
+		virtual double Next() override;
 
 	protected:
-		float _lastVal;
+		double _lastVal;
 		ExponentialParams _params;
 	};
 }

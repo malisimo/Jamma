@@ -7,7 +7,7 @@
 #include "AudioSink.h"
 #include "InterpolatedValue.h"
 #include "GuiElement.h"
-#include "../actions/FloatAction.h"
+#include "../actions/DoubleAction.h"
 #include "../gui/GuiSlider.h"
 
 namespace audio
@@ -117,7 +117,7 @@ namespace audio
 		AudioMixer(AudioMixerParams params);
 
 	public:
-		virtual actions::ActionResult OnAction(actions::FloatAction val) override;
+		virtual actions::ActionResult OnAction(actions::DoubleAction val) override;
 		virtual void InitReceivers() override;
 
 		void Play(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, unsigned int index);

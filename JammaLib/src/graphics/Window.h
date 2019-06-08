@@ -55,21 +55,6 @@ namespace graphics
 			resources::ResourceLib& resourceLib);
 		~Window();
 
-	private:
-		LPTSTR _windowClass;	// Window Class
-		HGLRC _rc;			// Rendering Context
-		HDC	_dc;				// Device Context
-		HWND _wnd;			// Window
-		DWORD _style;
-		Config _config;
-		bool _resizing;
-		bool _trackingMouse;
-		unsigned int _buttonsDown;
-
-		GlDrawContext _drawContext;
-		engine::Scene& _scene;
-		resources::ResourceLib& _resourceLib;
-
 	public:
 		void SetWindowHandle(HWND wnd);
 		void ShowMessage(LPCWSTR message);
@@ -104,5 +89,21 @@ namespace graphics
 
 		static void InitStyle(WNDCLASSEX& wcex) noexcept;
 		static void APIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
+
+	private:
+		LPTSTR _windowClass;	// Window Class
+		HGLRC _rc;			// Rendering Context
+		HDC	_dc;				// Device Context
+		HWND _wnd;			// Window
+		DWORD _style;
+		Config _config;
+		bool _resizing;
+		bool _trackingMouse;
+		unsigned int _buttonsDown;
+
+		GlDrawContext _drawContext;
+		engine::Scene& _scene;
+		resources::ResourceLib& _resourceLib;
+		actions::Modifier _modifiers;
 	};
 }

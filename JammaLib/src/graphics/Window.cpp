@@ -21,7 +21,8 @@ Window::Window(Scene& scene,
 	_style(WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN),
 	_resizing(false),
 	_trackingMouse(false),
-	_buttonsDown(0)
+	_buttonsDown(0),
+	_modifiers(actions::MODIFIER_NONE)
 {
 	_config.Size = { scene.Width(), scene.Height() };
 	_config.Position = { CW_USEDEFAULT, 0};
@@ -410,6 +411,37 @@ ActionResult Window::OnAction(TouchMoveAction touchAction)
 
 ActionResult Window::OnAction(KeyAction keyAction)
 {
+	// Handle modifiers
+	int modifiers = _modifiers;
+
+	switch (keyAction.KeyChar)
+	{
+	case 16:
+		if (KeyAction::KEY_DOWN == keyAction.KeyActionType)
+			modifiers |= ((int)actions::MODIFIER_SHIFT);
+		else
+			modifiers &= ~((int)actions::MODIFIER_SHIFT);
+
+		break;
+	case 17:
+		if (KeyAction::KEY_DOWN == keyAction.KeyActionType)
+			modifiers |= ((int)actions::MODIFIER_CTRL);
+		else
+			modifiers &= ~((int)actions::MODIFIER_CTRL);
+
+		break;
+	case 18:
+		if (KeyAction::KEY_DOWN == keyAction.KeyActionType)
+			modifiers |= ((int)actions::MODIFIER_ALT);
+		else
+			modifiers &= ~((int)actions::MODIFIER_ALT);
+
+		break;
+	}
+
+	_modifiers = (actions::Modifier)modifiers;
+	keyAction.Modifiers = _modifiers;
+
 	return _scene.OnAction(keyAction);
 }
 

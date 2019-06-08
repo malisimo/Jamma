@@ -12,7 +12,9 @@
 #include "ActionReceiver.h"
 #include "AudioSource.h"
 #include "Sizeable.h"
+#include "GuiElement.h"
 #include "Station.h"
+#include "UndoHistory.h"
 
 namespace engine
 {
@@ -54,17 +56,10 @@ namespace engine
 			_channelMixer(std::move(other._channelMixer)),
 			_audioDevice(std::move(other._audioDevice)),
 			_stations(std::move(other._stations)),
-			_image(std::move(other._image)),
-			_label(std::move(other._label)),
-			_slider(std::move(other._slider))
+			_label(std::move(other._label))
 		{
 			other._audioDevice = std::make_unique<audio::AudioDevice>();
 			other._stations = std::vector<std::shared_ptr<Station>>();
-			other._image = std::make_unique<graphics::Image>(
-				graphics::ImageParams(
-					base::DrawableParams{ "" },
-					base::SizeableParams{ 1, 1 },
-					"texture"));
 			other._label = std::make_unique<gui::GuiLabel>(
 				gui::GuiLabelParams(
 					base::GuiElementParams(
@@ -76,7 +71,6 @@ namespace engine
 						"",
 						{}),
 					""));
-			other._slider = std::make_unique<gui::GuiSlider>(gui::GuiSliderParams());
 			other._viewProj = glm::mat4();
 			other._overlayViewProj = glm::mat4();
 		}
@@ -94,8 +88,6 @@ namespace engine
 				std::swap(_viewProj, other._viewProj);
 				std::swap(_overlayViewProj, other._overlayViewProj);
 				_label.swap(other._label);
-				_slider.swap(other._slider);
-				_image.swap(other._image);
 				_stations.swap(other._stations);
 				_audioDevice.swap(other._audioDevice);
 			}
@@ -126,6 +118,7 @@ namespace engine
 	private:
 		static int AudioCallback(void* outBuffer, void* inBuffer, unsigned int numSamps, double streamTime, RtAudioStreamStatus status, void* userData);
 		void OnAudio(float* inBuffer, float* outBuffer, unsigned int numSamps);
+		bool OnUndo(std::shared_ptr<base::ActionUndo> undo);
 		void InitSize();
 		glm::mat4 View();
 
@@ -135,8 +128,8 @@ namespace engine
 		audio::ChannelMixer _channelMixer;
 		std::unique_ptr<audio::AudioDevice> _audioDevice;
 		std::unique_ptr<gui::GuiLabel> _label;
-		std::unique_ptr<gui::GuiSlider> _slider;
-		std::unique_ptr<graphics::Image> _image;
 		std::vector<std::shared_ptr<Station>> _stations;
+		UndoHistory _undoHistory;
+		std::weak_ptr<base::GuiElement> _touchDownElement;
 	};
 }

@@ -8,6 +8,7 @@
 #include "Moveable.h"
 #include "../graphics/GlDrawContext.h"
 #include "../graphics/Image.h"
+#include "ActionSender.h"
 #include "ActionReceiver.h"
 
 namespace base
@@ -42,7 +43,12 @@ namespace base
 		std::vector<GuiElementParams> ChildParams;
 	};
 
-	class GuiElement : public Drawable, public Sizeable, public Moveable, public ActionReceiver
+	class GuiElement :
+		public Drawable, 
+		public Sizeable, 
+		public Moveable,
+		public virtual ActionSender,
+		public virtual ActionReceiver
 	{
 	public:
 		GuiElement(GuiElementParams params);
@@ -65,6 +71,12 @@ namespace base
 		virtual actions::ActionResult OnAction(actions::TouchAction action) override;
 		virtual actions::ActionResult OnAction(actions::TouchMoveAction action) override;
 		virtual void InitReceivers() override;
+
+		std::shared_ptr<GuiElement> shared_from_this()
+		{
+			return std::dynamic_pointer_cast<GuiElement>(
+				Actionable::shared_from_this());
+		}
 
 	protected:
 		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;

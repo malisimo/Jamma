@@ -207,8 +207,10 @@
   <ItemGroup>
     <ClInclude Include="src\actions\ActionResult.h" />
     <ClInclude Include="src\audio\ChannelMixer.h" />
-    <ClInclude Include="src\actions\FloatAction.h" />
+    <ClInclude Include="src\actions\DoubleAction.h" />
+    <ClInclude Include="src\base\Actionable.h" />
     <ClInclude Include="src\base\AudioSink.h" />
+    <ClInclude Include="src\base\ActionUndo.h" />
     <ClInclude Include="src\engine\LoopTake.h" />
     <ClInclude Include="src\base\MultiAudioSource.h" />
     <ClInclude Include="src\audio\AudioBuffer.h" />
@@ -285,7 +287,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\audio\ChannelMixer.cpp" />
-    <ClCompile Include="src\actions\FloatAction.cpp" />
+    <ClCompile Include="src\actions\DoubleAction.cpp" />
     <ClCompile Include="src\engine\LoopTake.cpp" />
     <ClCompile Include="src\audio\AudioBuffer.cpp" />
     <ClCompile Include="src\audio\AudioMixer.cpp" />

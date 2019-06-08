@@ -278,7 +278,13 @@
     <ClInclude Include="src\actions\ActionResult.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="src\actions\FloatAction.h">
+    <ClInclude Include="src\base\ActionUndo.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\actions\DoubleAction.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\Actionable.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
@@ -415,7 +421,7 @@
     <ClCompile Include="src\audio\InterpolatedValue.cpp">
       <Filter>src\audio</Filter>
     </ClCompile>
-    <ClCompile Include="src\actions\FloatAction.cpp">
+    <ClCompile Include="src\actions\DoubleAction.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

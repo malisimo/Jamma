@@ -17,14 +17,9 @@ Scene::Scene(SceneParams params) :
 	_overlayViewProj(glm::mat4()),
 	_channelMixer(ChannelMixerParams{}),
 	_label(std::unique_ptr<GuiLabel>()),
-	_slider(std::unique_ptr<GuiSlider>()),
-	_image(std::make_unique<Image>(
-		ImageParams(
-			DrawableParams{ "grid" },
-			SizeableParams{ 450, 450 },
-			"texture"))),
 	_audioDevice(std::unique_ptr<AudioDevice>()),
-	_stations()
+	_stations(),
+	_touchDownElement(std::weak_ptr<GuiElement>())
 {
 	GuiLabelParams labelParams(GuiElementParams(
 		DrawableParams{ "" },
@@ -33,7 +28,7 @@ Scene::Scene(SceneParams params) :
 		"",
 		"",
 		"",
-		{}), "Hello");
+		{}), "Jamma");
 	_label = std::make_unique<GuiLabel>(labelParams);
 
 	// Nicer with default constructor
@@ -47,7 +42,6 @@ Scene::Scene(SceneParams params) :
 	sliderParams.Texture = "fader_back";
 	sliderParams.DragTexture = "fader";
 	sliderParams.DragOverTexture = "fader_over";
-	//_slider = std::make_unique<GuiSlider>(sliderParams);
 
 	PanMixBehaviourParams mixBehaviour;
 	mixBehaviour.ChannelLevels = { 0.8f, 0.2f };
@@ -58,18 +52,17 @@ Scene::Scene(SceneParams params) :
 	mixerParams.Behaviour = mixBehaviour;
 
 	StationParams stationParams;
-	//stationParams.Texture = "grid";
 	stationParams.Size = { 240, 200 };
 	stationParams.Position = { 120, 45 };
 	auto station = std::make_shared<Station>(stationParams);
+
 	LoopParams loopParams;
 	loopParams.Wav = "hh";
-	//loopParams.Texture = "grid";
 	loopParams.Size = { 80, 80 };
 	loopParams.Position = { 10, 22 };
 	loopParams.MixerParams = mixerParams;
+
 	LoopTakeParams takeParams;
-	//takeParams.Texture = "grid";
 	takeParams.Size = { 140, 140 };
 	takeParams.Position = { 4, 4 };
 	takeParams.Loops = { loopParams };
@@ -89,14 +82,12 @@ void Scene::Draw(DrawContext& ctx)
 	glCtx.ClearMvp();
 	glCtx.PushMvp(_viewProj);
 
-	//_image->Draw(ctx);
 	glCtx.PopMvp();
 
 	// Draw overlays
 	glCtx.ClearMvp();
 	glCtx.PushMvp(_overlayViewProj);
 
-	//_slider->Draw(ctx);
 	_label->Draw(ctx);
 
 	for (auto& station : _stations)
@@ -108,8 +99,6 @@ void Scene::Draw(DrawContext& ctx)
 bool Scene::_InitResources(ResourceLib& resourceLib)
 {
 	_label->InitResources(resourceLib);
-	//_slider->InitResources(resourceLib);
-	_image->InitResources(resourceLib);
 
 	for (auto& station : _stations)
 		station->InitResources(resourceLib);
@@ -122,8 +111,6 @@ bool Scene::_InitResources(ResourceLib& resourceLib)
 bool Scene::_ReleaseResources()
 {
 	_label->ReleaseResources();
-	//_slider->ReleaseResources();
-	_image->ReleaseResources();
 
 	for (auto& station : _stations)
 		station->ReleaseResources();
@@ -134,39 +121,66 @@ bool Scene::_ReleaseResources()
 ActionResult Scene::OnAction(TouchAction action)
 {
 	std::cout << "Touch action " << action.Touch << " [" << action.State << "] " << action.Index << std::endl;
-	//_slider->OnAction(touchAction);
+
+	if (TouchAction::TouchState::TOUCH_UP == action.State)
+	{
+		auto activeElement = _touchDownElement.lock();
+
+		if (activeElement)
+		{
+			auto res = activeElement->OnAction(action);
+
+			if (res.IsEaten)
+			{
+				if (nullptr != res.Undo)
+					_undoHistory.Add(res.Undo);
+			}
+		}
+
+		return { false, nullptr };
+	}
 
 	for (auto& station : _stations)
 	{
 		auto res = station->OnAction(action);
 
 		if (res.IsEaten)
+		{
+			if (nullptr != res.Undo)
+				_undoHistory.Add(res.Undo);
+
+			_touchDownElement = res.ActiveElement;
 			return res;
+		}
 	}
 
-	return { false };
+	return { false, nullptr };
 }
 
 ActionResult Scene::OnAction(TouchMoveAction action)
 {
 	std::cout << "Touch Move action " << action.Touch << " [" << action.Position.X << "," << action.Position.Y << "] " << action.Index << std::endl;
-	//_slider->OnAction(touchAction);
+	
+	auto activeElement = _touchDownElement.lock();
 
-	for (auto& station : _stations)
-	{
-		auto res = station->OnAction(action);
+	if (activeElement)
+		return activeElement->OnAction(action);
 
-		if (res.IsEaten)
-			return res;
-	}
-
-	return { false };
+	return { false, nullptr }; 
 }
 
 ActionResult Scene::OnAction(KeyAction action)
 {
-	std::cout << "Key action " << action.KeyActionType << " [" << action.KeyChar << "]" << std::endl;
-	//_slider->OnAction(keyAction);
+	std::cout << "Key action " << action.KeyActionType << " [" << action.KeyChar << "] IsSytem:" << action.IsSystem << ", Modifiers:" << action.Modifiers << "]" << std::endl;
+
+	if ((90 == action.KeyChar) && (actions::KeyAction::KEY_UP == action.KeyActionType) && (actions::MODIFIER_CTRL == action.Modifiers))
+	{
+		std::cout << ">> Undo <<" << std::endl;
+
+		auto res = _undoHistory.Undo();
+
+		return { res };
+	}
 
 	for (auto& station : _stations)
 	{
@@ -176,7 +190,7 @@ ActionResult Scene::OnAction(KeyAction action)
 			return res;
 	}
 
-	return { false };
+	return { false, nullptr };
 }
 
 void Scene::InitAudio()
@@ -233,6 +247,22 @@ void Scene::OnAudio(float* inBuf, float* outBuf, unsigned int numSamps)
 
 		_channelMixer.ToDac(outBuf, outDeviceInfo.outputChannels, numSamps);
 	}
+}
+
+bool engine::Scene::OnUndo(std::shared_ptr<base::ActionUndo> undo)
+{
+	switch (undo->UndoType())
+	{
+	case UNDO_DOUBLE:
+		auto doubleUndo = std::dynamic_pointer_cast<actions::DoubleActionUndo>(undo);
+		if (doubleUndo)
+		{
+			doubleUndo->Value();
+			return true;
+		}		
+	}
+
+	return false;
 }
 
 void Scene::InitSize()

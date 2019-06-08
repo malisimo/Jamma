@@ -6,6 +6,7 @@
 #include "GuiElement.h"
 #include "MultiAudioSource.h"
 #include "AudioSink.h"
+#include "ActionUndo.h"
 
 namespace engine
 {

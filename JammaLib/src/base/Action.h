@@ -4,7 +4,6 @@
 
 namespace base
 {
-	class ActionSender;
 	class ActionReceiver;
 
 	class Action
@@ -18,7 +17,6 @@ namespace base
 		//Action& operator=(const Action &) = delete;
 		Action(const Action& other)
 		{
-			_sender = other._sender;
 			_receiver = other._receiver;
 		}
 		Action& operator=(const Action& other)
@@ -26,17 +24,14 @@ namespace base
 			if (&other == this)
 				return *this;
 
-			_sender = other._sender;
 			_receiver = other._receiver;
 			return *this;
 		}
 
 		// Move
 		Action(Action && other) :
-			_sender(other._sender),
 			_receiver(other._receiver)
 		{
-			other._sender = std::weak_ptr<ActionSender>();
 			other._receiver = std::weak_ptr<ActionReceiver>();
 		}
 
@@ -44,20 +39,13 @@ namespace base
 		{
 			if (this != &other)
 			{
-				_sender.swap(other._sender);
 				_receiver.swap(other._receiver);
 			}
 
 			return *this;
 		}
 
-		virtual auto GetReceiver() -> std::weak_ptr<ActionReceiver>
-		{
-			return _receiver;
-		}
-
 	protected:
-		std::weak_ptr<ActionSender> _sender;
-		std::weak_ptr<ActionReceiver> _receiver;
+		std::weak_ptr<ActionReceiver> _receiver; // Not used???
 	};
 }

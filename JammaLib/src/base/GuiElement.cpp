@@ -69,7 +69,7 @@ ActionResult GuiElement::OnAction(KeyAction action)
 			return res;
 	}
 
-	return { false };
+	return { false, nullptr };
 }
 
 ActionResult GuiElement::OnAction(TouchAction action)
@@ -85,9 +85,9 @@ ActionResult GuiElement::OnAction(TouchAction action)
 	}
 
 	if (Size2d::RectTest(_sizeParams.Size, action.Position))
-		return { true };
+		return { true, nullptr };
 
-	return { false };
+	return { false, nullptr };
 }
 
 ActionResult GuiElement::OnAction(TouchMoveAction action)
@@ -102,7 +102,7 @@ ActionResult GuiElement::OnAction(TouchMoveAction action)
 			return res;
 	}
 
-	return { false };
+	return { false, nullptr };
 }
 
 void GuiElement::InitReceivers()
@@ -110,7 +110,6 @@ void GuiElement::InitReceivers()
 	for (auto& child : _children)
 		child->InitReceivers();
 }
-
 
 bool GuiElement::HitTest(Position2d pos)
 {
