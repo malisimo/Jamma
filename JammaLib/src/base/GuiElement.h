@@ -13,6 +13,8 @@
 
 namespace base
 {
+	class GuiElement;
+
 	class GuiElementParams :
 		public DrawableParams,
 		public MoveableParams,
@@ -63,14 +65,20 @@ namespace base
 		};
 
 	public:
+		virtual void Init();
 		virtual void SetSize(utils::Size2d size) override;
 		virtual void Draw(DrawContext& ctx) override;
-		virtual bool HitTest(utils::Position2d pos);
+		virtual bool HitTest(utils::Position2d localPos);
 
 		virtual actions::ActionResult OnAction(actions::KeyAction action) override;
 		virtual actions::ActionResult OnAction(actions::TouchAction action) override;
 		virtual actions::ActionResult OnAction(actions::TouchMoveAction action) override;
-		virtual void InitReceivers() override;
+
+		void SetParent(std::shared_ptr<GuiElement> parent);
+		actions::TouchAction GlobalToLocal(actions::TouchAction action);
+		actions::TouchAction ParentToLocal(actions::TouchAction action);
+		actions::TouchMoveAction GlobalToLocal(actions::TouchMoveAction action);
+		actions::TouchMoveAction ParentToLocal(actions::TouchMoveAction action);
 
 		std::shared_ptr<GuiElement> shared_from_this()
 		{
@@ -82,8 +90,6 @@ namespace base
 		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
 		virtual bool _ReleaseResources() override;
 
-		utils::Position2d ToLocal(utils::Position2d pos);
-
 	protected:
 		GuiElementParams _guiParams;
 		GuiElementState _state;
@@ -91,6 +97,7 @@ namespace base
 		graphics::Image _overTexture;
 		graphics::Image _downTexture;
 		graphics::Image _outTexture;
+		std::shared_ptr<GuiElement> _parent;
 		std::vector<std::shared_ptr<GuiElement>> _children;
 	};
 }

@@ -106,10 +106,8 @@ void GuiSlider::SetValue(double value, bool bypassUpdates)
 	OnValueChange(bypassUpdates);
 }
 
-bool GuiSlider::HitTest(Position2d pos)
+bool GuiSlider::HitTest(Position2d localPos)
 {
-	auto localPos = pos - _moveParams.Position;
-
 	for (auto& child : _children)
 	{
 		if (child->HitTest(localPos))
@@ -143,7 +141,10 @@ void GuiSlider::Draw(DrawContext & ctx)
 
 ActionResult GuiSlider::OnAction(TouchAction action)
 {
-	auto localPos = ToLocal(action.Position);
+	auto res = GuiElement::OnAction(action);
+
+	//if (res.IsEaten)
+	//	return res;
 
 	if (_isDragging)
 	{
@@ -167,7 +168,7 @@ ActionResult GuiSlider::OnAction(TouchAction action)
 	{
 		if (TouchAction::TOUCH_DOWN == action.State)
 		{
-			if (_dragElement.HitTest(localPos))
+			if (_dragElement.HitTest(action.Position))
 			{
 				std::cout << "Slider DOWN" << std::endl;
 				_isDragging = true;
@@ -185,8 +186,13 @@ ActionResult GuiSlider::OnAction(TouchAction action)
 
 ActionResult GuiSlider::OnAction(TouchMoveAction action)
 {
+	auto res = GuiElement::OnAction(action);
+
+	if (res.IsEaten)
+		return res;
+
 	if (!_isDragging)
-		return { false };
+		return { false, nullptr };
 
 	auto dPos = action.Position - _initClickPos;
 	auto dragPos = _initDragPos + dPos;

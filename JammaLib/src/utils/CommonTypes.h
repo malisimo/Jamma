@@ -22,6 +22,27 @@ namespace utils
 			return { X * a.X, Y * a.Y };
 		}
 
+		Position2d& operator+=(const Position2d& a)
+		{
+			X += a.X;
+			Y += a.Y;
+			return *this;
+		}
+
+		Position2d& operator-=(const Position2d& a)
+		{
+			X -= a.X;
+			Y -= a.Y;
+			return *this;
+		}
+
+		Position2d& operator*=(const Position2d& a)
+		{
+			X *= a.X;
+			Y *= a.Y;
+			return *this;
+		}
+
 		bool operator==(const Position2d& a) const
 		{
 			return (a.X == X && a.Y == Y);
@@ -54,12 +75,33 @@ namespace utils
 			return { w, h };
 		}
 
-		Size2d operator*(const Size2d & a) const
+		Size2d operator*(const Size2d& a) const
 		{
 			return { Width * a.Width, Height * a.Height };
 		}
 
-		bool operator==(const Size2d & a) const
+		Size2d& operator+=(const Size2d& a)
+		{
+			Width += a.Width;
+			Height += a.Height;
+			return *this;
+		}
+
+		Size2d& operator-=(const Size2d& a)
+		{
+			Width = Width <= a.Width ? (Width - a.Width) : 0;
+			Height = Height <= a.Height ? (Height - a.Height) : 0;
+			return *this;
+		}
+
+		Size2d& operator*=(const Size2d& a)
+		{
+			Width *= a.Width;
+			Height *= a.Height;
+			return *this;
+		}
+
+		bool operator==(const Size2d& a) const
 		{
 			return (a.Width == Width && a.Height == Height);
 		}

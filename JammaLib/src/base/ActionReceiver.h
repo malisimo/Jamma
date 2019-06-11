@@ -22,12 +22,13 @@ namespace base
 		virtual actions::ActionResult OnAction(actions::KeyAction action) { return { false, nullptr }; };
 		virtual actions::ActionResult OnAction(actions::DoubleAction action) { return { false, nullptr }; };
 
-		virtual void InitReceivers() {};
-
 		std::shared_ptr<ActionReceiver> shared_from_this()
 		{
 			return std::dynamic_pointer_cast<ActionReceiver>(
 				Actionable::shared_from_this());
 		}
+
+	protected:
+		virtual void InitReceivers() {};
 	};
 }

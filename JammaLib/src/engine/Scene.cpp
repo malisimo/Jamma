@@ -72,7 +72,7 @@ Scene::Scene(SceneParams params) :
 	_audioDevice = std::make_unique<AudioDevice>();
 
 	for (auto& station : _stations)
-		station->InitReceivers();
+		station->Init();
 }
 
 void Scene::Draw(DrawContext& ctx)
@@ -128,7 +128,7 @@ ActionResult Scene::OnAction(TouchAction action)
 
 		if (activeElement)
 		{
-			auto res = activeElement->OnAction(action);
+			auto res = activeElement->OnAction(activeElement->GlobalToLocal(action));
 
 			if (res.IsEaten)
 			{
@@ -137,19 +137,23 @@ ActionResult Scene::OnAction(TouchAction action)
 			}
 		}
 
+		_touchDownElement.reset();
+
 		return { false, nullptr };
 	}
 
 	for (auto& station : _stations)
 	{
-		auto res = station->OnAction(action);
+		auto res = station->OnAction(station->ParentToLocal(action));
 
 		if (res.IsEaten)
 		{
 			if (nullptr != res.Undo)
 				_undoHistory.Add(res.Undo);
 
-			_touchDownElement = res.ActiveElement;
+			if (!_touchDownElement.lock())
+				_touchDownElement = res.ActiveElement;
+
 			return res;
 		}
 	}
@@ -164,7 +168,7 @@ ActionResult Scene::OnAction(TouchMoveAction action)
 	auto activeElement = _touchDownElement.lock();
 
 	if (activeElement)
-		return activeElement->OnAction(action);
+		return activeElement->OnAction(activeElement->GlobalToLocal(action));
 
 	return { false, nullptr }; 
 }

@@ -18,8 +18,20 @@ GuiElement::GuiElement(GuiElementParams params) :
 	_texture(ImageParams(DrawableParams{ params.Texture }, SizeableParams{ params.Size,params.MinSize }, "texture")),
 	_overTexture(ImageParams(DrawableParams{ params.OverTexture }, SizeableParams{ params.Size,params.MinSize }, "texture")),
 	_downTexture(ImageParams(DrawableParams{ params.DownTexture }, SizeableParams{ params.Size,params.MinSize }, "texture")),
-	_outTexture(ImageParams(DrawableParams{ params.OutTexture }, SizeableParams{ params.Size,params.MinSize }, "texture"))
+	_outTexture(ImageParams(DrawableParams{ params.OutTexture }, SizeableParams{ params.Size,params.MinSize }, "texture")),
+	_children({})
 {
+}
+
+void GuiElement::Init()
+{
+	InitReceivers();
+
+	for (auto& child : _children)
+	{
+		child->SetParent(shared_from_this());
+		child->Init();
+	}
 }
 
 void GuiElement::SetSize(Size2d size)
@@ -74,11 +86,9 @@ ActionResult GuiElement::OnAction(KeyAction action)
 
 ActionResult GuiElement::OnAction(TouchAction action)
 {
-	action.Position = ToLocal(action.Position);
-
 	for (auto& child : _children)
 	{
-		auto res = child->OnAction(action);
+		auto res = child->OnAction(child->ParentToLocal(action));
 		
 		if (res.IsEaten)
 			return res;
@@ -92,11 +102,9 @@ ActionResult GuiElement::OnAction(TouchAction action)
 
 ActionResult GuiElement::OnAction(TouchMoveAction action)
 {
-	action.Position = ToLocal(action.Position);
-
 	for (auto& child : _children)
 	{
-		auto res = child->OnAction(action);
+		auto res = child->OnAction(child->ParentToLocal(action));
 
 		if (res.IsEaten)
 			return res;
@@ -105,16 +113,39 @@ ActionResult GuiElement::OnAction(TouchMoveAction action)
 	return { false, nullptr };
 }
 
-void GuiElement::InitReceivers()
+void GuiElement::SetParent(std::shared_ptr<GuiElement> parent)
 {
-	for (auto& child : _children)
-		child->InitReceivers();
+	_parent = parent;
 }
 
-bool GuiElement::HitTest(Position2d pos)
+TouchAction GuiElement::GlobalToLocal(actions::TouchAction action)
 {
-	auto localPos = ToLocal(pos);
+	auto actionParent = nullptr == _parent ? action : _parent->GlobalToLocal(action);
+	actionParent.Position -= _moveParams.Position;
+	return actionParent;
+}
 
+TouchAction GuiElement::ParentToLocal(actions::TouchAction action)
+{
+	action.Position -= _moveParams.Position;
+	return action;
+}
+
+TouchMoveAction GuiElement::GlobalToLocal(TouchMoveAction action)
+{
+	auto actionParent = nullptr == _parent ? action : _parent->GlobalToLocal(action);
+	actionParent.Position -= _moveParams.Position;
+	return actionParent;
+}
+
+TouchMoveAction GuiElement::ParentToLocal(TouchMoveAction action)
+{
+	action.Position -= _moveParams.Position;
+	return action;
+}
+
+bool GuiElement::HitTest(Position2d localPos)
+{
 	for (auto& child : _children)
 	{
 		if (child->HitTest(localPos))
@@ -150,9 +181,4 @@ bool GuiElement::_ReleaseResources()
 	_outTexture.ReleaseResources();
 
 	return true;
-}
-
-utils::Position2d GuiElement::ToLocal(utils::Position2d pos)
-{
-	return pos - _moveParams.Position;
 }

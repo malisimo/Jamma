@@ -13,8 +13,9 @@ Loop::Loop(LoopParams loopParams) :
 	_index(0),
 	_loopParams(loopParams),
 	_wav(std::weak_ptr<WavResource>()),
-	_mixer(std::make_unique<AudioMixer>(loopParams.MixerParams))
+	_mixer(nullptr)
 {
+	_mixer = std::make_unique<AudioMixer>(loopParams.MixerParams);
 	_children.push_back(_mixer);
 }
 
