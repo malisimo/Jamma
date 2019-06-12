@@ -144,6 +144,19 @@ TouchMoveAction GuiElement::ParentToLocal(TouchMoveAction action)
 	return action;
 }
 
+utils::Position2d GuiElement::GlobalToLocal(utils::Position2d pos)
+{
+	auto posParent = nullptr == _parent ? pos : _parent->GlobalToLocal(pos);
+	posParent -= _moveParams.Position;
+	return posParent;
+}
+
+utils::Position2d GuiElement::ParentToLocal(utils::Position2d pos)
+{
+	pos -= _moveParams.Position;
+	return pos;
+}
+
 bool GuiElement::HitTest(Position2d localPos)
 {
 	for (auto& child : _children)

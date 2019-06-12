@@ -79,6 +79,8 @@ namespace base
 		actions::TouchAction ParentToLocal(actions::TouchAction action);
 		actions::TouchMoveAction GlobalToLocal(actions::TouchMoveAction action);
 		actions::TouchMoveAction ParentToLocal(actions::TouchMoveAction action);
+		utils::Position2d GlobalToLocal(utils::Position2d pos);
+		utils::Position2d ParentToLocal(utils::Position2d pos);
 
 		std::shared_ptr<GuiElement> shared_from_this()
 		{
