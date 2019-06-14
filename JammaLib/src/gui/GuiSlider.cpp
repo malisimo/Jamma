@@ -1,4 +1,5 @@
 #include "GuiSlider.h"
+#include "CommonTypes.h"
 #include "glm/ext.hpp"
 
 using namespace gui;
@@ -83,11 +84,12 @@ GuiSlider::GuiSlider(GuiSliderParams params) :
 
 	_calcDragPosFun = calcDragPosFun;
 	SetValue(params.InitValue);
+	_initDragPos = _dragElement.Position();
 }
 
 double GuiSlider::Value() const
 {
-	return _initValue + _calcValueOffsetFun(_dragElement.Position(), _initDragPos, _initValue);
+	return _initValue + _valueOffset;// _calcValueOffsetFun(_dragElement.Position(), _initDragPos, _initValue);
 }
 
 void GuiSlider::SetValue(double value)
@@ -151,16 +153,18 @@ ActionResult GuiSlider::OnAction(TouchAction action)
 		if (TouchAction::TOUCH_UP == action.State)
 		{
 			_isDragging = false;
+			auto oldValue = _initValue;
 
 			std::cout << "Slider UP" << std::endl;
 
-			_initValue = _initValue + _valueOffset;
+			_initValue = oldValue + _valueOffset;
 			_valueOffset = 0.0;
-			std::cout << "InitValue: " << _initValue << ", ValueOffset: " << _valueOffset << " = " << (_initValue + _valueOffset) << std::endl;
+			std::cout << "New InitValue: " << _initValue << ", ValueOffset: " << _valueOffset << " = " << (_initValue + _valueOffset) << std::endl;
 
 			ActionResult res;
 			res.IsEaten = true;
-			res.Undo = std::make_shared<DoubleActionUndo>(_initValue, GuiElement::shared_from_this());
+			res.Undo = std::make_shared<DoubleActionUndo>(oldValue, GuiElement::shared_from_this());
+
 			return res;
 		}
 	}

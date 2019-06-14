@@ -4,6 +4,7 @@
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="src\graphics\Window_Tests.cpp" />
     <ClCompile Include="src\utils\CommonTypes_Tests.cpp" />
+    <ClCompile Include="src\gui\GuiSlider_Tests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -18,5 +19,8 @@
     <Filter Include="src\utils">
       <UniqueIdentifier>{c9136b91-b5f6-4cfd-8e17-3a1eebfd5ec5}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>
