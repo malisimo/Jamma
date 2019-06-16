@@ -75,6 +75,7 @@ std::optional<std::shared_ptr<ActionUndo>> engine::UndoHistory::UnPop()
 		return std::nullopt;
 
 	_history.push(_poppedHistory.front());
+	_poppedHistory.pop();
 
 	return _history.front();
 }

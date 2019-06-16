@@ -69,8 +69,8 @@ namespace utils
 
 		Size2d operator-(const Size2d& a) const
 		{
-			auto w = Width <= a.Width ? (Width - a.Width) : 0;
-			auto h = Height <= a.Height ? (Height - a.Height) : 0;
+			auto w = Width >= a.Width ? (Width - a.Width) : 0;
+			auto h = Height >= a.Height ? (Height - a.Height) : 0;
 
 			return { w, h };
 		}

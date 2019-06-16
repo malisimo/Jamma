@@ -2,57 +2,117 @@
 #include "gtest/gtest.h"
 #include "resources/ResourceLib.h"
 #include "gui/GuiSlider.h"
-#include "actions/TouchAction.h"
-#include "actions/TouchMoveAction.h"
 
+using base::ActionReceiver;
 using resources::ResourceLib;
 using gui::GuiSlider;
 using gui::GuiSliderParams;
+using actions::DoubleAction;
 using actions::TouchAction;
 using actions::TouchMoveAction;
 
+class MockedActionReceiver :
+	public ActionReceiver
+{
+public:
+	MockedActionReceiver(double expected) :
+		ActionReceiver(),
+		_expected(expected),
+		_value(0.0) {}
+public:
+	virtual actions::ActionResult OnAction(actions::DoubleAction action) override
+	{
+		_value = action.Value();
+		return { true, nullptr };
+	};
+	
+	bool IsExpected() { return _expected == _value; }
+
+private:
+	double _expected;
+	double _value;
+};
+
 TEST(GuiSlider, DoesUndo) {
+	auto dragLength = 100;
+	auto dragSize = 20;
+
 	auto sliderParams = GuiSliderParams();
-	sliderParams.DragLength = 100;
+	sliderParams.DragLength = dragLength;
 	sliderParams.Position = { 0, 0 };
-	sliderParams.Size = { 20, 120 };
-	sliderParams.DragControlSize = { 20, 20 };
-	sliderParams.DragControlOffset = { 0, 10 };
+	sliderParams.Size = { (unsigned int)dragSize, (unsigned int)(dragLength + dragSize) };
+	sliderParams.DragControlSize = { (unsigned int)dragSize, (unsigned int)dragSize };
+	sliderParams.DragControlOffset = { 0, 0 };
 	sliderParams.InitValue = 0.0;
 	sliderParams.Orientation = GuiSliderParams::SLIDER_VERTICAL;
 
 	auto slider = std::make_shared<GuiSlider>(sliderParams);
-	auto v1 = slider->Value();
-
 	ASSERT_EQ(0.0, slider->Value());
 
 	auto downAction = TouchAction();
 	downAction.Touch = actions::TouchAction::TOUCH_MOUSE;
-	downAction.Position = { 10, 20 };
+	downAction.Position = { dragSize / 2, dragSize / 2 };
 	downAction.Index = 0;
 	downAction.State = TouchAction::TOUCH_DOWN;
 	slider->OnAction(downAction);
 
 	auto moveAction = TouchMoveAction();
 	moveAction.Touch = actions::TouchAction::TOUCH_MOUSE;
-	moveAction.Position = { 10, 120 };
+	moveAction.Position = { dragSize / 2, dragLength + dragSize / 2 };
 	moveAction.Index = 0;
 	slider->OnAction(moveAction);
 
-	auto v2 = slider->Value();
 	ASSERT_EQ(1.0, slider->Value());
 
 	auto upAction = TouchAction();
 	upAction.Touch = actions::TouchAction::TOUCH_MOUSE;
-	upAction.Position = { 10, 120 };
+	upAction.Position = { dragSize / 2, dragLength + dragSize / 2 };
 	upAction.Index = 0;
 	upAction.State = TouchAction::TOUCH_UP;
 	auto res = slider->OnAction(upAction);
 
-	ASSERT_EQ(true, res.IsEaten);
-	
+	ASSERT_TRUE(res.IsEaten);
+
 	res.Undo->Undo();
 
-	auto v3 = slider->Value();
 	ASSERT_EQ(0.0, slider->Value());
+}
+
+TEST(GuiSlider, ReceiverGetsValue) {
+	auto expectedValue = 0.5;
+	auto dragLength = 100;
+	auto dragSize = 20;
+
+	auto sliderParams = GuiSliderParams();
+	sliderParams.DragLength = dragLength;
+	sliderParams.Position = { 0, 0 };
+	sliderParams.Size = { (unsigned int)(dragLength + dragSize), (unsigned int)dragSize };
+	sliderParams.DragControlSize = { (unsigned int)dragSize, (unsigned int)dragSize };
+	sliderParams.DragControlOffset = { 0, 0 };
+	sliderParams.InitValue = 0.0;
+	sliderParams.Orientation = GuiSliderParams::SLIDER_HORIZONTAL;
+
+	auto slider = std::make_shared<GuiSlider>(sliderParams);
+
+	auto receiver = std::make_shared<MockedActionReceiver>(expectedValue);
+	ASSERT_FALSE(receiver->IsExpected());
+
+	slider->SetReceiver(receiver);
+	ASSERT_EQ(0.0, slider->Value());
+
+	auto downAction = TouchAction();
+	downAction.Touch = actions::TouchAction::TOUCH_MOUSE;
+	downAction.Position = { dragSize / 2, dragSize / 2 };
+	downAction.Index = 0;
+	downAction.State = TouchAction::TOUCH_DOWN;
+	slider->OnAction(downAction);
+
+	auto moveAction = TouchMoveAction();
+	moveAction.Touch = actions::TouchAction::TOUCH_MOUSE;
+	moveAction.Position = { ((int)(dragLength * expectedValue)) + dragSize / 2, dragSize / 2,  };
+	moveAction.Index = 0;
+	slider->OnAction(moveAction);
+
+	ASSERT_EQ(expectedValue, slider->Value());
+	ASSERT_TRUE(receiver->IsExpected());
 }
