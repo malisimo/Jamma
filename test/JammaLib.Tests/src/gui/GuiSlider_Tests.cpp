@@ -11,19 +11,19 @@ using actions::DoubleAction;
 using actions::TouchAction;
 using actions::TouchMoveAction;
 
-class MockedActionReceiver :
+class MockedSliderReceiver :
 	public ActionReceiver
 {
 public:
-	MockedActionReceiver(double expected) :
+	MockedSliderReceiver(double expected) :
 		ActionReceiver(),
 		_expected(expected),
-		_value(0.0) {}
+		_value(0.0)	{}
 public:
 	virtual actions::ActionResult OnAction(actions::DoubleAction action) override
 	{
 		_value = action.Value();
-		return { true, nullptr };
+		return { true, actions::ACTIONRESULT_DEFAULT, nullptr };
 	};
 	
 	bool IsExpected() { return _expected == _value; }
@@ -94,8 +94,9 @@ TEST(GuiSlider, ReceiverGetsValue) {
 
 	auto slider = std::make_shared<GuiSlider>(sliderParams);
 
-	auto receiver = std::make_shared<MockedActionReceiver>(expectedValue);
+	auto receiver = std::make_shared<MockedSliderReceiver>(expectedValue);
 	ASSERT_FALSE(receiver->IsExpected());
+	receiver->OnAction(DoubleAction(2.5));
 
 	slider->SetReceiver(receiver);
 	ASSERT_EQ(0.0, slider->Value());

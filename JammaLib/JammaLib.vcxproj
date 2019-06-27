@@ -92,7 +92,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -100,9 +100,10 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;GLEW_STATIC;__WINDOWS_DS__;__WINDOWS_ASIO__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)src\base;$(ProjectDir)src\utils;$(ProjectDir)lib\opengl;$(ProjectDir)lib;$(ProjectDir)lib\rtaudio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <PrecompiledHeaderFile>include\stdafx.h</PrecompiledHeaderFile>
-      <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -130,7 +131,9 @@
       <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)src\base;$(ProjectDir)src\utils;$(ProjectDir)lib\opengl;$(ProjectDir)lib;$(ProjectDir)lib\rtaudio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>include\stdafx.h</PrecompiledHeaderFile>
-      <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -156,7 +159,9 @@
       <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)src\base;$(ProjectDir)src\utils;$(ProjectDir)lib\opengl;$(ProjectDir)lib;$(ProjectDir)lib\rtaudio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>include\stdafx.h</PrecompiledHeaderFile>
-      <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -175,7 +180,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -185,7 +190,8 @@
       <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)src\base;$(ProjectDir)src\utils;$(ProjectDir)lib\opengl;$(ProjectDir)lib;$(ProjectDir)lib\rtaudio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>include\stdafx.h</PrecompiledHeaderFile>
-      <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -208,6 +214,7 @@
     <ClInclude Include="src\actions\ActionResult.h" />
     <ClInclude Include="src\audio\ChannelMixer.h" />
     <ClInclude Include="src\actions\DoubleAction.h" />
+    <ClInclude Include="src\actions\TriggerAction.h" />
     <ClInclude Include="src\base\Actionable.h" />
     <ClInclude Include="src\base\AudioSink.h" />
     <ClInclude Include="src\base\ActionUndo.h" />
@@ -279,6 +286,7 @@
     <ClInclude Include="src\base\Touchable.h" />
     <ClInclude Include="src\actions\WindowAction.h" />
     <ClInclude Include="src\resources\WavResource.h" />
+    <ClInclude Include="src\engine\Timer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\glew\glew.h" />
@@ -288,6 +296,7 @@
   <ItemGroup>
     <ClCompile Include="src\audio\ChannelMixer.cpp" />
     <ClCompile Include="src\actions\DoubleAction.cpp" />
+    <ClCompile Include="src\actions\TriggerAction.cpp" />
     <ClCompile Include="src\engine\LoopTake.cpp" />
     <ClCompile Include="src\audio\AudioBuffer.cpp" />
     <ClCompile Include="src\audio\AudioMixer.cpp" />
@@ -328,6 +337,7 @@
     <ClCompile Include="src\resources\TextureResource.cpp" />
     <ClCompile Include="src\actions\WindowAction.cpp" />
     <ClCompile Include="src\resources\WavResource.cpp" />
+    <ClCompile Include="src\engine\Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\graphics\Window.h" />

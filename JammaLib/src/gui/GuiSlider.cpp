@@ -163,6 +163,7 @@ ActionResult GuiSlider::OnAction(TouchAction action)
 
 			ActionResult res;
 			res.IsEaten = true;
+			res.ResultType = ACTIONRESULT_DEFAULT;
 			res.Undo = std::make_shared<DoubleActionUndo>(oldValue, GuiElement::shared_from_this());
 
 			return res;
@@ -180,7 +181,12 @@ ActionResult GuiSlider::OnAction(TouchAction action)
 				_initDragPos = _dragElement.Position();
 				_valueOffset = 0.0;
 
-				return { true, nullptr, GuiElement::shared_from_this() };
+				ActionResult res;
+				res.IsEaten = true;
+				res.ResultType = ACTIONRESULT_ACTIVEELEMENT;
+				res.ActiveElement = GuiElement::shared_from_this();
+
+				return res;
 			}
 		}
 	}
@@ -195,8 +201,11 @@ ActionResult GuiSlider::OnAction(TouchMoveAction action)
 	if (res.IsEaten)
 		return res;
 
+	res.IsEaten = false;
+	res.ResultType = ACTIONRESULT_DEFAULT;
+
 	if (!_isDragging)
-		return { false, nullptr };
+		return res;
 
 	auto dPos = action.Position - _initClickPos;
 	auto dragPos = _initDragPos + dPos;
@@ -206,7 +215,8 @@ ActionResult GuiSlider::OnAction(TouchMoveAction action)
 
 	OnValueChange(false);
 
-	return { true, nullptr };
+	res.IsEaten = true;
+	return res;
 }
 
 bool GuiSlider::Undo(std::shared_ptr<ActionUndo> undo)

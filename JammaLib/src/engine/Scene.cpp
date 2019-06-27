@@ -18,6 +18,7 @@ Scene::Scene(SceneParams params) :
 	_channelMixer(ChannelMixerParams{}),
 	_label(std::unique_ptr<GuiLabel>()),
 	_audioDevice(std::unique_ptr<AudioDevice>()),
+	_masterLoop(std::shared_ptr<Loop>()),
 	_stations(),
 	_touchDownElement(std::weak_ptr<GuiElement>())
 {
@@ -139,7 +140,7 @@ ActionResult Scene::OnAction(TouchAction action)
 
 		_touchDownElement.reset();
 
-		return { false, nullptr };
+		return { false, ACTIONRESULT_DEFAULT };
 	}
 
 	for (auto& station : _stations)
@@ -158,7 +159,7 @@ ActionResult Scene::OnAction(TouchAction action)
 		}
 	}
 
-	return { false, nullptr };
+	return { false, ACTIONRESULT_DEFAULT };
 }
 
 ActionResult Scene::OnAction(TouchMoveAction action)
@@ -170,7 +171,7 @@ ActionResult Scene::OnAction(TouchMoveAction action)
 	if (activeElement)
 		return activeElement->OnAction(activeElement->GlobalToLocal(action));
 
-	return { false, nullptr }; 
+	return { false, ACTIONRESULT_DEFAULT };
 }
 
 ActionResult Scene::OnAction(KeyAction action)
@@ -191,10 +192,19 @@ ActionResult Scene::OnAction(KeyAction action)
 		auto res = station->OnAction(action);
 
 		if (res.IsEaten)
+		{
+			switch (res.ResultType)
+			{
+			case ACTIONRESULT_MASTERLOOP:
+				_masterLoop = std::dynamic_pointer_cast<engine::Loop>(res.MasterLoop);
+				break;
+			}
+
 			return res;
+		}
 	}
 
-	return { false, nullptr };
+	return { false, ACTIONRESULT_DEFAULT };
 }
 
 void Scene::InitAudio()

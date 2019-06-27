@@ -8,6 +8,7 @@
 #include "../actions/TouchMoveAction.h"
 #include "../actions/KeyAction.h"
 #include "../actions/DoubleAction.h"
+#include "../actions/TriggerAction.h"
 #include "../actions/ActionResult.h"
 
 namespace base
@@ -16,11 +17,12 @@ namespace base
 		public virtual Actionable
 	{
 	public:
-		virtual actions::ActionResult OnAction(actions::WindowAction action) { return { false, nullptr }; };
-		virtual actions::ActionResult OnAction(actions::TouchAction action) { return { false, nullptr }; };
-		virtual actions::ActionResult OnAction(actions::TouchMoveAction action) { return { false, nullptr }; };
-		virtual actions::ActionResult OnAction(actions::KeyAction action) { return { false, nullptr }; };
-		virtual actions::ActionResult OnAction(actions::DoubleAction action) { return { false, nullptr }; };
+		virtual actions::ActionResult OnAction(actions::WindowAction action) { return { false, actions::ACTIONRESULT_DEFAULT }; };
+		virtual actions::ActionResult OnAction(actions::TouchAction action) { return { false, actions::ACTIONRESULT_DEFAULT }; };
+		virtual actions::ActionResult OnAction(actions::TouchMoveAction action) { return { false, actions::ACTIONRESULT_DEFAULT }; };
+		virtual actions::ActionResult OnAction(actions::KeyAction action) { return { false, actions::ACTIONRESULT_DEFAULT }; };
+		virtual actions::ActionResult OnAction(actions::DoubleAction action) { return { false, actions::ACTIONRESULT_DEFAULT }; };
+		virtual actions::ActionResult OnAction(actions::TriggerAction action) { return { false, actions::ACTIONRESULT_DEFAULT }; };
 
 		std::shared_ptr<ActionReceiver> shared_from_this()
 		{

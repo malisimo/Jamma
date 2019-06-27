@@ -55,9 +55,11 @@ namespace engine
 			_overlayViewProj(other._overlayViewProj),
 			_channelMixer(std::move(other._channelMixer)),
 			_audioDevice(std::move(other._audioDevice)),
+			_masterLoop(std::move(other._masterLoop)),
 			_stations(std::move(other._stations)),
 			_label(std::move(other._label))
 		{
+			other._masterLoop = std::make_shared<Loop>(LoopParams());
 			other._audioDevice = std::make_unique<audio::AudioDevice>();
 			other._stations = std::vector<std::shared_ptr<Station>>();
 			other._label = std::make_unique<gui::GuiLabel>(
@@ -90,6 +92,7 @@ namespace engine
 				_label.swap(other._label);
 				_stations.swap(other._stations);
 				_audioDevice.swap(other._audioDevice);
+				_masterLoop.swap(other._masterLoop);
 			}
 
 			return *this;
@@ -131,5 +134,6 @@ namespace engine
 		std::vector<std::shared_ptr<Station>> _stations;
 		UndoHistory _undoHistory;
 		std::weak_ptr<base::GuiElement> _touchDownElement;
+		std::shared_ptr<Loop> _masterLoop;
 	};
 }

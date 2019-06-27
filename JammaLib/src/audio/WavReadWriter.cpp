@@ -48,7 +48,7 @@ std::optional<std::tuple<std::vector<float>, unsigned int, unsigned int>>
 
 	std::vector<float> data(numSampsLoaded);
 
-	for (int i = 0; i<numSampsLoaded; i++)
+	for (auto i=0U; i<numSampsLoaded; i++)
 	{
 		data[i] = CharToFloat(datain + (i * 2));
 	}

@@ -287,6 +287,12 @@
     <ClInclude Include="src\base\Actionable.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\Timer.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\actions\TriggerAction.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\stdafx.cpp">
@@ -422,6 +428,12 @@
       <Filter>src\audio</Filter>
     </ClCompile>
     <ClCompile Include="src\actions\DoubleAction.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\Timer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\actions\TriggerAction.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

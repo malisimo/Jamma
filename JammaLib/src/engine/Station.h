@@ -37,10 +37,9 @@ namespace engine
 
 	public:
 		virtual void Play(const std::vector<std::shared_ptr<base::AudioSink>>& dest, unsigned int numSamps) override;
-		//virtual void Draw(base::DrawContext& ctx) override;
-		//virtual bool InitResources(resources::ResourceLib& resourceLib) override;
-		//virtual bool ReleaseResources() override;
-
+		virtual actions::ActionResult OnAction(actions::KeyAction action) override;
+		virtual actions::ActionResult OnAction(actions::TouchAction action) override;
+		
 		void AddTake(LoopTakeParams takeParams);
 
 	protected:

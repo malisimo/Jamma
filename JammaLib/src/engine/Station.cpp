@@ -7,6 +7,9 @@ using base::GuiElement;
 using base::GuiElementParams;
 using base::DrawContext;
 using resources::ResourceLib;
+using actions::ActionResult;
+using actions::KeyAction;
+using actions::TouchAction;
 
 Station::Station(StationParams params) :
 	GuiElement(params),
@@ -25,6 +28,28 @@ void Station::Play(const std::vector<std::shared_ptr<base::AudioSink>>& dest, un
 	// Need to rewind buffer as we are pushing to the same place for multiple takes
 	for (auto& take : _loopTakes)
 		take->Play(dest, numSamps);
+}
+
+ActionResult Station::OnAction(KeyAction action)
+{
+	ActionResult res;
+	res.IsEaten = false;
+	res.ResultType = actions::ACTIONRESULT_DEFAULT;
+
+	for (auto trig : _triggers)
+	{
+		auto trigResult = trig.OnAction(action);
+		if (trigResult.IsEaten)
+			return trigResult;
+	}
+
+	res.IsEaten = false;
+	return res;
+}
+
+ActionResult Station::OnAction(TouchAction action)
+{
+	return ActionReceiver::OnAction(action);
 }
 
 void Station::AddTake(LoopTakeParams takeParams)
