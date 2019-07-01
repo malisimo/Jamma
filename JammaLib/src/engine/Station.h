@@ -41,9 +41,10 @@ namespace engine
 		virtual actions::ActionResult OnAction(actions::TouchAction action) override;
 		
 		void AddTake(LoopTakeParams takeParams);
+		void AddTrigger(TriggerParams trigParams);
 
 	protected:
 		std::vector<std::shared_ptr<LoopTake>> _loopTakes;
-		std::vector<Trigger> _triggers;
+		std::vector<std::shared_ptr<Trigger>> _triggers;
 	};
 }

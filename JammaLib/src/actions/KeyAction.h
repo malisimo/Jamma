@@ -22,8 +22,8 @@ namespace actions
 	public:
 		enum KeyActionType
 		{
-			KEY_DOWN,
-			KEY_UP
+			KEY_UP,
+			KEY_DOWN
 		};
 
 	public:

@@ -50,9 +50,11 @@ namespace engine
 
 	public:
 		virtual void Play(const std::vector<std::shared_ptr<base::AudioSink>>& dest, unsigned int numSamps) override;
-		//virtual void Draw(base::DrawContext& ctx) override;
-		//virtual bool InitResources(resources::ResourceLib& resourceLib) override;
-		//virtual bool ReleaseResources() override;
+	/*	virtual void Draw(base::DrawContext& ctx) override;
+
+	protected:
+		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
+		virtual bool _ReleaseResources() override;*/
 
 		void AddLoop(LoopParams loopParams);
 

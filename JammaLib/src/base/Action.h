@@ -2,6 +2,7 @@
 
 #include <memory>
 #include "../utils/CommonTypes.h"
+#include "../engine/Timer.h"
 
 namespace base
 {
@@ -12,5 +13,12 @@ namespace base
 	public:
 		Action() {};
 		~Action() {};
+
+	public:
+		Time GetActionTime() const { return _actionTime; }
+		void SetActionTime(Time time) { _actionTime = time; }
+
+	protected:
+		Time _actionTime;
 	};
 }

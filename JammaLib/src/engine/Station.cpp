@@ -36,9 +36,9 @@ ActionResult Station::OnAction(KeyAction action)
 	res.IsEaten = false;
 	res.ResultType = actions::ACTIONRESULT_DEFAULT;
 
-	for (auto trig : _triggers)
+	for (auto& trig : _triggers)
 	{
-		auto trigResult = trig.OnAction(action);
+		auto trigResult = trig->OnAction(action);
 		if (trigResult.IsEaten)
 			return trigResult;
 	}
@@ -61,4 +61,12 @@ void Station::AddTake(LoopTakeParams takeParams)
 
 	_loopTakes.push_back(take);
 	_children.push_back(take);
+}
+
+void Station::AddTrigger(TriggerParams trigParams)
+{
+	auto trigger = std::make_shared<Trigger>(trigParams);
+
+	_triggers.push_back(trigger);
+	_children.push_back(trigger);
 }

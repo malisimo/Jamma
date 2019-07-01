@@ -68,6 +68,40 @@ Scene::Scene(SceneParams params) :
 	takeParams.Position = { 4, 4 };
 	takeParams.Loops = { loopParams };
 	station->AddTake(takeParams);
+
+	TriggerParams trigParams;
+	trigParams.Size = { 160, 160 };
+	trigParams.Position = { 6, 6 };
+	trigParams.Activate = {
+		DualBinding(0,
+			TriggerBinding{
+				TriggerSource::TRIGGER_KEY,
+				49,
+				1
+			},
+			TriggerBinding{
+				TriggerSource::TRIGGER_KEY,
+				49,
+				0
+			}) };
+	trigParams.Ditch = {
+		DualBinding(0,
+			TriggerBinding{
+				TriggerSource::TRIGGER_KEY,
+				50,
+				1
+			},
+			TriggerBinding{
+				TriggerSource::TRIGGER_KEY,
+				50,
+				0
+			}) };
+	trigParams.Texture = "green";
+	trigParams.TextureRecording = "red";
+	trigParams.TextureDitchDown = "blue";
+	trigParams.TextureOverdubbing = "orange";
+	trigParams.TexturePunchedIn = "purple";
+	station->AddTrigger(trigParams);
 	_stations.push_back(std::move(station));
 
 	_audioDevice = std::make_unique<AudioDevice>();
@@ -121,6 +155,7 @@ bool Scene::_ReleaseResources()
 
 ActionResult Scene::OnAction(TouchAction action)
 {
+	action.SetActionTime(Timer::GetTime());
 	std::cout << "Touch action " << action.Touch << " [" << action.State << "] " << action.Index << std::endl;
 
 	if (TouchAction::TouchState::TOUCH_UP == action.State)
@@ -164,7 +199,8 @@ ActionResult Scene::OnAction(TouchAction action)
 
 ActionResult Scene::OnAction(TouchMoveAction action)
 {
-	std::cout << "Touch Move action " << action.Touch << " [" << action.Position.X << "," << action.Position.Y << "] " << action.Index << std::endl;
+	action.SetActionTime(Timer::GetTime());
+	//std::cout << "Touch Move action " << action.Touch << " [" << action.Position.X << "," << action.Position.Y << "] " << action.Index << std::endl;
 	
 	auto activeElement = _touchDownElement.lock();
 
@@ -176,6 +212,7 @@ ActionResult Scene::OnAction(TouchMoveAction action)
 
 ActionResult Scene::OnAction(KeyAction action)
 {
+	action.SetActionTime(Timer::GetTime());
 	std::cout << "Key action " << action.KeyActionType << " [" << action.KeyChar << "] IsSytem:" << action.IsSystem << ", Modifiers:" << action.Modifiers << "]" << std::endl;
 
 	if ((90 == action.KeyChar) && (actions::KeyAction::KEY_UP == action.KeyActionType) && (actions::MODIFIER_CTRL == action.Modifiers))

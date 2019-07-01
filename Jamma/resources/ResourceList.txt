@@ -4,3 +4,9 @@
 1 fader
 1 fader_over
 3 hh
+1 red
+1 green
+1 orange
+1 yellow
+1 purple
+1 blue

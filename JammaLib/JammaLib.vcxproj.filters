@@ -293,6 +293,9 @@
     <ClInclude Include="src\actions\TriggerAction.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="src\base\Tickable.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\stdafx.cpp">

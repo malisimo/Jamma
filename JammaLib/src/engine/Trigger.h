@@ -3,6 +3,9 @@
 #include <vector>
 #include <optional>
 #include "ActionReceiver.h"
+#include "GuiElement.h"
+#include "Tickable.h"
+#include "Timer.h"
 #include "../actions/KeyAction.h"
 #include "../actions/TriggerAction.h"
 #include "../actions/ActionResult.h"
@@ -66,9 +69,19 @@ namespace engine
 		};
 
 	public:
-		DualBinding() :
-			_isDown(false)
+		DualBinding(unsigned int debounceTimeMs) :
+			_isDown(false),
+			_debounceTimeMs(debounceTimeMs)
 		{
+		};
+		DualBinding(unsigned int debounceTimeMs,
+			TriggerBinding downBinding,
+			TriggerBinding releaseBinding) :
+			_isDown(false),
+			_debounceTimeMs(debounceTimeMs)
+		{
+			SetDown(downBinding, false);
+			SetRelease(releaseBinding, false);
 		};
 
 	public:
@@ -135,49 +148,98 @@ namespace engine
 		TriggerBinding _triggerDown;
 		std::optional<TriggerBinding> _triggerRelease;
 		bool _isDown;
+		unsigned int _debounceTimeMs;
 	};
 
-	struct TriggerParams
+	class TriggerParams :
+		public base::GuiElementParams
 	{
-		std::vector<DualBinding> Bindings;
+	public:
+		TriggerParams() :
+			base::GuiElementParams(DrawableParams{ "" },
+			MoveableParams{ 0,0 },
+			SizeableParams{ 1,1 },
+			"",
+			"",
+			"",
+			{})
+		{};
+
+	public:
+		std::vector<DualBinding> Activate;
+		std::vector<DualBinding> Ditch;
+		std::string TextureRecording;
+		std::string TextureDitchDown;
+		std::string TextureOverdubbing;
+		std::string TexturePunchedIn;
 	};
 
 	enum TriggerState
 	{
-		TRIGGER_DEFAULT,
-		TRIGGER_RECORDING,
-		TRIGGER_DITCHDOWN,
-		TRIGGER_ARMED,
-		TRIGGER_OVERDUBBING
+		TRIGSTATE_DEFAULT,
+		TRIGSTATE_RECORDING,
+		TRIGSTATE_DITCHDOWN,
+		TRIGSTATE_OVERDUBBING,
+		TRIGSTATE_PUNCHEDIN
 	};
 
 	class Trigger :
-		public base::ActionReceiver,
-		public base::ActionSender
+		public base::Tickable,
+		public base::GuiElement
 	{
 	public:
-		Trigger();
-		Trigger(TriggerParams activateParams,
-			TriggerParams ditchParams);
+		Trigger(TriggerParams trigParams);
 		~Trigger();
 
 	public:
 		virtual actions::ActionResult OnAction(actions::KeyAction action) override;
+		virtual void OnTick(Time curTime, unsigned int samps) override;
+		virtual void Draw(base::DrawContext& ctx) override;
 
+		TriggerState GetState() const;
+		void Reset();
+
+	protected:
+		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
+		virtual bool _ReleaseResources() override;
+
+	private:
+		bool IgnoreRepeats(bool isActivate,
+			DualBinding::TestResult trigResult);
+		bool Debounce(bool isActivate,
+			DualBinding::TestResult trigResult,
+			Time acionTime);
 		bool TryChangeState(DualBinding& binding,
 			bool isActivate,
 			const actions::KeyAction& action,
 			int keyState);
-		
-		TriggerState GetState() const;
-		void Reset();
-
-	private:
 		bool StateMachine(bool isDown, bool isActivate);
 
+		// Only call from state machine
+		void StartRecording();
+		void EndRecording();
+		void SetDitchDown();
+		void Ditch();
+		void StartOverdub();
+		void EndOverdub();
+		void DitchOverdub();
+		void StartPunchIn();
+		void EndPunchIn();
+
 	private:
-		TriggerParams _activateParams;
-		TriggerParams _ditchParams;
+		double _debounceTimeMs;
+		std::vector<DualBinding> _activateBindings;
+		std::vector<DualBinding> _ditchBindings;
 		TriggerState _state;
+		Time _lastActivateTime;
+		Time _lastDitchTime;
+		bool _isLastActivateDown;
+		bool _isLastDitchDown;
+		bool _isLastActivateDownRaw;
+		bool _isLastDitchDownRaw;
+		graphics::Image _textureRecording;
+		graphics::Image _textureDitchDown;
+		graphics::Image _textureOverdubbing;
+		graphics::Image _texturePunchedIn;
 	};
 }
