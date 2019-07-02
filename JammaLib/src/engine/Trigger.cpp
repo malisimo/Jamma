@@ -29,7 +29,7 @@ Trigger::Trigger(TriggerParams trigParams) :
 	_activateBindings(trigParams.Activate),
 	_ditchBindings(trigParams.Ditch),
 	_state(TRIGSTATE_DEFAULT),
-	_debounceTimeMs(0.0),
+	_debounceTimeMs(trigParams.DebounceMs),
 	_lastActivateTime(),
 	_lastDitchTime(),
 	_isLastActivateDown(false),
@@ -106,7 +106,7 @@ void Trigger::OnTick(Time curTime, unsigned int samps)
 	}
 }
 
-void engine::Trigger::Draw(base::DrawContext& ctx)
+void Trigger::Draw(base::DrawContext& ctx)
 {
 	if (TRIGSTATE_DEFAULT == _state)
 	{
@@ -164,16 +164,16 @@ bool Trigger::IgnoreRepeats(bool isActivate, DualBinding::TestResult trigResult)
 
 	if (isActivate)
 	{
-		if ((DualBinding::MATCH_DOWN == trigResult) && _isLastActivateDown)
+		if ((DualBinding::MATCH_DOWN == trigResult) && _isLastActivateDownRaw)
 			allowedThrough = false;
-		else if ((DualBinding::MATCH_RELEASE == trigResult) && !_isLastActivateDown)
+		else if ((DualBinding::MATCH_RELEASE == trigResult) && !_isLastActivateDownRaw)
 			allowedThrough = false;
 	}
 	else
 	{
-		if ((DualBinding::MATCH_DOWN == trigResult) && _isLastDitchDown)
+		if ((DualBinding::MATCH_DOWN == trigResult) && _isLastDitchDownRaw)
 			allowedThrough = false;
-		else if ((DualBinding::MATCH_RELEASE == trigResult) && !_isLastDitchDown)
+		else if ((DualBinding::MATCH_RELEASE == trigResult) && !_isLastDitchDownRaw)
 			allowedThrough = false;
 	}
 
@@ -190,23 +190,23 @@ bool Trigger::Debounce(bool isActivate,
 	{
 		auto elapsedMs = Timer::GetElapsedSeconds(_lastActivateTime, actionTime) * 1000.0;
 
-		if ((DualBinding::MATCH_DOWN == trigResult) && !_isLastActivateDown)
+		if ((DualBinding::MATCH_DOWN == trigResult) && !_isLastActivateDownRaw)
 		{
 			_lastActivateTime = actionTime;
 			_isLastActivateDownRaw = true;
 
-			if (elapsedMs > _debounceTimeMs)
+			if ((0 == _debounceTimeMs) || (elapsedMs > _debounceTimeMs))
 			{
 				allowedThrough = true;
 				_isLastActivateDown = true;
 			}
 		}
-		else if ((DualBinding::MATCH_RELEASE == trigResult) && _isLastActivateDown)
+		else if ((DualBinding::MATCH_RELEASE == trigResult) && _isLastActivateDownRaw)
 		{
 			_lastActivateTime = actionTime;
 			_isLastActivateDownRaw = false;
 
-			if (elapsedMs > _debounceTimeMs)
+			if ((0 == _debounceTimeMs) || (elapsedMs > _debounceTimeMs))
 			{
 				allowedThrough = true;
 				_isLastActivateDown = false;
@@ -217,21 +217,23 @@ bool Trigger::Debounce(bool isActivate,
 	{
 		auto elapsedMs = Timer::GetElapsedSeconds(_lastDitchTime, actionTime) * 1000.0;
 
-		if ((DualBinding::MATCH_DOWN == trigResult) && !_isLastDitchDown)
+		if ((DualBinding::MATCH_DOWN == trigResult) && !_isLastDitchDownRaw)
 		{
 			_lastDitchTime = actionTime;
+			_isLastDitchDownRaw = true;
 
-			if (elapsedMs > _debounceTimeMs)
+			if ((0 == _debounceTimeMs) || (elapsedMs > _debounceTimeMs))
 			{
 				allowedThrough = true;
 				_isLastDitchDown = true;
 			}
 		}
-		else if ((DualBinding::MATCH_RELEASE == trigResult) && _isLastDitchDown)
+		else if ((DualBinding::MATCH_RELEASE == trigResult) && _isLastDitchDownRaw)
 		{
 			_lastDitchTime = actionTime;
+			_isLastDitchDownRaw = false;
 
-			if (elapsedMs > _debounceTimeMs)
+			if ((0 == _debounceTimeMs) || (elapsedMs > _debounceTimeMs))
 			{
 				allowedThrough = true;
 				_isLastDitchDown = false;

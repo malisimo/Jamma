@@ -73,7 +73,7 @@ Scene::Scene(SceneParams params) :
 	trigParams.Size = { 160, 160 };
 	trigParams.Position = { 6, 6 };
 	trigParams.Activate = {
-		DualBinding(0,
+		DualBinding(
 			TriggerBinding{
 				TriggerSource::TRIGGER_KEY,
 				49,
@@ -85,7 +85,7 @@ Scene::Scene(SceneParams params) :
 				0
 			}) };
 	trigParams.Ditch = {
-		DualBinding(0,
+		DualBinding(
 			TriggerBinding{
 				TriggerSource::TRIGGER_KEY,
 				50,
@@ -101,6 +101,7 @@ Scene::Scene(SceneParams params) :
 	trigParams.TextureDitchDown = "blue";
 	trigParams.TextureOverdubbing = "orange";
 	trigParams.TexturePunchedIn = "purple";
+	trigParams.DebounceMs = 0;
 	station->AddTrigger(trigParams);
 	_stations.push_back(std::move(station));
 

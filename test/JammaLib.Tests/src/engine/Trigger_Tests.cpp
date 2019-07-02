@@ -16,10 +16,14 @@ const unsigned int DitchChar = 50;
 const unsigned int ActivateMidi = 211;
 const unsigned int DitchMidi = 212;
 
-Time GetTime(unsigned int seconds)
+Time GetTime()
 {
-	auto t = std::chrono::steady_clock::now();
-	return t + std::chrono::seconds(seconds);
+	return std::chrono::steady_clock::now();
+}
+
+Time OffsetTime(const Time t, unsigned int ms)
+{
+	return t + std::chrono::milliseconds(ms);
 }
 
 class MockedTriggerReceiver :
@@ -53,18 +57,20 @@ private:
 	int _numTimesCalled;
 };
 
-std::unique_ptr<Trigger> MakeDefaultTrigger(std::shared_ptr<MockedTriggerReceiver> receiver)
+std::unique_ptr<Trigger> MakeDefaultTrigger(std::shared_ptr<MockedTriggerReceiver> receiver,
+	unsigned int debounceMs)
 {
-	auto activateBind = engine::DualBinding(0);
+	auto activateBind = engine::DualBinding();
 	activateBind.SetDown(engine::TriggerBinding(engine::TRIGGER_KEY, ActivateChar, 1), true);
 
-	auto ditchBind = engine::DualBinding(0);
+	auto ditchBind = engine::DualBinding();
 	ditchBind.SetRelease(engine::TriggerBinding(engine::TRIGGER_KEY, DitchChar, 0), true);
 
 	TriggerParams trigParams;
 	trigParams.Activate = { activateBind };
 	TriggerParams ditchParams;
 	trigParams.Ditch = { ditchBind };
+	trigParams.DebounceMs = debounceMs;
 	auto trigger = std::make_unique<Trigger>(trigParams);
 	trigger->SetReceiver(receiver);
 
@@ -73,76 +79,68 @@ std::unique_ptr<Trigger> MakeDefaultTrigger(std::shared_ptr<MockedTriggerReceive
 
 TEST(Trigger, DitchesLoop) {
 	auto receiver = std::make_shared<MockedTriggerReceiver>();
-	auto trigger = MakeDefaultTrigger(receiver);
+	auto trigger = MakeDefaultTrigger(receiver, 0);
 	auto action = KeyAction();;
 	actions::ActionResult actionRes;
 
 	receiver->SetExpected(TriggerAction::TRIGGER_REC_START);
 	action.KeyChar = ActivateChar;
 	action.KeyActionType = KeyAction::KEY_DOWN;
-	action.SetActionTime(GetTime(0));
 	actionRes = trigger->OnAction(action);
 	ASSERT_TRUE(receiver->GetLastMatched());
 
 	receiver->SetExpected(TriggerAction::TRIGGER_DITCH);
 	action.KeyChar = DitchChar;
 	action.KeyActionType = KeyAction::KEY_UP;
-	action.SetActionTime(GetTime(1));
 	actionRes = trigger->OnAction(action);
 	ASSERT_TRUE(receiver->GetLastMatched());
 }
 
 TEST(Trigger, RecordsTwoLoops) {
 	auto receiver = std::make_shared<MockedTriggerReceiver>();
-	auto trigger = MakeDefaultTrigger(receiver);
+	auto trigger = MakeDefaultTrigger(receiver, 0);
 	auto action = KeyAction();
 	actions::ActionResult actionRes;
 
 	receiver->SetExpected(TriggerAction::TRIGGER_REC_START);
 	action.KeyChar = ActivateChar;
 	action.KeyActionType = KeyAction::KEY_DOWN;
-	action.SetActionTime(GetTime(0));
 	actionRes = trigger->OnAction(action);
 	ASSERT_TRUE(receiver->GetLastMatched());
 	ASSERT_EQ(1, receiver->GetNumTimesCalled());
 
 	action.KeyChar = ActivateChar;
 	action.KeyActionType = KeyAction::KEY_UP;
-	action.SetActionTime(GetTime(1));
 	actionRes = trigger->OnAction(action);
 	ASSERT_EQ(1, receiver->GetNumTimesCalled());
 
 	receiver->SetExpected(TriggerAction::TRIGGER_REC_END);
 	action.KeyChar = ActivateChar;
 	action.KeyActionType = KeyAction::KEY_DOWN;
-	action.SetActionTime(GetTime(2));
 	actionRes = trigger->OnAction(action);
 	ASSERT_TRUE(receiver->GetLastMatched());
 	ASSERT_EQ(2, receiver->GetNumTimesCalled());
 
 	action.KeyChar = ActivateChar;
 	action.KeyActionType = KeyAction::KEY_UP;
-	action.SetActionTime(GetTime(3));
 	actionRes = trigger->OnAction(action);
 	ASSERT_EQ(2, receiver->GetNumTimesCalled());
 }
 
 TEST(Trigger, NoReleaseSkipsAction) {
 	auto receiver = std::make_shared<MockedTriggerReceiver>();
-	auto trigger = MakeDefaultTrigger(receiver);
+	auto trigger = MakeDefaultTrigger(receiver, 0);
 	auto action = KeyAction();
 	actions::ActionResult actionRes;
 
 	receiver->SetExpected(TriggerAction::TRIGGER_REC_START);
 	action.KeyChar = ActivateChar;
 	action.KeyActionType = KeyAction::KEY_DOWN;
-	action.SetActionTime(GetTime(0));
 	actionRes = trigger->OnAction(action);
 	ASSERT_TRUE(receiver->GetLastMatched());
 
 	action.KeyChar = ActivateChar;
 	action.KeyActionType = KeyAction::KEY_DOWN;
-	action.SetActionTime(GetTime(1));
 	actionRes = trigger->OnAction(action);
 	ASSERT_TRUE(receiver->GetLastMatched());
 	ASSERT_EQ(1, receiver->GetNumTimesCalled());
@@ -150,40 +148,35 @@ TEST(Trigger, NoReleaseSkipsAction) {
 
 TEST(Trigger, OverDubReleasingActivateFirst) {
 	auto receiver = std::make_shared<MockedTriggerReceiver>();
-	auto trigger = MakeDefaultTrigger(receiver);
+	auto trigger = MakeDefaultTrigger(receiver, 0);
 	auto action = KeyAction();
 	actions::ActionResult actionRes;
 
 	action.KeyChar = DitchChar;
 	action.KeyActionType = KeyAction::KEY_DOWN;
-	action.SetActionTime(GetTime(0));
 	actionRes = trigger->OnAction(action);
 	ASSERT_EQ(0, receiver->GetNumTimesCalled());
 
 	receiver->SetExpected(TriggerAction::TRIGGER_OVERDUB_START);
 	action.KeyChar = ActivateChar;
 	action.KeyActionType = KeyAction::KEY_DOWN;
-	action.SetActionTime(GetTime(1));
 	actionRes = trigger->OnAction(action);
 	ASSERT_TRUE(receiver->GetLastMatched());
 	ASSERT_EQ(1, receiver->GetNumTimesCalled());
 
 	action.KeyChar = ActivateChar;
 	action.KeyActionType = KeyAction::KEY_UP;
-	action.SetActionTime(GetTime(2));
 	actionRes = trigger->OnAction(action);
 	ASSERT_EQ(1, receiver->GetNumTimesCalled());
 
 	action.KeyChar = DitchChar;
 	action.KeyActionType = KeyAction::KEY_UP;
-	action.SetActionTime(GetTime(3));
 	actionRes = trigger->OnAction(action);
 	ASSERT_EQ(1, receiver->GetNumTimesCalled());
 
 	receiver->SetExpected(TriggerAction::TRIGGER_PUNCHIN_START);
 	action.KeyChar = DitchChar;
 	action.KeyActionType = KeyAction::KEY_DOWN;
-	action.SetActionTime(GetTime(4));
 	actionRes = trigger->OnAction(action);
 	ASSERT_TRUE(receiver->GetLastMatched());
 	ASSERT_EQ(2, receiver->GetNumTimesCalled());
@@ -191,7 +184,6 @@ TEST(Trigger, OverDubReleasingActivateFirst) {
 	receiver->SetExpected(TriggerAction::TRIGGER_PUNCHIN_END);
 	action.KeyChar = DitchChar;
 	action.KeyActionType = KeyAction::KEY_UP;
-	action.SetActionTime(GetTime(5));
 	actionRes = trigger->OnAction(action);
 	ASSERT_TRUE(receiver->GetLastMatched());
 	ASSERT_EQ(3, receiver->GetNumTimesCalled());
@@ -199,60 +191,52 @@ TEST(Trigger, OverDubReleasingActivateFirst) {
 	receiver->SetExpected(TriggerAction::TRIGGER_OVERDUB_END);
 	action.KeyChar = ActivateChar;
 	action.KeyActionType = KeyAction::KEY_DOWN;
-	action.SetActionTime(GetTime(6));
 	actionRes = trigger->OnAction(action);
 	ASSERT_TRUE(receiver->GetLastMatched());
 	ASSERT_EQ(4, receiver->GetNumTimesCalled());
 
 	action.KeyChar = DitchChar;
 	action.KeyActionType = KeyAction::KEY_DOWN;
-	action.SetActionTime(GetTime(7));
 	actionRes = trigger->OnAction(action);
 	ASSERT_EQ(4, receiver->GetNumTimesCalled());
 
 	action.KeyChar = ActivateChar;
 	action.KeyActionType = KeyAction::KEY_UP;
-	action.SetActionTime(GetTime(8));
 	actionRes = trigger->OnAction(action);
 	ASSERT_EQ(4, receiver->GetNumTimesCalled());
 }
 
 TEST(Trigger, OverDubReleasingDitchFirst) {
 	auto receiver = std::make_shared<MockedTriggerReceiver>();
-	auto trigger = MakeDefaultTrigger(receiver);
+	auto trigger = MakeDefaultTrigger(receiver, 0);
 	auto action = KeyAction();
 	actions::ActionResult actionRes;
 
 	action.KeyChar = DitchChar;
 	action.KeyActionType = KeyAction::KEY_DOWN;
-	action.SetActionTime(GetTime(0));
 	actionRes = trigger->OnAction(action);
 	ASSERT_EQ(0, receiver->GetNumTimesCalled());
 
 	receiver->SetExpected(TriggerAction::TRIGGER_OVERDUB_START);
 	action.KeyChar = ActivateChar;
 	action.KeyActionType = KeyAction::KEY_DOWN;
-	action.SetActionTime(GetTime(1));
 	actionRes = trigger->OnAction(action);
 	ASSERT_TRUE(receiver->GetLastMatched());
 	ASSERT_EQ(1, receiver->GetNumTimesCalled());
 
 	action.KeyChar = DitchChar;
 	action.KeyActionType = KeyAction::KEY_UP;
-	action.SetActionTime(GetTime(2));
 	actionRes = trigger->OnAction(action);
 	ASSERT_EQ(1, receiver->GetNumTimesCalled());
 
 	action.KeyChar = ActivateChar;
 	action.KeyActionType = KeyAction::KEY_UP;
-	action.SetActionTime(GetTime(3));
 	actionRes = trigger->OnAction(action);
 	ASSERT_EQ(1, receiver->GetNumTimesCalled());
 
 	receiver->SetExpected(TriggerAction::TRIGGER_PUNCHIN_START);
 	action.KeyChar = DitchChar;
 	action.KeyActionType = KeyAction::KEY_DOWN;
-	action.SetActionTime(GetTime(4));
 	actionRes = trigger->OnAction(action);
 	ASSERT_TRUE(receiver->GetLastMatched());
 	ASSERT_EQ(2, receiver->GetNumTimesCalled());
@@ -260,7 +244,6 @@ TEST(Trigger, OverDubReleasingDitchFirst) {
 	receiver->SetExpected(TriggerAction::TRIGGER_PUNCHIN_END);
 	action.KeyChar = DitchChar;
 	action.KeyActionType = KeyAction::KEY_UP;
-	action.SetActionTime(GetTime(5));
 	actionRes = trigger->OnAction(action);
 	ASSERT_TRUE(receiver->GetLastMatched());
 	ASSERT_EQ(3, receiver->GetNumTimesCalled());
@@ -268,54 +251,47 @@ TEST(Trigger, OverDubReleasingDitchFirst) {
 	receiver->SetExpected(TriggerAction::TRIGGER_OVERDUB_END);
 	action.KeyChar = ActivateChar;
 	action.KeyActionType = KeyAction::KEY_DOWN;
-	action.SetActionTime(GetTime(6));
 	actionRes = trigger->OnAction(action);
 	ASSERT_TRUE(receiver->GetLastMatched());
 	ASSERT_EQ(4, receiver->GetNumTimesCalled());
 
 	action.KeyChar = DitchChar;
 	action.KeyActionType = KeyAction::KEY_DOWN;
-	action.SetActionTime(GetTime(7));
 	actionRes = trigger->OnAction(action);
 	ASSERT_EQ(4, receiver->GetNumTimesCalled());
 
 	action.KeyChar = ActivateChar;
 	action.KeyActionType = KeyAction::KEY_UP;
-	action.SetActionTime(GetTime(8));
 	actionRes = trigger->OnAction(action);
 	ASSERT_EQ(4, receiver->GetNumTimesCalled());
 }
 
 TEST(Trigger, OverDubNotReleasingActivateBeforeDub) {
 	auto receiver = std::make_shared<MockedTriggerReceiver>();
-	auto trigger = MakeDefaultTrigger(receiver);
+	auto trigger = MakeDefaultTrigger(receiver, 0);
 	auto action = KeyAction();
 	actions::ActionResult actionRes;
 
 	action.KeyChar = DitchChar;
 	action.KeyActionType = KeyAction::KEY_DOWN;
-	action.SetActionTime(GetTime(0));
 	actionRes = trigger->OnAction(action);
 	ASSERT_EQ(0, receiver->GetNumTimesCalled());
 
 	receiver->SetExpected(TriggerAction::TRIGGER_OVERDUB_START);
 	action.KeyChar = ActivateChar;
 	action.KeyActionType = KeyAction::KEY_DOWN;
-	action.SetActionTime(GetTime(1));
 	actionRes = trigger->OnAction(action);
 	ASSERT_TRUE(receiver->GetLastMatched());
 	ASSERT_EQ(1, receiver->GetNumTimesCalled());
 
 	action.KeyChar = DitchChar;
 	action.KeyActionType = KeyAction::KEY_UP;
-	action.SetActionTime(GetTime(2));
 	actionRes = trigger->OnAction(action);
 	ASSERT_EQ(1, receiver->GetNumTimesCalled());
 
 	receiver->SetExpected(TriggerAction::TRIGGER_PUNCHIN_START);
 	action.KeyChar = DitchChar;
 	action.KeyActionType = KeyAction::KEY_DOWN;
-	action.SetActionTime(GetTime(3));
 	actionRes = trigger->OnAction(action);
 	ASSERT_TRUE(receiver->GetLastMatched());
 	ASSERT_EQ(2, receiver->GetNumTimesCalled());
@@ -323,34 +299,98 @@ TEST(Trigger, OverDubNotReleasingActivateBeforeDub) {
 	receiver->SetExpected(TriggerAction::TRIGGER_PUNCHIN_END);
 	action.KeyChar = DitchChar;
 	action.KeyActionType = KeyAction::KEY_UP;
-	action.SetActionTime(GetTime(4));
 	actionRes = trigger->OnAction(action);
 	ASSERT_TRUE(receiver->GetLastMatched());
 	ASSERT_EQ(3, receiver->GetNumTimesCalled());
 
 	action.KeyChar = ActivateChar;
 	action.KeyActionType = KeyAction::KEY_DOWN;
-	action.SetActionTime(GetTime(5));
 	actionRes = trigger->OnAction(action);
 	ASSERT_EQ(3, receiver->GetNumTimesCalled());
 
 	action.KeyChar = ActivateChar;
 	action.KeyActionType = KeyAction::KEY_UP;
-	action.SetActionTime(GetTime(6));
 	actionRes = trigger->OnAction(action);
 	ASSERT_EQ(3, receiver->GetNumTimesCalled());
 
 	receiver->SetExpected(TriggerAction::TRIGGER_OVERDUB_END);
 	action.KeyChar = ActivateChar;
 	action.KeyActionType = KeyAction::KEY_DOWN;
-	action.SetActionTime(GetTime(7));
 	actionRes = trigger->OnAction(action);
 	ASSERT_TRUE(receiver->GetLastMatched());
 	ASSERT_EQ(4, receiver->GetNumTimesCalled());
 
 	action.KeyChar = ActivateChar;
 	action.KeyActionType = KeyAction::KEY_UP;
-	action.SetActionTime(GetTime(8));
 	actionRes = trigger->OnAction(action);
 	ASSERT_EQ(4, receiver->GetNumTimesCalled());
+}
+
+
+TEST(Trigger, DebounceSimpleTest) {
+	auto receiver = std::make_shared<MockedTriggerReceiver>();
+	auto debounceMs = 100;
+	auto trigger = MakeDefaultTrigger(receiver, debounceMs);
+	auto action = KeyAction();
+	actions::ActionResult actionRes;
+	auto curTime = GetTime();
+
+	receiver->SetExpected(TriggerAction::TRIGGER_REC_START);
+	action.KeyChar = ActivateChar;
+	action.KeyActionType = KeyAction::KEY_DOWN;
+	action.SetActionTime(curTime);
+	actionRes = trigger->OnAction(action);
+	ASSERT_TRUE(receiver->GetLastMatched());
+	ASSERT_EQ(1, receiver->GetNumTimesCalled());
+
+	curTime = OffsetTime(curTime, debounceMs/2);
+	action.KeyChar = ActivateChar;
+	action.KeyActionType = KeyAction::KEY_UP;
+	action.SetActionTime(curTime);
+	actionRes = trigger->OnAction(action);
+	ASSERT_EQ(1, receiver->GetNumTimesCalled());
+
+	curTime = OffsetTime(curTime, debounceMs/2);
+	action.KeyChar = ActivateChar;
+	action.KeyActionType = KeyAction::KEY_DOWN;
+	action.SetActionTime(curTime);
+	actionRes = trigger->OnAction(action);
+	ASSERT_EQ(1, receiver->GetNumTimesCalled());
+
+	curTime = OffsetTime(curTime, debounceMs/2);
+	action.KeyChar = ActivateChar;
+	action.KeyActionType = KeyAction::KEY_UP;
+	action.SetActionTime(curTime);
+	actionRes = trigger->OnAction(action);
+	ASSERT_EQ(1, receiver->GetNumTimesCalled());
+
+	curTime = OffsetTime(curTime, debounceMs*2);
+	receiver->SetExpected(TriggerAction::TRIGGER_REC_END);
+	action.KeyChar = ActivateChar;
+	action.KeyActionType = KeyAction::KEY_DOWN;
+	action.SetActionTime(curTime);
+	actionRes = trigger->OnAction(action);
+	ASSERT_TRUE(receiver->GetLastMatched());
+	ASSERT_EQ(2, receiver->GetNumTimesCalled());
+
+	curTime = OffsetTime(curTime, debounceMs/2);
+	action.KeyChar = ActivateChar;
+	action.KeyActionType = KeyAction::KEY_UP;
+	action.SetActionTime(curTime);
+	actionRes = trigger->OnAction(action);
+	ASSERT_EQ(2, receiver->GetNumTimesCalled());
+
+	curTime = OffsetTime(curTime, debounceMs/2);
+	action.KeyChar = ActivateChar;
+	action.KeyActionType = KeyAction::KEY_DOWN;
+	action.SetActionTime(curTime);
+	actionRes = trigger->OnAction(action);
+	ASSERT_EQ(2, receiver->GetNumTimesCalled());
+
+	curTime = OffsetTime(curTime, debounceMs/2);
+	action.KeyChar = ActivateChar;
+	action.KeyActionType = KeyAction::KEY_UP;
+	action.SetActionTime(curTime);
+	actionRes = trigger->OnAction(action);
+	ASSERT_EQ(2, receiver->GetNumTimesCalled());
 }

@@ -69,16 +69,13 @@ namespace engine
 		};
 
 	public:
-		DualBinding(unsigned int debounceTimeMs) :
-			_isDown(false),
-			_debounceTimeMs(debounceTimeMs)
+		DualBinding() :
+			_isDown(false)
 		{
 		};
-		DualBinding(unsigned int debounceTimeMs,
-			TriggerBinding downBinding,
+		DualBinding(TriggerBinding downBinding,
 			TriggerBinding releaseBinding) :
-			_isDown(false),
-			_debounceTimeMs(debounceTimeMs)
+			_isDown(false)
 		{
 			SetDown(downBinding, false);
 			SetRelease(releaseBinding, false);
@@ -148,7 +145,6 @@ namespace engine
 		TriggerBinding _triggerDown;
 		std::optional<TriggerBinding> _triggerRelease;
 		bool _isDown;
-		unsigned int _debounceTimeMs;
 	};
 
 	class TriggerParams :
@@ -172,6 +168,7 @@ namespace engine
 		std::string TextureDitchDown;
 		std::string TextureOverdubbing;
 		std::string TexturePunchedIn;
+		unsigned int DebounceMs;
 	};
 
 	enum TriggerState
