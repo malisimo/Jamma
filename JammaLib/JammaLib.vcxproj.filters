@@ -51,6 +51,12 @@
     <Filter Include="src\resources">
       <UniqueIdentifier>{1bb16a90-7c53-4068-abc4-e7bd62de4055}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\actions">
+      <UniqueIdentifier>{4b80c986-b88c-44ad-958e-f8415bda425d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\rtaudio\include">
+      <UniqueIdentifier>{90d7c2ab-66cd-4315-9941-6c651a0af991}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
@@ -131,9 +137,6 @@
     <ClInclude Include="src\graphics\GlDrawContext.h">
       <Filter>src\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphics\Window.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="src\utils\GlUtils.h">
       <Filter>src\utils</Filter>
     </ClInclude>
@@ -158,9 +161,6 @@
     <ClInclude Include="src\resources\ShaderResource.h">
       <Filter>src\resources</Filter>
     </ClInclude>
-    <ClInclude Include="src\gui\GuiLabel.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="src\utils\FunctionUtils.h">
       <Filter>src\utils</Filter>
     </ClInclude>
@@ -170,95 +170,8 @@
     <ClInclude Include="src\base\Touchable.h">
       <Filter>src\base</Filter>
     </ClInclude>
-    <ClInclude Include="src\base\GuiElement.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\gui\GuiGrid.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\utils\CommonTypes.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\base\Sizeable.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\base\Moveable.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\actions\CursorAction.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\actions\KeyAction.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\actions\WindowAction.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\actions\TouchAction.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\actions\TouchMoveAction.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\gui\GuiSlider.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="src\graphics\Shader.h">
       <Filter>src\resources</Filter>
-    </ClInclude>
-    <ClInclude Include="src\resources\WavResource.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\audio\AudioDevice.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\rtaudio\include\iasiodrv.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\rtaudio\include\asiolist.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\rtaudio\include\asiosys.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\rtaudio\include\dsound.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\rtaudio\include\functiondiscoverykeys_devpkey.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\rtaudio\include\ginclude.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\rtaudio\include\asiodrvr.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\rtaudio\include\asiodrivers.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\rtaudio\include\asio.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\rtaudio\include\iasiothiscallresolver.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\rtaudio\include\soundcard.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\base\ResourceUser.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\audio\AudioMixer.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\audio\AudioBuffer.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\LoopTake.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\audio\ChannelMixer.h">
-      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\Scene.h">
       <Filter>src\graphics</Filter>
@@ -269,38 +182,128 @@
     <ClInclude Include="src\base\AudioSource.h">
       <Filter>src\base</Filter>
     </ClInclude>
-    <ClInclude Include="src\base\AudioSink.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\base\MultiAudioSource.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\actions\ActionResult.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\base\ActionUndo.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="src\actions\DoubleAction.h">
-      <Filter>include</Filter>
+      <Filter>src\actions</Filter>
     </ClInclude>
-    <ClInclude Include="src\base\Actionable.h">
-      <Filter>include</Filter>
+    <ClInclude Include="src\actions\CursorAction.h">
+      <Filter>src\actions</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\Timer.h">
-      <Filter>include</Filter>
+    <ClInclude Include="src\actions\TouchAction.h">
+      <Filter>src\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="src\actions\TouchMoveAction.h">
+      <Filter>src\actions</Filter>
     </ClInclude>
     <ClInclude Include="src\actions\TriggerAction.h">
-      <Filter>include</Filter>
+      <Filter>src\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="src\actions\WindowAction.h">
+      <Filter>src\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="src\actions\KeyAction.h">
+      <Filter>src\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gui\GuiLabel.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\audio\AudioMixer.h">
+      <Filter>src\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="src\audio\AudioDevice.h">
+      <Filter>src\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="src\audio\AudioBuffer.h">
+      <Filter>src\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\MultiAudioSource.h">
+      <Filter>src\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="src\audio\ChannelMixer.h">
+      <Filter>src\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\GuiElement.h">
+      <Filter>src\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\AudioSink.h">
+      <Filter>src\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\Moveable.h">
+      <Filter>src\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\Sizeable.h">
+      <Filter>src\base</Filter>
     </ClInclude>
     <ClInclude Include="src\base\Tickable.h">
-      <Filter>include</Filter>
+      <Filter>src\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gui\GuiGrid.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gui\GuiSlider.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\Actionable.h">
+      <Filter>src\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\actions\ActionResult.h">
+      <Filter>src\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\ActionUndo.h">
+      <Filter>src\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\WavResource.h">
+      <Filter>src\resources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\LoopTake.h">
+      <Filter>src\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utils\CommonTypes.h">
+      <Filter>src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\Timer.h">
+      <Filter>src\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\ResourceUser.h">
+      <Filter>src\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\Window.h">
+      <Filter>src\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\rtaudio\include\asio.h">
+      <Filter>lib\rtaudio\include</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\rtaudio\include\asiodrivers.h">
+      <Filter>lib\rtaudio\include</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\rtaudio\include\asiodrvr.h">
+      <Filter>lib\rtaudio\include</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\rtaudio\include\asiolist.h">
+      <Filter>lib\rtaudio\include</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\rtaudio\include\asiosys.h">
+      <Filter>lib\rtaudio\include</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\rtaudio\include\dsound.h">
+      <Filter>lib\rtaudio\include</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\rtaudio\include\functiondiscoverykeys_devpkey.h">
+      <Filter>lib\rtaudio\include</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\rtaudio\include\ginclude.h">
+      <Filter>lib\rtaudio\include</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\rtaudio\include\iasiodrv.h">
+      <Filter>lib\rtaudio\include</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\rtaudio\include\iasiothiscallresolver.h">
+      <Filter>lib\rtaudio\include</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\rtaudio\include\soundcard.h">
+      <Filter>lib\rtaudio\include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\stdafx.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="lib\glew\glew.c">
       <Filter>lib\glew</Filter>
     </ClCompile>
@@ -352,9 +355,6 @@
     <ClCompile Include="src\resources\ResourceLib.cpp">
       <Filter>src\resources</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\GuiLabel.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\GuiButton.cpp">
       <Filter>src\gui</Filter>
     </ClCompile>
@@ -367,62 +367,8 @@
     <ClCompile Include="src\utils\ImageUtils.cpp">
       <Filter>src\utils</Filter>
     </ClCompile>
-    <ClCompile Include="src\base\GuiElement.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\GuiGrid.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\actions\CursorAction.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\actions\KeyAction.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\actions\WindowAction.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\actions\TouchAction.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\actions\TouchMoveAction.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\GuiSlider.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\graphics\Shader.cpp">
       <Filter>src\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="src\resources\WavResource.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\audio\AudioDevice.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="lib\rtaudio\include\asiodrivers.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="lib\rtaudio\include\asiolist.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="lib\rtaudio\include\iasiothiscallresolver.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="lib\rtaudio\include\asio.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\audio\AudioMixer.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\audio\AudioBuffer.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\LoopTake.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\audio\ChannelMixer.cpp">
-      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\Scene.cpp">
       <Filter>src\graphics</Filter>
@@ -430,13 +376,73 @@
     <ClCompile Include="src\audio\InterpolatedValue.cpp">
       <Filter>src\audio</Filter>
     </ClCompile>
-    <ClCompile Include="src\actions\DoubleAction.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\Timer.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="src\actions\WindowAction.cpp">
+      <Filter>src\actions</Filter>
     </ClCompile>
     <ClCompile Include="src\actions\TriggerAction.cpp">
+      <Filter>src\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="src\actions\TouchAction.cpp">
+      <Filter>src\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="src\actions\TouchMoveAction.cpp">
+      <Filter>src\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="src\actions\KeyAction.cpp">
+      <Filter>src\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="src\actions\DoubleAction.cpp">
+      <Filter>src\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="src\actions\CursorAction.cpp">
+      <Filter>src\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\GuiGrid.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\GuiLabel.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\GuiSlider.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\audio\AudioBuffer.cpp">
+      <Filter>src\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="src\audio\AudioDevice.cpp">
+      <Filter>src\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="src\audio\AudioMixer.cpp">
+      <Filter>src\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="src\audio\ChannelMixer.cpp">
+      <Filter>src\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="src\resources\WavResource.cpp">
+      <Filter>src\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\LoopTake.cpp">
+      <Filter>src\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\Timer.cpp">
+      <Filter>src\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\base\GuiElement.cpp">
+      <Filter>src\base</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\rtaudio\include\asio.cpp">
+      <Filter>lib\rtaudio\include</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\rtaudio\include\asiodrivers.cpp">
+      <Filter>lib\rtaudio\include</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\rtaudio\include\asiolist.cpp">
+      <Filter>lib\rtaudio\include</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\rtaudio\include\iasiothiscallresolver.cpp">
+      <Filter>lib\rtaudio\include</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stdafx.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

@@ -2,11 +2,21 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="src\graphics\Window_Tests.cpp" />
-    <ClCompile Include="src\utils\CommonTypes_Tests.cpp" />
-    <ClCompile Include="src\gui\GuiSlider_Tests.cpp" />
-    <ClCompile Include="src\engine\UndoHistory_Tests.cpp" />
-    <ClCompile Include="src\engine\Trigger_Tests.cpp" />
+    <ClCompile Include="src\graphics\Window_Tests.cpp">
+      <Filter>src\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\GuiSlider_Tests.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utils\CommonTypes_Tests.cpp">
+      <Filter>src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\Trigger_Tests.cpp">
+      <Filter>src\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\UndoHistory_Tests.cpp">
+      <Filter>src\engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -20,6 +30,12 @@
     </Filter>
     <Filter Include="src\utils">
       <UniqueIdentifier>{c9136b91-b5f6-4cfd-8e17-3a1eebfd5ec5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\gui">
+      <UniqueIdentifier>{ea95c538-c3c3-445c-a4bc-8309ff729115}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\engine">
+      <UniqueIdentifier>{2cd22d39-9fc3-4e1a-b5b9-2182899b534e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

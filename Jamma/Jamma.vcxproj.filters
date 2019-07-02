@@ -64,6 +64,24 @@
     <Content Include="resources\textures\fader_over.tga">
       <Filter>resources\textures</Filter>
     </Content>
+    <Content Include="resources\textures\red.tga">
+      <Filter>resources\textures</Filter>
+    </Content>
+    <Content Include="resources\textures\green.tga">
+      <Filter>resources\textures</Filter>
+    </Content>
+    <Content Include="resources\textures\blue.tga">
+      <Filter>resources\textures</Filter>
+    </Content>
+    <Content Include="resources\textures\yellow.tga">
+      <Filter>resources\textures</Filter>
+    </Content>
+    <Content Include="resources\textures\orange.tga">
+      <Filter>resources\textures</Filter>
+    </Content>
+    <Content Include="resources\textures\purple.tga">
+      <Filter>resources\textures</Filter>
+    </Content>
     <Content Include="resources\shaders\texture.frag">
       <Filter>resources\shaders</Filter>
     </Content>

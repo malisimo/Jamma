@@ -84,9 +84,6 @@ void Window::ShowMessage(LPCWSTR message)
 
 int Window::Create(HINSTANCE hInstance, int nCmdShow)
 {
-	//_windowClass = MAKEINTATOM([&](auto& hInstance){return Window::RegisterClass(hInstance, window)}());
-	//_windowClass = MAKEINTATOM(Window::RegisterClass(hInstance));
-	//_windowClass = reinterpret_cast<LPCWSTR>(static_cast<ULONG_PTR>(static_cast<WORD>(Window::Register(hInstance))));
 	_windowClass = MAKEINTATOM(Window::Register(hInstance));
 	if (_windowClass == 0) {
 		ShowMessage(L"registerClass() failed.");
@@ -103,9 +100,13 @@ int Window::Create(HINSTANCE hInstance, int nCmdShow)
 		nullptr, nullptr,					// parent window, menu
 		hInstance, nullptr);			// instance, param
 
-	HDC fakeDC = GetDC(fakeWND);	// Device Context
+	if (fakeWND == 0) {
+		auto errCode = GetLastError();
+		ShowMessage(L"CreateWindowEx() failed.");
+		return 1;
+	}
 
-	//DwmExtendFrameIntoClientArea
+	HDC fakeDC = GetDC(fakeWND);	// Device Context
 
 	PIXELFORMATDESCRIPTOR fakePFD;
 	ZeroMemory(&fakePFD, sizeof(fakePFD));
@@ -124,6 +125,7 @@ int Window::Create(HINSTANCE hInstance, int nCmdShow)
 	}
 
 	if (SetPixelFormat(fakeDC, fakePFDID, &fakePFD) == false) {
+		auto errCode = GetLastError();
 		ShowMessage(L"SetPixelFormat() failed.");
 		return 1;
 	}
@@ -519,7 +521,7 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 	}
 
 	if (!window)
-		return 0;
+		return DefWindowProc(hWindow, message, wParam, lParam);
 
 	switch (message)
 	{
@@ -547,6 +549,7 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 			}
 			winAction.Size = { LOWORD(lParam), HIWORD(lParam) };
 			window->OnAction(winAction);
+			return 0;
 		}
 
 		// If the device is not nullptr and the WM_SIZE message is not a
@@ -575,7 +578,7 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 	case WM_SIZING:
 		window->Render();
 		window->Swap();
-		break;
+		return TRUE;
 	case WM_GETMINMAXINFO:
 	{
 		// Window size/position is going to change
@@ -586,12 +589,14 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 
 		MinMaxInfo->ptMinTrackSize.x = (long)min.Width;
 		MinMaxInfo->ptMinTrackSize.y = (long)min.Height;
+		return 0;
 	}
 	case WM_ENTERSIZEMOVE:
 	{
 		if (window->IsResizing())
 		{
 			window->SetResizing(false);
+			return 0;
 		}
 	}
 	break;
@@ -610,6 +615,7 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 		if (window->IsResizing())
 		{
 			window->SetResizing(false);
+			return 0;
 		}
 	}
 	break;
@@ -618,6 +624,7 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 		if (window->IsResizing())
 		{
 			window->SetResizing(false);
+			return 0;
 		}
 	}
 	break;
@@ -902,7 +909,7 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 
 		FreeConsole();
 		PostQuitMessage(0);
-		break;
+		return 0;
 	}
 	}
 
