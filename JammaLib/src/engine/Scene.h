@@ -8,6 +8,7 @@
 #include "../graphics/GlDrawContext.h"
 #include "../gui/GuiLabel.h"
 #include "../gui/GuiSlider.h"
+#include "Tickable.h"
 #include "Drawable.h"
 #include "ActionReceiver.h"
 #include "AudioSource.h"
@@ -35,6 +36,7 @@ namespace engine
 
 	class Scene :
 		public std::enable_shared_from_this<Scene>,
+		public base::Tickable,
 		public base::Drawable,
 		public base::Sizeable,
 		public base::ActionReceiver
@@ -49,6 +51,7 @@ namespace engine
 
 		// Move
 		Scene(Scene&& other) :
+			base::Tickable(std::move(other)),
 			base::Drawable(std::move(other)),
 			base::Sizeable(std::move(other)),
 			_viewProj(other._viewProj),
@@ -111,6 +114,7 @@ namespace engine
 		virtual actions::ActionResult OnAction(actions::TouchAction action) override;
 		virtual actions::ActionResult OnAction(actions::TouchMoveAction action) override;
 		virtual actions::ActionResult OnAction(actions::KeyAction action) override;
+		virtual void OnTick(Time curTime, unsigned int samps) override;
 
 		void InitAudio();
 

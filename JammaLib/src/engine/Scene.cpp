@@ -101,7 +101,7 @@ Scene::Scene(SceneParams params) :
 	trigParams.TextureDitchDown = "blue";
 	trigParams.TextureOverdubbing = "orange";
 	trigParams.TexturePunchedIn = "purple";
-	trigParams.DebounceMs = 0;
+	trigParams.DebounceMs = 120;
 	station->AddTrigger(trigParams);
 	_stations.push_back(std::move(station));
 
@@ -245,6 +245,14 @@ ActionResult Scene::OnAction(KeyAction action)
 	return { false, ACTIONRESULT_DEFAULT };
 }
 
+void Scene::OnTick(Time curTime, unsigned int samps)
+{
+	for (auto& station : _stations)
+	{
+		station->OnTick(curTime, samps);
+	}
+}
+
 void Scene::InitAudio()
 {
 	auto dev = AudioDevice::Open(Scene::AudioCallback,
@@ -299,6 +307,8 @@ void Scene::OnAudio(float* inBuf, float* outBuf, unsigned int numSamps)
 
 		_channelMixer.ToDac(outBuf, outDeviceInfo.outputChannels, numSamps);
 	}
+
+	OnTick(Timer::GetTime(), numSamps);
 }
 
 bool engine::Scene::OnUndo(std::shared_ptr<base::ActionUndo> undo)

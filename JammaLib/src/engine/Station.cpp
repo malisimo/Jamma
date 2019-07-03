@@ -52,6 +52,14 @@ ActionResult Station::OnAction(TouchAction action)
 	return ActionReceiver::OnAction(action);
 }
 
+void Station::OnTick(Time curTime, unsigned int samps)
+{
+	for (auto& trig : _triggers)
+	{
+		trig->OnTick(curTime, samps);
+	}
+}
+
 void Station::AddTake(LoopTakeParams takeParams)
 {
 	auto take = std::make_shared<LoopTake>(takeParams);

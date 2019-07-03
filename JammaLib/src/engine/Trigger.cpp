@@ -77,6 +77,9 @@ ActionResult Trigger::OnAction(KeyAction action)
 
 void Trigger::OnTick(Time curTime, unsigned int samps)
 {
+	if (0 == _debounceTimeMs)
+		return;
+
 	// Eventually flick to new state
 	// (if held long enough)
 	auto elapsedMs = Timer::GetElapsedSeconds(_lastActivateTime, curTime) * 1000.0;

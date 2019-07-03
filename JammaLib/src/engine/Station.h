@@ -24,6 +24,7 @@ namespace engine
 	};
 		
 	class Station :
+		public base::Tickable,
 		public base::GuiElement,
 		public base::MultiAudioSource
 	{
@@ -39,6 +40,7 @@ namespace engine
 		virtual void Play(const std::vector<std::shared_ptr<base::AudioSink>>& dest, unsigned int numSamps) override;
 		virtual actions::ActionResult OnAction(actions::KeyAction action) override;
 		virtual actions::ActionResult OnAction(actions::TouchAction action) override;
+		virtual void OnTick(Time curTime, unsigned int samps) override;
 		
 		void AddTake(LoopTakeParams takeParams);
 		void AddTrigger(TriggerParams trigParams);
