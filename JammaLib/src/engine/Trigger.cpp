@@ -77,6 +77,10 @@ ActionResult Trigger::OnAction(KeyAction action)
 
 void Trigger::OnTick(Time curTime, unsigned int samps)
 {
+	if ((TriggerState::TRIGSTATE_DEFAULT != _state) &&
+		(TriggerState::TRIGSTATE_DITCHDOWN != _state))
+		_recordSampCount++;
+
 	if (0 == _debounceTimeMs)
 		return;
 
@@ -159,6 +163,11 @@ void Trigger::Reset()
 	{
 		b.Reset();
 	}
+
+	_state = TriggerState::TRIGSTATE_DEFAULT;
+	_targetId = 0;
+	_overdubTargetId = 0;
+	_recordSampCount = 0;
 }
 
 bool Trigger::IgnoreRepeats(bool isActivate, DualBinding::TestResult trigResult)
@@ -359,12 +368,16 @@ bool Trigger::StateMachine(bool isDown, bool isActivate)
 void Trigger::StartRecording()
 {
 	_state = TRIGSTATE_RECORDING;
+	_recordSampCount = 0;
 
 	if (_receiver)
 	{
 		TriggerAction trigAction;
 		trigAction.ActionType = TriggerAction::TRIGGER_REC_START;
-		_receiver->OnAction(trigAction);
+		auto res = _receiver->OnAction(trigAction);
+
+		if (res.IsEaten)
+			_targetId = res.Id;
 	}
 }
 
@@ -376,6 +389,8 @@ void Trigger::EndRecording()
 	{
 		TriggerAction trigAction;
 		trigAction.ActionType = TriggerAction::TRIGGER_REC_END;
+		trigAction.TargetId = _targetId;
+		trigAction.SampleCount = _recordSampCount;
 		_receiver->OnAction(trigAction);
 	}
 }
@@ -393,19 +408,29 @@ void Trigger::Ditch()
 	{
 		TriggerAction trigAction;
 		trigAction.ActionType = TriggerAction::TRIGGER_DITCH;
+		trigAction.TargetId = _targetId;
+		trigAction.SampleCount = _recordSampCount;
 		_receiver->OnAction(trigAction);
 	}
+
+	_targetId = 0;
+	_overdubTargetId = 0;
 }
 
 void Trigger::StartOverdub()
 {
 	_state = TRIGSTATE_OVERDUBBING;
+	_recordSampCount = 0;
 
 	if (_receiver)
 	{
 		TriggerAction trigAction;
 		trigAction.ActionType = TriggerAction::TRIGGER_OVERDUB_START;
-		_receiver->OnAction(trigAction);
+		trigAction.SampleCount = _recordSampCount;
+		auto res = _receiver->OnAction(trigAction);
+
+		if (res.IsEaten)
+			_overdubTargetId = res.Id;
 	}
 }
 
@@ -417,6 +442,8 @@ void Trigger::EndOverdub()
 	{
 		TriggerAction trigAction;
 		trigAction.ActionType = TriggerAction::TRIGGER_OVERDUB_END;
+		trigAction.TargetId = _overdubTargetId;
+		trigAction.SampleCount = _recordSampCount;
 		_receiver->OnAction(trigAction);
 	}
 }
@@ -429,8 +456,12 @@ void Trigger::DitchOverdub()
 	{
 		TriggerAction trigAction;
 		trigAction.ActionType = TriggerAction::TRIGGER_OVERDUB_DITCH;
+		trigAction.TargetId = _overdubTargetId;
+		trigAction.SampleCount = _recordSampCount;
 		_receiver->OnAction(trigAction);
 	}
+
+	_overdubTargetId = 0;
 }
 
 void Trigger::StartPunchIn()
@@ -441,6 +472,8 @@ void Trigger::StartPunchIn()
 	{
 		TriggerAction trigAction;
 		trigAction.ActionType = TriggerAction::TRIGGER_PUNCHIN_START;
+		trigAction.TargetId = _overdubTargetId;
+		trigAction.SampleCount = _recordSampCount;
 		_receiver->OnAction(trigAction);
 	}
 }
@@ -453,6 +486,8 @@ void Trigger::EndPunchIn()
 	{
 		TriggerAction trigAction;
 		trigAction.ActionType = TriggerAction::TRIGGER_PUNCHIN_END;
+		trigAction.TargetId = _overdubTargetId;
+		trigAction.SampleCount = _recordSampCount;
 		_receiver->OnAction(trigAction);
 	}
 }

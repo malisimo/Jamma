@@ -132,7 +132,7 @@ namespace engine
 	private:
 		glm::mat4 _viewProj;
 		glm::mat4 _overlayViewProj;
-		audio::ChannelMixer _channelMixer;
+		std::shared_ptr<audio::ChannelMixer> _channelMixer;
 		std::unique_ptr<audio::AudioDevice> _audioDevice;
 		std::unique_ptr<gui::GuiLabel> _label;
 		std::vector<std::shared_ptr<Station>> _stations;

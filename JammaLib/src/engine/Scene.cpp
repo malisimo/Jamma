@@ -15,7 +15,7 @@ Scene::Scene(SceneParams params) :
 	Sizeable(params),
 	_viewProj(glm::mat4()),
 	_overlayViewProj(glm::mat4()),
-	_channelMixer(ChannelMixerParams{}),
+	_channelMixer(std::make_shared<ChannelMixer>(ChannelMixerParams{})),
 	_label(std::unique_ptr<GuiLabel>()),
 	_audioDevice(std::unique_ptr<AudioDevice>()),
 	_masterLoop(std::shared_ptr<Loop>()),
@@ -231,12 +231,12 @@ ActionResult Scene::OnAction(KeyAction action)
 
 		if (res.IsEaten)
 		{
-			switch (res.ResultType)
+			/*switch (res.ResultType)
 			{
-			case ACTIONRESULT_MASTERLOOP:
-				_masterLoop = std::dynamic_pointer_cast<engine::Loop>(res.MasterLoop);
+			case ACTIONRESULT_ID:
+				_masterLoop = std::dynamic_pointer_cast<engine::Loop>(res.IdMasterLoop);
 				break;
-			}
+			}*/
 
 			return res;
 		}
@@ -266,7 +266,7 @@ void Scene::InitAudio()
 		auto inParams = _audioDevice->GetInputStreamInfo();
 		auto outParams = _audioDevice->GetOutputStreamInfo();
 		
-		_channelMixer.SetParams(ChannelMixerParams({
+		_channelMixer->SetParams(ChannelMixerParams({
 				ChannelMixer::DefaultBufferSize,
 				ChannelMixer::DefaultBufferSize,
 				inParams.inputChannels,
@@ -294,7 +294,12 @@ void Scene::OnAudio(float* inBuf, float* outBuf, unsigned int numSamps)
 	if (nullptr != inBuf)
 	{
 		auto inDeviceInfo = nullptr == _audioDevice ? RtAudio::DeviceInfo() : _audioDevice->GetInputStreamInfo();
-		_channelMixer.FromAdc(inBuf, inDeviceInfo.inputChannels, numSamps);
+		_channelMixer->FromAdc(inBuf, inDeviceInfo.inputChannels, numSamps);
+
+		for (auto& station : _stations)
+		{
+			station->OnWrite(_channelMixer, numSamps);
+		}
 	}
 
 	if (nullptr != outBuf)
@@ -303,15 +308,15 @@ void Scene::OnAudio(float* inBuf, float* outBuf, unsigned int numSamps)
 		std::fill(outBuf, outBuf + numSamps * outDeviceInfo.outputChannels, 0.0f);
 
 		for (auto& station : _stations)
-			_channelMixer.Play(station, numSamps);
+			_channelMixer->OnPlay(station, numSamps);
 
-		_channelMixer.ToDac(outBuf, outDeviceInfo.outputChannels, numSamps);
+		_channelMixer->ToDac(outBuf, outDeviceInfo.outputChannels, numSamps);
 	}
 
 	OnTick(Timer::GetTime(), numSamps);
 }
 
-bool engine::Scene::OnUndo(std::shared_ptr<base::ActionUndo> undo)
+bool Scene::OnUndo(std::shared_ptr<base::ActionUndo> undo)
 {
 	switch (undo->UndoType())
 	{

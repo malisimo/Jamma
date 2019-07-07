@@ -4,7 +4,7 @@
 #include <memory>
 #include <variant>
 #include "AudioSource.h"
-#include "AudioSink.h"
+#include "MultiAudioSink.h"
 #include "InterpolatedValue.h"
 #include "GuiElement.h"
 #include "../actions/DoubleAction.h"
@@ -15,7 +15,9 @@ namespace audio
 	class MixBehaviour
 	{
 	public:
-		virtual void Apply(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, unsigned int index) const {}
+		virtual void Apply(const std::shared_ptr<base::MultiAudioSink> dest,
+			float samp,
+			unsigned int index) const {};
 	};
 
 	class MixBehaviourParams {};
@@ -36,7 +38,9 @@ namespace audio
 		}
 
 	public:
-		virtual void Apply(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, unsigned int index) const override;
+		virtual void Apply(const std::shared_ptr<base::MultiAudioSink> dest,
+			float samp,
+			unsigned int index) const override;
 
 	protected:
 		WireMixBehaviourParams _mixParams;
@@ -58,7 +62,9 @@ namespace audio
 		}
 
 	public:
-		virtual void Apply(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, unsigned int index) const override;
+		virtual void Apply(const std::shared_ptr<base::MultiAudioSink> dest,
+			float samp,
+			unsigned int index) const override;
 
 	protected:
 		PanMixBehaviourParams _mixParams;
@@ -94,6 +100,7 @@ namespace audio
 
 	public:
 		BehaviourParams Behaviour;
+		unsigned int InputChannel;
 		gui::GuiSliderParams SliderParams;
 	};
 	
@@ -120,10 +127,17 @@ namespace audio
 		virtual actions::ActionResult OnAction(actions::DoubleAction val) override;
 		virtual void InitReceivers() override;
 
-		void Play(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, unsigned int index);
-		void Offset(const std::vector<std::shared_ptr<base::AudioSink>>& dest, unsigned int index);
+		void OnPlay(const std::shared_ptr<base::MultiAudioSink> dest,
+			float samp,
+			unsigned int index);
+		void Offset(const std::shared_ptr<base::MultiAudioSink> dest,
+			unsigned int numSamps);
+		
+		unsigned int InputChannel() const;
+		void SetInputChannel(unsigned int channel);
 
 	protected:
+		unsigned int _inputChannel;
 		std::unique_ptr<MixBehaviour> _behaviour;
 		std::shared_ptr<gui::GuiSlider> _slider;
 		std::unique_ptr<InterpolatedValue> _fade;

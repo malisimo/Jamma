@@ -228,6 +228,9 @@ namespace engine
 		std::vector<DualBinding> _activateBindings;
 		std::vector<DualBinding> _ditchBindings;
 		TriggerState _state;
+		unsigned long _targetId;
+		unsigned long _overdubTargetId;
+		unsigned long _recordSampCount;
 		Time _lastActivateTime;
 		Time _lastDitchTime;
 		bool _isLastActivateDown;

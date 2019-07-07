@@ -2,13 +2,15 @@
 
 using namespace audio;
 using namespace actions;
-using base::AudioSink;
+using base::AudioSource;
+using base::MultiAudioSink;
 using base::GuiElement;
 using gui::GuiSlider;
 using gui::GuiSliderParams;
 
 AudioMixer::AudioMixer(AudioMixerParams params) :
 	GuiElement(params),
+	_inputChannel(params.InputChannel),
 	_behaviour(std::unique_ptr<MixBehaviour>()),
 	_slider(std::make_shared<GuiSlider>(params.SliderParams)),
 	_fade(std::make_unique<InterpolatedValueExp>())
@@ -33,42 +35,53 @@ void AudioMixer::InitReceivers()
 ActionResult AudioMixer::OnAction(DoubleAction val)
 {
 	_fade->SetTarget(val.Value());
-	return { true, ACTIONRESULT_DEFAULT, nullptr };
+	return { true, 0UL, ACTIONRESULT_DEFAULT, nullptr };
 }
 
-void AudioMixer::Play(const std::vector<std::shared_ptr<AudioSink>>& dest, float samp, unsigned int index)
+void AudioMixer::OnPlay(const std::shared_ptr<MultiAudioSink> dest,
+	float samp,
+	unsigned int index)
 {
 	_behaviour->Apply(dest, samp * (float)_fade->Next(), index);
 }
 
-void AudioMixer::Offset(const std::vector<std::shared_ptr<base::AudioSink>>& dest, unsigned int index)
+void AudioMixer::Offset(const std::shared_ptr<MultiAudioSink> dest, unsigned int numSamps)
 {
-	for (auto& buf : dest)
-		buf->Offset(index);
+	dest->Offset(numSamps);
 }
 
-void WireMixBehaviour::Apply(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, unsigned int offset) const
+unsigned int AudioMixer::InputChannel() const
 {
-	auto chan = 0u;
-	for (auto& buf : dest)
+	return _inputChannel;
+}
+
+void AudioMixer::SetInputChannel(unsigned int channel)
+{
+	_inputChannel = channel;
+}
+
+void WireMixBehaviour::Apply(const std::shared_ptr<MultiAudioSink> dest,
+	float samp,
+	unsigned int index) const
+{
+	auto numChans = dest->NumInputChannels();
+
+	for (auto chan = 0u; chan < numChans; chan++)
 	{
 		if (std::find(_mixParams.Channels.begin(), _mixParams.Channels.end(), chan) != _mixParams.Channels.end())
-		{
-			buf->WriteMix(samp, offset);
-		}
-
-		chan++;
+			dest->OnWriteChannel(chan, samp, index);
 	}
 }
 
-void PanMixBehaviour::Apply(const std::vector<std::shared_ptr<base::AudioSink>>& dest, float samp, unsigned int offset) const
+void PanMixBehaviour::Apply(const std::shared_ptr<MultiAudioSink> dest,
+	float samp,
+	unsigned int index) const
 {
-	auto chan = 0u;
-	for (auto& buf : dest)
+	auto numChans = dest->NumInputChannels();
+
+	for (auto chan = 0u; chan < numChans; chan++)
 	{
 		if (chan < _mixParams.ChannelLevels.size())
-			buf->WriteMix(samp * _mixParams.ChannelLevels.at(chan), offset);
-
-		chan++;
+			dest->OnWriteChannel(chan, samp * _mixParams.ChannelLevels.at(chan), index);
 	}
 }

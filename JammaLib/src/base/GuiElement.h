@@ -65,6 +65,10 @@ namespace base
 		};
 
 	public:
+		virtual ActionDirection Direction() const override
+		{
+			return ACTION_BOTH;
+		}
 		virtual void Init();
 		virtual void SetSize(utils::Size2d size) override;
 		virtual void Draw(DrawContext& ctx) override;

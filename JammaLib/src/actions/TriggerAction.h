@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include "Action.h"
 #include "CommonTypes.h"
 
@@ -27,5 +28,9 @@ namespace actions
 
 	public:
 		TriggerActionType ActionType;
+		unsigned long TargetId;
+		unsigned long OverbudTargetId;
+		unsigned long SampleCount;
+		std::vector<unsigned int> InputChannels;
 	};
 }

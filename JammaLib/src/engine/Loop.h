@@ -39,13 +39,28 @@ namespace engine
 
 	public:
 		std::string Wav;
+		std::string PlayTexture;
+		std::string RecordTexture;
+		std::string OverdubTexture;
+		std::string PunchTexture;
 		audio::AudioMixerParams MixerParams;
 	};
 
 	class Loop :
+		public base::AudioSink,
 		public base::MultiAudioSource,
 		public base::GuiElement
 	{
+	public:
+		enum LoopVisualState
+		{
+			STATE_INACTIVE,
+			STATE_PLAYING,
+			STATE_RECORDING,
+			STATE_OVERDUBBING,
+			STATE_PUNCHEDIN
+		};
+
 	public:
 		Loop(LoopParams loopParams);
 		~Loop() { ReleaseResources(); }
@@ -57,7 +72,8 @@ namespace engine
 		// Move
 		Loop(Loop&& other) :
 			GuiElement(other._guiParams),
-			_index(other._index),
+			_playPos(other._playPos),
+			_recPos(other._recPos),
 			_loopParams{other._loopParams},
 			_mixer(std::move(other._mixer)),
 			_wav(std::move(other._wav))
@@ -84,16 +100,38 @@ namespace engine
 		}
 
 	public:
-		virtual void Play(const std::vector<std::shared_ptr<base::AudioSink>>& dest, unsigned int numSamps) override;
+		virtual void OnPlay(const std::shared_ptr<base::MultiAudioSink> dest, unsigned int numSamps) override;
+		virtual int OnWrite(float samp, int indexOffset) override;
+		//virtual int WriteMix(float samp, int indexOffset) override;
+		//virtual void Offset(int indexOffset) override;
+
+		unsigned int InputChannel();
+		void SetInputChannel(unsigned int channel);
+
+		void Record();
+		void Play(unsigned long index, unsigned long length);
+		void Ditch();
+		void Overdub();
+		void PunchIn();
+		void PunchOut();
 
 	protected:
 		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
 		virtual bool _ReleaseResources() override;
 
 	private:
-		unsigned int _index;
+		static const unsigned int _MaxFadeSamps = 30000;
+		static const unsigned int _InitBufferSize = 1000000;
+		static const unsigned int _MaxBufferSize = 40000000;
+
+		unsigned long _playPos;
+		unsigned long _recPos;
+		double _pitch;
+		unsigned long _length;
+		LoopVisualState _state;
 		LoopParams _loopParams;
 		std::shared_ptr<audio::AudioMixer> _mixer;
 		std::weak_ptr<resources::WavResource> _wav;
+		std::vector<float> _buffer;
 	};
 }

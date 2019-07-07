@@ -2,7 +2,12 @@
 
 using namespace actions;
 
-TriggerAction::TriggerAction()
+TriggerAction::TriggerAction() :
+	ActionType(TriggerActionType::TRIGGER_REC_START),
+	TargetId(0),
+	OverbudTargetId(0),
+	SampleCount(0),
+	InputChannels({})
 {
 }
 

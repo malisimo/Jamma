@@ -17,55 +17,14 @@ namespace audio
 		~AudioBuffer();
 
 	public:
-		virtual void Play(AudioSink& dest, unsigned int numSamps) override;
-		inline virtual int Write(float samp, int indexOffset) override
+		virtual AudioDirection AudibleDirection() const override
 		{
-			auto bufSize = (unsigned int)_buffer.size();
-
-			while (bufSize <= _index + indexOffset)
-				indexOffset -= (int)_buffer.size();
-
-			_buffer[_index + indexOffset] = samp;
-
-			indexOffset++;
-
-			_numSamps++;
-			if (_numSamps > bufSize)
-				_numSamps = bufSize;
-
-			return indexOffset;
+			return AUDIO_BOTH;
 		}
-
-		inline virtual int WriteMix(float samp, int indexOffset) override
-		{
-			auto bufSize = (unsigned int)_buffer.size();
-
-			while (bufSize <= _index + indexOffset)
-				indexOffset -= (int)_buffer.size();
-
-			_buffer[_index + indexOffset] += samp;
-
-			indexOffset++;
-
-			_numSamps++;
-			if (_numSamps > bufSize)
-				_numSamps = bufSize;
-
-			return indexOffset;
-		}
-
-		inline virtual void Offset(int indexOffset) override
-		{
-			auto bufSize = (unsigned int)_buffer.size();
-			_index += indexOffset;
-
-			while (bufSize <= _index)
-				_index -= bufSize;
-
-			_numSamps += indexOffset > 0 ? indexOffset : bufSize;
-			if (_numSamps > bufSize)
-				_numSamps = bufSize;
-		}
+		virtual void OnPlay(const std::shared_ptr<base::AudioSink> dest,
+			unsigned int numSamps) override;
+		inline virtual int OnWrite(float samp, int indexOffset) override;
+		inline virtual void Offset(int indexOffset) override;
 
 		void Zero(unsigned int numSamps);
 		void SetSize(unsigned int size);
@@ -79,7 +38,7 @@ namespace audio
 
 	protected:
 		unsigned int _index;
-		unsigned int _numSamps;
+		unsigned int _length;
 		std::vector<float> _buffer;
 	};
 }

@@ -302,6 +302,15 @@
     <ClInclude Include="lib\rtaudio\include\soundcard.h">
       <Filter>lib\rtaudio\include</Filter>
     </ClInclude>
+    <ClInclude Include="src\base\MultiAudioSink.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\Audible.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\MultiAudible.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lib\glew\glew.c">

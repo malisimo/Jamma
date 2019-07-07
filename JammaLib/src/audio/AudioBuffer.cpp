@@ -18,9 +18,26 @@ AudioBuffer::~AudioBuffer()
 {
 }
 
-void AudioBuffer::Play(AudioSink& buf, unsigned int numSamps)
+void AudioBuffer::OnPlay(const std::shared_ptr<base::AudioSink> dest,
+	unsigned int numSamps)
 {
-	// TODO: AudioBuffer should output its samples when played...
+	auto index = _index;
+	while (index >= _length)
+		index -= _length;
+
+	auto destIndex = 0;
+
+	for (auto i = 0u; i < numSamps; i++)
+	{
+		destIndex = dest->OnWrite(_buffer[index], destIndex);
+
+		index++;
+		if (index >= _length)
+			index -= _length;
+	}
+
+	_index += numSamps;
+	_index %= _length;
 }
 
 void AudioBuffer::Zero(unsigned int numSamps)
@@ -28,7 +45,38 @@ void AudioBuffer::Zero(unsigned int numSamps)
 	auto offset = 0;
 
 	for (auto i = 0u; i < numSamps; i++)
-		offset = Write(0.0f, offset);
+		offset = OnWrite(0.0f, offset);
+}
+
+inline int AudioBuffer::OnWrite(float samp, int indexOffset)
+{
+	auto bufSize = (unsigned int)_buffer.size();
+
+	while (bufSize <= _index + indexOffset)
+		indexOffset -= (int)_buffer.size();
+
+	_buffer[_index + indexOffset]+= samp;
+
+	indexOffset++;
+
+	_length++;
+	if (_length > bufSize)
+		_length = bufSize;
+
+	return indexOffset;
+}
+
+inline void AudioBuffer::Offset(int indexOffset)
+{
+	auto bufSize = (unsigned int)_buffer.size();
+	_index += indexOffset;
+
+	while (bufSize <= _index)
+		_index -= bufSize;
+
+	_length += indexOffset > 0 ? indexOffset : bufSize;
+	if (_length > bufSize)
+		_length = bufSize;
 }
 
 void AudioBuffer::SetSize(unsigned int size)
@@ -46,14 +94,14 @@ void AudioBuffer::SetIndex(unsigned int index)
 	if (bufSize <= _index)
 		_index = bufSize - 1;
 
-	_numSamps += numExtraSamps;
-	if (_numSamps > bufSize)
-		_numSamps = bufSize;
+	_length += numExtraSamps;
+	if (_length > bufSize)
+		_length = bufSize;
 }
 
 unsigned int AudioBuffer::NumSamps() const
 {
-	return _numSamps;
+	return _length;
 }
 
 unsigned int AudioBuffer::BufSize() const

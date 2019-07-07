@@ -81,7 +81,7 @@ ActionResult GuiElement::OnAction(KeyAction action)
 			return res;
 	}
 
-	return { false, ACTIONRESULT_DEFAULT, nullptr };
+	return { false, 0UL, ACTIONRESULT_DEFAULT, nullptr };
 }
 
 ActionResult GuiElement::OnAction(TouchAction action)
@@ -95,9 +95,9 @@ ActionResult GuiElement::OnAction(TouchAction action)
 	}
 
 	if (Size2d::RectTest(_sizeParams.Size, action.Position))
-		return { true, ACTIONRESULT_DEFAULT, nullptr };
+		return { true, 0UL, ACTIONRESULT_DEFAULT, nullptr };
 
-	return { false, ACTIONRESULT_DEFAULT, nullptr };
+	return { false, 0UL, ACTIONRESULT_DEFAULT, nullptr };
 }
 
 ActionResult GuiElement::OnAction(TouchMoveAction action)
@@ -110,7 +110,7 @@ ActionResult GuiElement::OnAction(TouchMoveAction action)
 			return res;
 	}
 
-	return { false, ACTIONRESULT_DEFAULT, nullptr };
+	return { false, 0UL, ACTIONRESULT_DEFAULT, nullptr };
 }
 
 void GuiElement::SetParent(std::shared_ptr<GuiElement> parent)

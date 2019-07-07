@@ -212,9 +212,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\actions\ActionResult.h" />
+    <ClInclude Include="src\base\MultiAudible.h" />
+    <ClInclude Include="src\base\Audible.h" />
     <ClInclude Include="src\audio\ChannelMixer.h" />
     <ClInclude Include="src\actions\DoubleAction.h" />
     <ClInclude Include="src\actions\TriggerAction.h" />
+    <ClInclude Include="src\base\MultiAudioSink.h" />
     <ClInclude Include="src\base\Actionable.h" />
     <ClInclude Include="src\base\AudioSink.h" />
     <ClInclude Include="src\base\ActionUndo.h" />

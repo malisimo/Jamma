@@ -5,12 +5,15 @@
 #include "Loop.h"
 #include "GuiElement.h"
 #include "MultiAudioSource.h"
+#include "MultiAudioSink.h"
 #include "AudioSink.h"
 #include "ActionUndo.h"
+#include "Trigger.h"
 
 namespace engine
 {
-	class LoopTakeParams : public base::GuiElementParams
+	class LoopTakeParams :
+		public base::GuiElementParams
 	{
 	public:
 		LoopTakeParams() :
@@ -33,13 +36,29 @@ namespace engine
 		}
 
 	public:
+		unsigned long Id;
 		std::vector<LoopParams> Loops;
 	};
 
 	class LoopTake :
 		public base::GuiElement,
-		public base::MultiAudioSource
+		public base::MultiAudioSource,
+		public base::MultiAudioSink
 	{
+	public:
+		enum LoopTakeSource
+		{
+			SOURCE_ADC,
+			SOURCE_STATION,
+			SOURCE_LOOPTAKE
+		};
+
+		enum LoopTakeState
+		{
+			STATE_DEFAULT,
+			STATE_RECORDING
+		};
+
 	public:
 		LoopTake(LoopTakeParams params);
 		~LoopTake();
@@ -49,16 +68,28 @@ namespace engine
 		LoopTake& operator=(const LoopTake&) = delete;
 
 	public:
-		virtual void Play(const std::vector<std::shared_ptr<base::AudioSink>>& dest, unsigned int numSamps) override;
-	/*	virtual void Draw(base::DrawContext& ctx) override;
-
-	protected:
-		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
-		virtual bool _ReleaseResources() override;*/
-
+		virtual MultiAudioDirection MultiAudibleDirection() const override
+		{
+			return MULTIAUDIO_BOTH;
+		}
+		virtual void OnPlay(const std::shared_ptr<base::MultiAudioSink> dest, unsigned int numSamps) override;
+		//virtual void OnWrite(const std::shared_ptr<base::MultiAudioSource> src, unsigned int numSamps) override;
+		
+		unsigned long Id() const;
+		unsigned long SourceId() const;
+		LoopTakeSource SourceType() const;
+		unsigned long NumRecordedSamps() const;
 		void AddLoop(LoopParams loopParams);
 
+		void Record(std::vector<unsigned int> channels);
+		void Play(unsigned long index, unsigned long length);
+		void Ditch();
+
 	protected:
+		unsigned long _id;
+		unsigned int _sourceId;
+		LoopTakeSource _sourceType;
+		unsigned long _recordedSampCount;
 		std::vector<std::shared_ptr<Loop>> _loops;
 	};
 }

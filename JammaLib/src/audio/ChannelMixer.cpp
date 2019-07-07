@@ -65,7 +65,7 @@ void ChannelMixer::FromAdc(float* inBuf, unsigned int numChannels, unsigned int 
 
 			for (auto samp = 0u; samp < numSamps; samp++)
 			{
-				currentOffset = buf->Write(inBuf[samp*numChannels + chan], currentOffset);
+				currentOffset = buf->OnWrite(inBuf[samp*numChannels + chan], currentOffset);
 			}
 
 			buf->Offset(numSamps);
@@ -97,20 +97,28 @@ void ChannelMixer::ToDac(float* outBuf, unsigned int numChannels, unsigned int n
 	}
 }
 
-
-void ChannelMixer::Play(std::shared_ptr<MultiAudioSource> source, unsigned int numSamps)
+unsigned int ChannelMixer::NumInputChannels() const
 {
-	// Clear buffers, as all inputs are set to mix (not replace)
-	for (auto& buf : _outputBuffers)
-	{
-		buf->Zero(numSamps);
-	}
+	return (unsigned int)_inputBuffers.size();
+}
 
-	std::vector<std::shared_ptr<AudioSink>> bufs = 
-	{
-		_outputBuffers.begin(),
-		_outputBuffers.end()
-	};
-	
-	source->Play(bufs, numSamps);
+unsigned int ChannelMixer::NumOutputChannels() const
+{
+	return (unsigned int)_outputBuffers.size();
+}
+
+const std::shared_ptr<AudioSink> ChannelMixer::InputChannel(unsigned int channel)
+{
+	if (channel < _inputBuffers.size())
+		return _inputBuffers[channel];
+
+	return std::shared_ptr<AudioSink>();
+}
+
+const std::shared_ptr<AudioSource> ChannelMixer::OutputChannel(unsigned int channel)
+{
+	if (channel < _outputBuffers.size())
+		return _outputBuffers[channel];
+
+	return std::shared_ptr<AudioSource>();
 }
