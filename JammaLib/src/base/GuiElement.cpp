@@ -29,7 +29,7 @@ void GuiElement::Init()
 
 	for (auto& child : _children)
 	{
-		child->SetParent(shared_from_this());
+		child->SetParent(GuiElement::shared_from_this());
 		child->Init();
 	}
 }

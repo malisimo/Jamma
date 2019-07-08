@@ -28,13 +28,13 @@ namespace base
 		void SetReceiver(std::shared_ptr<ActionReceiver> receiver) { _receiver = receiver; }
 		const std::shared_ptr<ActionReceiver> GetReceiver() { return _receiver; }
 
-	protected:
 		std::shared_ptr<ActionSender> shared_from_this()
 		{
 			return std::dynamic_pointer_cast<ActionSender>(
 				Actionable::shared_from_this());
 		}
 
+	protected:
 		std::shared_ptr<ActionReceiver> _receiver;
 	};
 }

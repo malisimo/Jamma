@@ -67,7 +67,8 @@ bool Loop::_ReleaseResources()
 	return GuiElement::_ReleaseResources();
 }
 
-void Loop::OnPlay(const std::shared_ptr<MultiAudioSink> dest, unsigned int numSamps)
+void Loop::OnPlay(const std::shared_ptr<MultiAudioSink> dest,
+	unsigned int numSamps)
 {
 	// Mixer will stereo spread the mono wav
 	// and adjust level
@@ -120,6 +121,35 @@ int Loop::OnWrite(float samp, int indexOffset)
 	_buffer[_recPos + indexOffset] = samp;
 
 	return indexOffset + 1;
+}
+
+void Loop::OnPlayRaw(const std::shared_ptr<base::MultiAudioSink> dest,
+	unsigned int channel,
+	unsigned int delaySamps,
+	unsigned int numSamps)
+{
+	// Mixer will stereo spread the mono wav
+	// and adjust level
+	auto wav = _wav.lock();
+
+	if (!wav)
+		return;
+
+	//auto wavLength = wav->Length();
+	//auto wavBuf = wav->Buffer();
+	auto index = _index + delaySamps;
+	auto bufSize = _length + _MaxFadeSamps;
+	while (index >= bufSize)
+		index -= _length;
+
+	for (auto i = 0u; i < numSamps; i++)
+	{
+		dest->OnWriteChannel(channel, _buffer[index], i);
+
+		index++;
+		if (index >= bufSize)
+			index -= _length;
+	}
 }
 
 unsigned int Loop::InputChannel()

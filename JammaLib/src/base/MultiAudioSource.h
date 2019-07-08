@@ -35,13 +35,13 @@ namespace base
 		}
 		virtual unsigned int NumOutputChannels() const { return 0; };
 
-	protected:
 		std::shared_ptr<MultiAudioSource> shared_from_this()
 		{
 			return std::dynamic_pointer_cast<MultiAudioSource>(
 				MultiAudible::shared_from_this());
 		}
 
+	protected:
 		virtual const std::shared_ptr<AudioSource> OutputChannel(unsigned int channel) { return std::shared_ptr<AudioSource>(); }
 	};
 }

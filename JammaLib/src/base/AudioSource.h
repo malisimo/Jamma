@@ -26,7 +26,6 @@ namespace base
 		virtual void OnPlay(const std::shared_ptr<base::AudioSink> dest,
 			unsigned int numSamps) {};
 
-	protected:
 		std::shared_ptr<AudioSource> shared_from_this()
 		{
 			return std::dynamic_pointer_cast<AudioSource>(

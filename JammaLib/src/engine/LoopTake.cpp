@@ -26,13 +26,15 @@ LoopTake::~LoopTake()
 {
 }
 
-void LoopTake::OnPlay(const std::shared_ptr<MultiAudioSink> dest, unsigned int numSamps)
+void LoopTake::OnPlay(const std::shared_ptr<MultiAudioSink> dest,
+	unsigned int numSamps)
 {
 	for (auto& loop : _loops)
 		loop->OnPlay(dest, numSamps);
 }
 
-/*void LoopTake::OnWrite(const std::shared_ptr<MultiAudioSource> src, unsigned int numSamps)
+void LoopTake::OnWrite(const std::shared_ptr<MultiAudioSource> src,
+	unsigned int numSamps)
 {
 	for (auto& loop : _loops)
 	{
@@ -41,7 +43,19 @@ void LoopTake::OnPlay(const std::shared_ptr<MultiAudioSink> dest, unsigned int n
 	}
 
 	_recordedSampCount += numSamps;
-}*/
+}
+
+void LoopTake::OnPlayRaw(const std::shared_ptr<MultiAudioSink> dest,
+	unsigned int delaySamps,
+	unsigned int numSamps)
+{
+	auto loopNum = 0u;
+	for (auto& loop : _loops)
+	{
+		loop->OnPlayRaw(dest, loopNum, delaySamps, numSamps);
+		loopNum++;
+	}
+}
 
 unsigned long LoopTake::Id() const
 {

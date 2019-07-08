@@ -73,7 +73,9 @@ namespace engine
 			return MULTIAUDIO_BOTH;
 		}
 		virtual void OnPlay(const std::shared_ptr<base::MultiAudioSink> dest, unsigned int numSamps) override;
-		//virtual void OnWrite(const std::shared_ptr<base::MultiAudioSource> src, unsigned int numSamps) override;
+		virtual void OnWrite(const std::shared_ptr<base::MultiAudioSource> src, unsigned int numSamps) override;
+		
+		void OnPlayRaw(const std::shared_ptr<MultiAudioSink> dest, unsigned int delaySamps, unsigned int numSamps);
 		
 		unsigned long Id() const;
 		unsigned long SourceId() const;

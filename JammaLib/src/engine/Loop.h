@@ -102,8 +102,8 @@ namespace engine
 	public:
 		virtual void OnPlay(const std::shared_ptr<base::MultiAudioSink> dest, unsigned int numSamps) override;
 		virtual int OnWrite(float samp, int indexOffset) override;
-		//virtual int WriteMix(float samp, int indexOffset) override;
 		//virtual void Offset(int indexOffset) override;
+		void OnPlayRaw(const std::shared_ptr<base::MultiAudioSink> dest, unsigned int channel, unsigned int delaySamps, unsigned int numSamps);
 
 		unsigned int InputChannel();
 		void SetInputChannel(unsigned int channel);

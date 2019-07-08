@@ -28,13 +28,13 @@ namespace base
 		virtual actions::ActionResult OnAction(actions::DoubleAction action) { return { false, actions::ACTIONRESULT_DEFAULT }; };
 		virtual actions::ActionResult OnAction(actions::TriggerAction action) { return { false, actions::ACTIONRESULT_DEFAULT }; };
 
-	protected:
 		std::shared_ptr<ActionReceiver> shared_from_this()
 		{
 			return std::dynamic_pointer_cast<ActionReceiver>(
 				Actionable::shared_from_this());
 		}
 
+	protected:
 		virtual void InitReceivers() {};
 	};
 }

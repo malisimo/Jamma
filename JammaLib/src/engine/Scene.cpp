@@ -103,12 +103,12 @@ Scene::Scene(SceneParams params) :
 	trigParams.TexturePunchedIn = "purple";
 	trigParams.DebounceMs = 120;
 	station->AddTrigger(trigParams);
-	_stations.push_back(std::move(station));
+	_stations.push_back(station);
 
 	_audioDevice = std::make_unique<AudioDevice>();
 
-	for (auto& station : _stations)
-		station->Init();
+	for (auto& stat : _stations)
+		stat->Init();
 }
 
 void Scene::Draw(DrawContext& ctx)
@@ -298,7 +298,7 @@ void Scene::OnAudio(float* inBuf, float* outBuf, unsigned int numSamps)
 
 		for (auto& station : _stations)
 		{
-			station->OnWrite(_channelMixer, numSamps);
+			_channelMixer->OnPlay(station, numSamps);
 		}
 	}
 

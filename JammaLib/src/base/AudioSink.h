@@ -20,7 +20,6 @@ namespace base
 		inline virtual int OnWrite(float samp, int indexOffset) { return indexOffset; };
 		inline virtual void Offset(int indexOffset) { _index+= indexOffset; };
 
-	protected:
 		std::shared_ptr<AudioSink> shared_from_this()
 		{
 			return std::dynamic_pointer_cast<AudioSink>(

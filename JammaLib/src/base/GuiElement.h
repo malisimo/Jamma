@@ -49,8 +49,8 @@ namespace base
 		public Drawable, 
 		public Sizeable, 
 		public Moveable,
-		public virtual ActionSender,
-		public virtual ActionReceiver
+		public ActionSender,
+		public ActionReceiver
 	{
 	public:
 		GuiElement(GuiElementParams params);
