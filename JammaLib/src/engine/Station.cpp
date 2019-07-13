@@ -42,6 +42,12 @@ void Station::OnWrite(const std::shared_ptr<base::MultiAudioSource> src, unsigne
 		take->OnWrite(src, numSamps);
 }
 
+void Station::Offset(unsigned int numSamps)
+{
+	for (auto& take : _loopTakes)
+		take->Offset(numSamps);
+}
+
 ActionResult Station::OnAction(KeyAction action)
 {
 	ActionResult res;
@@ -61,7 +67,7 @@ ActionResult Station::OnAction(KeyAction action)
 
 ActionResult Station::OnAction(TouchAction action)
 {
-	return ActionReceiver::OnAction(action);
+	return GuiElement::OnAction(action);
 }
 
 ActionResult Station::OnAction(TriggerAction action)

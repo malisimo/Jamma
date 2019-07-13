@@ -45,6 +45,12 @@ void LoopTake::OnWrite(const std::shared_ptr<MultiAudioSource> src,
 	_recordedSampCount += numSamps;
 }
 
+void LoopTake::Offset(unsigned int numSamps)
+{
+	for (auto& loop : _loops)
+		loop->Offset(numSamps);
+}
+
 void LoopTake::OnPlayRaw(const std::shared_ptr<MultiAudioSink> dest,
 	unsigned int delaySamps,
 	unsigned int numSamps)

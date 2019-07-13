@@ -311,6 +311,9 @@
     <ClInclude Include="src\base\MultiAudible.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="src\base\Sharable.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lib\glew\glew.c">

@@ -16,8 +16,8 @@ namespace audio
 	};
 
 	class ChannelMixer :
-		public base::MultiAudioSource,
-		public base::MultiAudioSink
+		public virtual base::MultiAudioSource,
+		public virtual base::MultiAudioSink
 	{
 	public:
 		ChannelMixer(ChannelMixerParams chanMixParams);

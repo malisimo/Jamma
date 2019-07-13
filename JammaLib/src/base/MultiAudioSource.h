@@ -12,10 +12,11 @@ namespace base
 		public virtual MultiAudible
 	{
 	public:
-		virtual MultiAudioDirection MultiAudibleDirection() const override
-		{
-			return MULTIAUDIO_SOURCE;
-		}
+		MultiAudioSource() {}
+		~MultiAudioSource() {}
+
+	public:
+		virtual MultiAudioDirection MultiAudibleDirection() const override { return MULTIAUDIO_SOURCE; }
 		virtual void OnPlay(const std::shared_ptr<base::MultiAudioSink> dest,
 			unsigned int numSamps)
 		{
@@ -38,7 +39,7 @@ namespace base
 		std::shared_ptr<MultiAudioSource> shared_from_this()
 		{
 			return std::dynamic_pointer_cast<MultiAudioSource>(
-				MultiAudible::shared_from_this());
+				Sharable::shared_from_this());
 		}
 
 	protected:

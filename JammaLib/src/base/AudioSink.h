@@ -13,10 +13,7 @@ namespace base
 		AudioSink() : _index(0) {}
 
 	public:
-		virtual AudioDirection AudibleDirection() const override
-		{
-			return AUDIO_SINK;
-		}
+		virtual AudioDirection AudibleDirection() const override { return AUDIO_SINK; }
 		inline virtual int OnWrite(float samp, int indexOffset) { return indexOffset; };
 		inline virtual void Offset(int indexOffset) { _index+= indexOffset; };
 

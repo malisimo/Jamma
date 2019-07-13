@@ -47,9 +47,9 @@ namespace engine
 	};
 
 	class Loop :
-		public base::AudioSink,
-		public base::MultiAudioSource,
-		public base::GuiElement
+		public virtual base::GuiElement,
+		public virtual base::AudioSink,
+		public virtual base::MultiAudioSource
 	{
 	public:
 		enum LoopVisualState
@@ -100,6 +100,7 @@ namespace engine
 		}
 
 	public:
+		virtual MultiAudioDirection MultiAudibleDirection() const override { return MULTIAUDIO_BOTH; }
 		virtual void OnPlay(const std::shared_ptr<base::MultiAudioSink> dest, unsigned int numSamps) override;
 		virtual int OnWrite(float samp, int indexOffset) override;
 		//virtual void Offset(int indexOffset) override;

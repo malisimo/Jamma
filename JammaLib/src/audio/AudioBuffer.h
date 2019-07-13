@@ -8,8 +8,8 @@
 namespace audio
 {
 	class AudioBuffer :
-		public base::AudioSink,
-		public base::AudioSource
+		public virtual base::AudioSink,
+		public virtual base::AudioSource
 	{
 	public:
 		AudioBuffer();

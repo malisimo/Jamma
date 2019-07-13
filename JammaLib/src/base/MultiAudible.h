@@ -2,11 +2,12 @@
 
 #include <memory>
 #include "Audible.h"
+#include "Sharable.h"
 
 namespace base
 {
 	class MultiAudible :
-		public std::enable_shared_from_this<MultiAudible>
+		public virtual Sharable
 	{
 	public:
 		enum MultiAudioDirection
@@ -21,9 +22,6 @@ namespace base
 		~MultiAudible() {};
 
 	public:
-		virtual MultiAudioDirection MultiAudibleDirection() const
-		{
-			return MULTIAUDIO_NONE;
-		}
+		virtual MultiAudioDirection MultiAudibleDirection() const { return MULTIAUDIO_NONE; }
 	};
 }

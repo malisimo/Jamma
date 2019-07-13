@@ -70,7 +70,7 @@ Scene::Scene(SceneParams params) :
 	station->AddTake(takeParams);
 
 	TriggerParams trigParams;
-	trigParams.Size = { 160, 160 };
+	trigParams.Size = { 24, 24 };
 	trigParams.Position = { 6, 6 };
 	trigParams.Activate = {
 		DualBinding(
@@ -297,9 +297,9 @@ void Scene::OnAudio(float* inBuf, float* outBuf, unsigned int numSamps)
 		_channelMixer->FromAdc(inBuf, inDeviceInfo.inputChannels, numSamps);
 
 		for (auto& station : _stations)
-		{
 			_channelMixer->OnPlay(station, numSamps);
-		}
+		
+		_channelMixer->Offset(numSamps);
 	}
 
 	if (nullptr != outBuf)
@@ -308,7 +308,10 @@ void Scene::OnAudio(float* inBuf, float* outBuf, unsigned int numSamps)
 		std::fill(outBuf, outBuf + numSamps * outDeviceInfo.outputChannels, 0.0f);
 
 		for (auto& station : _stations)
-			_channelMixer->OnPlay(station, numSamps);
+		{
+			station->OnPlay(_channelMixer, numSamps);
+			station->Offset(numSamps);
+		}
 
 		_channelMixer->ToDac(outBuf, outDeviceInfo.outputChannels, numSamps);
 	}

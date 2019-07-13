@@ -49,8 +49,8 @@ namespace base
 		public Drawable, 
 		public Sizeable, 
 		public Moveable,
-		public ActionSender,
-		public ActionReceiver
+		public virtual ActionSender,
+		public virtual ActionReceiver
 	{
 	public:
 		GuiElement(GuiElementParams params);
@@ -65,10 +65,7 @@ namespace base
 		};
 
 	public:
-		virtual ActionDirection Direction() const override
-		{
-			return ACTION_BOTH;
-		}
+		virtual ActionDirection Direction() const override { return ACTIONDIR_DUPLEX; }
 		virtual void Init();
 		virtual void SetSize(utils::Size2d size) override;
 		virtual void Draw(DrawContext& ctx) override;

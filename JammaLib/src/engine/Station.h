@@ -27,7 +27,7 @@ namespace engine
 	public:
 		std::shared_ptr<Timer> GlobalClock;
 	};
-		
+	
 	class Station :
 		public base::Tickable,
 		public base::GuiElement,
@@ -43,12 +43,10 @@ namespace engine
 		Station& operator=(const Station&) = delete;
 
 	public:
-		virtual MultiAudioDirection MultiAudibleDirection() const override
-		{
-			return MULTIAUDIO_BOTH;
-		}
+		virtual MultiAudioDirection MultiAudibleDirection() const override { return MULTIAUDIO_BOTH; }
 		virtual void OnPlay(const std::shared_ptr<base::MultiAudioSink> dest, unsigned int numSamps) override;
 		virtual void OnWrite(const std::shared_ptr<base::MultiAudioSource> src, unsigned int numSamps) override;
+		virtual void Offset(unsigned int numSamps) override;
 		virtual actions::ActionResult OnAction(actions::KeyAction action) override;
 		virtual actions::ActionResult OnAction(actions::TouchAction action) override;
 		virtual actions::ActionResult OnAction(actions::TriggerAction action) override;

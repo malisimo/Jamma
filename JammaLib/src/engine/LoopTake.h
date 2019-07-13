@@ -41,9 +41,9 @@ namespace engine
 	};
 
 	class LoopTake :
-		public base::GuiElement,
-		public base::MultiAudioSource,
-		public base::MultiAudioSink
+		public virtual base::GuiElement,
+		public virtual base::MultiAudioSource,
+		public virtual base::MultiAudioSink
 	{
 	public:
 		enum LoopTakeSource
@@ -68,13 +68,11 @@ namespace engine
 		LoopTake& operator=(const LoopTake&) = delete;
 
 	public:
-		virtual MultiAudioDirection MultiAudibleDirection() const override
-		{
-			return MULTIAUDIO_BOTH;
-		}
+		virtual MultiAudioDirection MultiAudibleDirection() const override { return MULTIAUDIO_BOTH; }
 		virtual void OnPlay(const std::shared_ptr<base::MultiAudioSink> dest, unsigned int numSamps) override;
 		virtual void OnWrite(const std::shared_ptr<base::MultiAudioSource> src, unsigned int numSamps) override;
-		
+		virtual void Offset(unsigned int numSamps) override;
+
 		void OnPlayRaw(const std::shared_ptr<MultiAudioSink> dest, unsigned int delaySamps, unsigned int numSamps);
 		
 		unsigned long Id() const;

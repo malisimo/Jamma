@@ -17,10 +17,7 @@ namespace base
 		public virtual Actionable
 	{
 	public:
-		virtual ActionDirection Direction() const override
-		{
-			return ACTION_RECEIVER;
-		}
+		virtual ActionDirection Direction() const override { return ACTIONDIR_RECEIVE; }
 		virtual actions::ActionResult OnAction(actions::WindowAction action) { return { false, actions::ACTIONRESULT_DEFAULT }; };
 		virtual actions::ActionResult OnAction(actions::TouchAction action) { return { false, actions::ACTIONRESULT_DEFAULT }; };
 		virtual actions::ActionResult OnAction(actions::TouchMoveAction action) { return { false, actions::ACTIONRESULT_DEFAULT }; };
@@ -31,7 +28,7 @@ namespace base
 		std::shared_ptr<ActionReceiver> shared_from_this()
 		{
 			return std::dynamic_pointer_cast<ActionReceiver>(
-				Actionable::shared_from_this());
+				Sharable::shared_from_this());
 		}
 
 	protected:

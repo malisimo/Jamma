@@ -1,26 +1,26 @@
 #pragma once
 
+#include "Sharable.h"
+
 namespace base
 {
 	class Actionable :
-		public std::enable_shared_from_this<Actionable>
+		public virtual Sharable
 	{
 	public:
 		enum ActionDirection
 		{
-			ACTION_NONE,
-			ACTION_RECEIVER,
-			ACTION_SENDER,
-			ACTION_BOTH
+			ACTIONDIR_NONE,
+			ACTIONDIR_RECEIVE,
+			ACTIONDIR_SEND,
+			ACTIONDIR_DUPLEX
 		};
+
 	public:
 		Actionable() {};
 		~Actionable() {};
 
 	public:
-		virtual ActionDirection Direction() const
-		{
-			return ACTION_NONE;
-		}
+		virtual ActionDirection Direction() const {	return ACTIONDIR_NONE;	}
 	};
 }

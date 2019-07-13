@@ -35,7 +35,6 @@ namespace engine
 	};
 
 	class Scene :
-		public std::enable_shared_from_this<Scene>,
 		public base::Tickable,
 		public base::Drawable,
 		public base::Sizeable,
@@ -48,7 +47,7 @@ namespace engine
 		// Copy
 		Scene(const Scene&) = delete;
 		Scene& operator=(const Scene&) = delete;
-
+		/*
 		// Move
 		Scene(Scene&& other) :
 			base::Tickable(std::move(other)),
@@ -58,13 +57,17 @@ namespace engine
 			_overlayViewProj(other._overlayViewProj),
 			_channelMixer(std::move(other._channelMixer)),
 			_audioDevice(std::move(other._audioDevice)),
-			_masterLoop(std::move(other._masterLoop)),
+			_label(std::move(other._label)),
+			_undoHistory(std::move(other._undoHistory)),
 			_stations(std::move(other._stations)),
-			_label(std::move(other._label))
+			_touchDownElement(other._touchDownElement),
+			_masterLoop(other._masterLoop)
 		{
-			other._masterLoop = std::make_shared<Loop>(LoopParams());
-			other._audioDevice = std::make_unique<audio::AudioDevice>();
 			other._stations = std::vector<std::shared_ptr<Station>>();
+			other._viewProj = glm::mat4();
+			other._overlayViewProj = glm::mat4();
+			other._channelMixer = std::make_unique<audio::ChannelMixer>();
+			other._audioDevice = std::make_unique<audio::AudioDevice>();
 			other._label = std::make_unique<gui::GuiLabel>(
 				gui::GuiLabelParams(
 					base::GuiElementParams(
@@ -76,8 +79,8 @@ namespace engine
 						"",
 						{}),
 					""));
-			other._viewProj = glm::mat4();
-			other._overlayViewProj = glm::mat4();
+			_undoHistory = UndoHistory();
+			other._masterLoop = std::make_shared<Loop>(LoopParams());
 		}
 
 		Scene& operator=(Scene&& other)
@@ -86,20 +89,22 @@ namespace engine
 			{
 				ReleaseResources();
 
-				std::swap(_drawParams, other._drawParams),
-				std::swap(_sizeParams, other._sizeParams),
-				std::swap(_texture, other._texture),
-				std::swap(_resizing, other._resizing),
 				std::swap(_viewProj, other._viewProj);
 				std::swap(_overlayViewProj, other._overlayViewProj);
+				_channelMixer.swap(other._channelMixer);
+				_audioDevice.swap(other._audioDevice);
 				_label.swap(other._label);
 				_stations.swap(other._stations);
-				_audioDevice.swap(other._audioDevice);
+				_undoHistory.swap(other._undoHistory);
+				std::swap(_touchDownElement, other._touchDownElement),
 				_masterLoop.swap(other._masterLoop);
+				std::swap(_drawParams, other._drawParams);
+				std::swap(_sizeParams, other._sizeParams);
+				std::swap(_texture, other._texture);
 			}
 
 			return *this;
-		}
+		}*/
 
 		virtual void Draw(base::DrawContext& ctx) override;
 

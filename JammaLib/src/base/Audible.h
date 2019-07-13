@@ -1,9 +1,11 @@
 #pragma once
 
+#include "Sharable.h"
+
 namespace base
 {
 	class Audible :
-		public std::enable_shared_from_this<Audible>
+		public virtual Sharable
 	{
 	public:
 		enum AudioDirection
@@ -19,9 +21,6 @@ namespace base
 		~Audible() {};
 
 	public:
-		virtual AudioDirection AudibleDirection() const
-		{
-			return AUDIO_NONE;
-		}
+		virtual AudioDirection AudibleDirection() const { return AUDIO_NONE; }
 	};
 }

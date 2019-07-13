@@ -12,18 +12,6 @@ using graphics::Image;
 using graphics::ImageParams;
 using resources::ResourceLib;
 
-//Trigger::Trigger() :
-//	_state(TRIGSTATE_DEFAULT),
-//	_debounceTimeMs(0.0),
-//	_lastActivateTime(),
-//	_lastDitchTime(),
-//	_isLastActivateDown(false),
-//	_isLastDitchDown(false),
-//	_isLastActivateDownRaw(false),
-//	_isLastDitchDownRaw(false)
-//{
-//}
-
 Trigger::Trigger(TriggerParams trigParams) :
 	GuiElement(trigParams),
 	_activateBindings(trigParams.Activate),

@@ -18,10 +18,7 @@ namespace base
 			_receiver(receiver)	{}
 
 	public:
-		virtual ActionDirection Direction() const override
-		{
-			return ACTION_SENDER;
-		}
+		virtual ActionDirection Direction() const override { return ACTIONDIR_SEND;	}
 		virtual bool Undo(std::shared_ptr<ActionUndo> undo) { return false; }
 		virtual bool Redo(std::shared_ptr<ActionUndo> undo) { return false; }
 
