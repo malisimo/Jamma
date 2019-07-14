@@ -15,35 +15,57 @@ namespace audio
 		unsigned int NumOutputChannels;
 	};
 
-	class ChannelMixer :
-		public virtual base::MultiAudioSource,
-		public virtual base::MultiAudioSink
+	class ChannelMixer
 	{
+	private:
+		class BufferMixer
+		{
+		public:
+			void SetNumChannels(unsigned int numChans, unsigned int bufSize);
+			const std::shared_ptr<audio::AudioBuffer> Channel(unsigned int channel);
+
+		protected:
+			std::vector<std::shared_ptr<AudioBuffer>> _buffers;
+		};
+		class AdcChannelMixer :
+			public BufferMixer,
+			public virtual base::MultiAudioSource
+		{
+		public:
+			virtual unsigned int NumOutputChannels() const override;
+
+		protected:
+			virtual const std::shared_ptr<base::AudioSource> OutputChannel(unsigned int channel) override;
+		};
+
+		class DacChannelMixer :
+			public BufferMixer,
+			public virtual base::MultiAudioSink
+		{
+		public:
+			virtual unsigned int NumInputChannels() const override;
+
+		protected:
+			virtual const std::shared_ptr<base::AudioSink> InputChannel(unsigned int channel) override;
+		};
+
 	public:
 		ChannelMixer(ChannelMixerParams chanMixParams);
 		~ChannelMixer();
 
 	public:
-		virtual MultiAudioDirection MultiAudibleDirection() const override
-		{
-			return MULTIAUDIO_BOTH;
-		}
-		virtual unsigned int NumInputChannels() const override;
-		virtual unsigned int NumOutputChannels() const override;
-
 		void SetParams(ChannelMixerParams chanMixParams);
 		void FromAdc(float* inBuf, unsigned int numChannels, unsigned int numSamps);
 		void ToDac(float* outBuf, unsigned int numChannels, unsigned int numSamps);
-
-	protected:
-		virtual const std::shared_ptr<base::AudioSink> InputChannel(unsigned int channel) override;
-		virtual const std::shared_ptr<base::AudioSource> OutputChannel(unsigned int channel) override;
+		void Offset(unsigned int numSamps);
+		const std::shared_ptr<base::MultiAudioSource> Source();
+		const std::shared_ptr<base::MultiAudioSink> Sink();
 
 	public:
 		static const unsigned int DefaultBufferSize = 3000;
 
 	protected:
-		std::vector<std::shared_ptr<AudioBuffer>> _inputBuffers;
-		std::vector<std::shared_ptr<AudioBuffer>> _outputBuffers;
+		std::shared_ptr<AdcChannelMixer> _adcMixer;
+		std::shared_ptr<DacChannelMixer> _dacMixer;
 	};
 }

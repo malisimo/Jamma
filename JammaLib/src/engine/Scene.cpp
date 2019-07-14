@@ -297,7 +297,7 @@ void Scene::OnAudio(float* inBuf, float* outBuf, unsigned int numSamps)
 		_channelMixer->FromAdc(inBuf, inDeviceInfo.inputChannels, numSamps);
 
 		for (auto& station : _stations)
-			_channelMixer->OnPlay(station, numSamps);
+			_channelMixer->Source()->OnPlay(station, numSamps);
 		
 		_channelMixer->Offset(numSamps);
 	}
@@ -309,7 +309,7 @@ void Scene::OnAudio(float* inBuf, float* outBuf, unsigned int numSamps)
 
 		for (auto& station : _stations)
 		{
-			station->OnPlay(_channelMixer, numSamps);
+			station->OnPlay(_channelMixer->Sink(), numSamps);
 			station->Offset(numSamps);
 		}
 
