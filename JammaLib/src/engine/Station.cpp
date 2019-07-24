@@ -36,16 +36,22 @@ void Station::OnPlay(const std::shared_ptr<base::MultiAudioSink> dest, unsigned 
 		take->OnPlay(dest, numSamps);
 }
 
+void Station::EndMultiPlay(unsigned int numSamps)
+{
+	for (auto& take : _loopTakes)
+		take->EndMultiPlay(numSamps);
+}
+
 void Station::OnWrite(const std::shared_ptr<base::MultiAudioSource> src, unsigned int numSamps)
 {
 	for (auto& take : _loopTakes)
 		take->OnWrite(src, numSamps);
 }
 
-void Station::Offset(unsigned int numSamps)
+void Station::EndMultiWrite(unsigned int numSamps, bool updateIndex)
 {
 	for (auto& take : _loopTakes)
-		take->Offset(numSamps);
+		take->EndMultiWrite(numSamps, updateIndex);
 }
 
 ActionResult Station::OnAction(KeyAction action)

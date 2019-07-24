@@ -25,7 +25,7 @@ namespace base
 		};
 
 	public:
-		virtual void Draw(DrawContext& ctx) {};
+		virtual void Draw(DrawContext& ctx) = 0;
 
 	protected:
 		DrawableParams _drawParams;

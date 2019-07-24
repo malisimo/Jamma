@@ -21,7 +21,8 @@ namespace base
 	public:
 		virtual AudioDirection AudibleDirection() const override { return AUDIO_SOURCE; }
 		virtual void OnPlay(const std::shared_ptr<base::AudioSink> dest,
-			unsigned int numSamps) {};
+			unsigned int numSamps) = 0;
+		virtual void EndPlay(unsigned int numSamps) = 0;
 
 		std::shared_ptr<AudioSource> shared_from_this()
 		{

@@ -4,12 +4,16 @@ using namespace audio;
 
 AudioBuffer::AudioBuffer() :
 	AudioSource({}),
+	_index(0),
+	_length(0),
 	_buffer(std::vector<float>(0, 0.0f))
 {
 }
 
 AudioBuffer::AudioBuffer(unsigned int size) :
 	AudioSource({}),
+	_index(0),
+	_length(0),
 	_buffer(std::vector<float>(size, 0.0f))
 {
 }
@@ -21,6 +25,9 @@ AudioBuffer::~AudioBuffer()
 void AudioBuffer::OnPlay(const std::shared_ptr<base::AudioSink> dest,
 	unsigned int numSamps)
 {
+	if (_length == 0)
+		return;
+
 	auto index = _index;
 	while (index >= _length)
 		index -= _length;
@@ -35,17 +42,19 @@ void AudioBuffer::OnPlay(const std::shared_ptr<base::AudioSink> dest,
 		if (index >= _length)
 			index -= _length;
 	}
-
-	_index += numSamps;
-	_index %= _length;
 }
 
-void AudioBuffer::Zero(unsigned int numSamps)
+void AudioBuffer::EndPlay(unsigned int numSamps)
 {
-	auto offset = 0;
+	auto bufSize = (unsigned int)_buffer.size();
+	_index += numSamps;
 
-	for (auto i = 0u; i < numSamps; i++)
-		offset = OnWrite(0.0f, offset);
+	while (bufSize <= _index)
+		_index -= bufSize;
+
+	_length += numSamps;
+	if (_length > bufSize)
+		_length = bufSize;
 }
 
 inline int AudioBuffer::OnWrite(float samp, int indexOffset)
@@ -57,26 +66,33 @@ inline int AudioBuffer::OnWrite(float samp, int indexOffset)
 
 	_buffer[_index + indexOffset]+= samp;
 
-	indexOffset++;
-
-	_length++;
-	if (_length > bufSize)
-		_length = bufSize;
-
-	return indexOffset;
+	return indexOffset + 1;
 }
 
-inline void AudioBuffer::Offset(int indexOffset)
+inline int AudioBuffer::OnOverwrite(float samp, int indexOffset)
 {
 	auto bufSize = (unsigned int)_buffer.size();
-	_index += indexOffset;
 
-	while (bufSize <= _index)
-		_index -= bufSize;
+	while (bufSize <= _index + indexOffset)
+		indexOffset -= (int)_buffer.size();
 
-	_length += indexOffset > 0 ? indexOffset : bufSize;
-	if (_length > bufSize)
-		_length = bufSize;
+	_buffer[_index + indexOffset] = samp;
+
+	return indexOffset + 1;
+}
+
+void AudioBuffer::EndWrite(unsigned int numSamps, bool updateIndex)
+{
+	// Skip - EndPlay() will do the offset as
+	// we are using the same buffers for IO
+	//		SetIndex(_index + numSamps);
+
+	_length += numSamps;
+	if (_length > _buffer.size())
+		_length = (unsigned int)_buffer.size();
+
+	if (updateIndex)
+		SetIndex(_index + numSamps);
 }
 
 void AudioBuffer::SetSize(unsigned int size)
@@ -88,15 +104,16 @@ void AudioBuffer::SetIndex(unsigned int index)
 {
 	auto bufSize = (unsigned int)_buffer.size();
 
-	auto numExtraSamps = index - _index;
+	if (0 == bufSize)
+	{
+		_index = 0;
+		return;
+	}
+
+	while (index >= bufSize)
+		index-= bufSize;
+
 	_index = index;
-
-	if (bufSize <= _index)
-		_index = bufSize - 1;
-
-	_length += numExtraSamps;
-	if (_length > bufSize)
-		_length = bufSize;
 }
 
 unsigned int AudioBuffer::NumSamps() const

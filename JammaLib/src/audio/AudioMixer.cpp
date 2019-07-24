@@ -45,9 +45,9 @@ void AudioMixer::OnPlay(const std::shared_ptr<MultiAudioSink> dest,
 	_behaviour->Apply(dest, samp * (float)_fade->Next(), index);
 }
 
-void AudioMixer::Offset(const std::shared_ptr<MultiAudioSink> dest, unsigned int numSamps)
+void AudioMixer::Offset(unsigned int numSamps)
 {
-	dest->Offset(numSamps);
+	// TODO: Update fader state
 }
 
 unsigned int AudioMixer::InputChannel() const

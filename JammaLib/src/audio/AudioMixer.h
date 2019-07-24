@@ -130,8 +130,7 @@ namespace audio
 		void OnPlay(const std::shared_ptr<base::MultiAudioSink> dest,
 			float samp,
 			unsigned int index);
-		void Offset(const std::shared_ptr<base::MultiAudioSink> dest,
-			unsigned int numSamps);
+		void Offset(unsigned int numSamps);
 		
 		unsigned int InputChannel() const;
 		void SetInputChannel(unsigned int channel);

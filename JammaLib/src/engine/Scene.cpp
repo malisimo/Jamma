@@ -20,7 +20,8 @@ Scene::Scene(SceneParams params) :
 	_audioDevice(std::unique_ptr<AudioDevice>()),
 	_masterLoop(std::shared_ptr<Loop>()),
 	_stations(),
-	_touchDownElement(std::weak_ptr<GuiElement>())
+	_touchDownElement(std::weak_ptr<GuiElement>()),
+	_audioCallbackCount(0)
 {
 	GuiLabelParams labelParams(GuiElementParams(
 		DrawableParams{ "" },
@@ -272,6 +273,7 @@ void Scene::InitAudio()
 				inParams.inputChannels,
 				outParams.outputChannels}));
 
+		_audioCallbackCount = 0;
 		_audioDevice->Start();
 	}
 }
@@ -293,28 +295,45 @@ void Scene::OnAudio(float* inBuf, float* outBuf, unsigned int numSamps)
 {
 	if (nullptr != inBuf)
 	{
-		auto inDeviceInfo = nullptr == _audioDevice ? RtAudio::DeviceInfo() : _audioDevice->GetInputStreamInfo();
+		auto inDeviceInfo = nullptr == _audioDevice ?
+			RtAudio::DeviceInfo() : _audioDevice->GetInputStreamInfo();
 		_channelMixer->FromAdc(inBuf, inDeviceInfo.inputChannels, numSamps);
 
 		for (auto& station : _stations)
+		{
 			_channelMixer->Source()->OnPlay(station, numSamps);
-		
-		_channelMixer->Offset(numSamps);
+			station->EndMultiWrite(numSamps, true);
+		}
 	}
+
+	_channelMixer->Source()->EndMultiPlay(numSamps);
+
+	_channelMixer->Sink()->Zero(numSamps);
 
 	if (nullptr != outBuf)
 	{
-		auto outDeviceInfo = nullptr == _audioDevice ? RtAudio::DeviceInfo() : _audioDevice->GetOutputStreamInfo();
+		auto outDeviceInfo = nullptr == _audioDevice ?
+			RtAudio::DeviceInfo() : _audioDevice->GetOutputStreamInfo();
 		std::fill(outBuf, outBuf + numSamps * outDeviceInfo.outputChannels, 0.0f);
 
 		for (auto& station : _stations)
 		{
 			station->OnPlay(_channelMixer->Sink(), numSamps);
-			station->Offset(numSamps);
+			station->EndMultiPlay(numSamps);
 		}
 
 		_channelMixer->ToDac(outBuf, outDeviceInfo.outputChannels, numSamps);
 	}
+	else
+	{
+		for (auto& station : _stations)
+		{
+			station->OnPlay(_channelMixer->Sink(), numSamps);
+			station->EndMultiPlay(numSamps);
+		}
+	}
+	
+	_channelMixer->Sink()->EndMultiWrite(numSamps, true);
 
 	OnTick(Timer::GetTime(), numSamps);
 }

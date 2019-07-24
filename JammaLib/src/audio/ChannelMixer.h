@@ -29,9 +29,10 @@ namespace audio
 		};
 		class AdcChannelMixer :
 			public BufferMixer,
-			public virtual base::MultiAudioSource
+			public base::MultiAudioSource
 		{
 		public:
+			virtual void EndMultiPlay(unsigned int numSamps) override;
 			virtual unsigned int NumOutputChannels() const override;
 
 		protected:
@@ -40,9 +41,11 @@ namespace audio
 
 		class DacChannelMixer :
 			public BufferMixer,
-			public virtual base::MultiAudioSink
+			public base::MultiAudioSink
 		{
 		public:
+			virtual void EndMultiWrite(unsigned int numSamps) override;
+			virtual void EndMultiWrite(unsigned int numSamps, bool updateIndex) override;
 			virtual unsigned int NumInputChannels() const override;
 
 		protected:
@@ -57,7 +60,6 @@ namespace audio
 		void SetParams(ChannelMixerParams chanMixParams);
 		void FromAdc(float* inBuf, unsigned int numChannels, unsigned int numSamps);
 		void ToDac(float* outBuf, unsigned int numChannels, unsigned int numSamps);
-		void Offset(unsigned int numSamps);
 		const std::shared_ptr<base::MultiAudioSource> Source();
 		const std::shared_ptr<base::MultiAudioSink> Sink();
 

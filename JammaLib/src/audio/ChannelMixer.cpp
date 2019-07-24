@@ -35,10 +35,10 @@ void ChannelMixer::FromAdc(float* inBuf, unsigned int numChannels, unsigned int 
 
 			for (auto samp = 0u; samp < numSamps; samp++)
 			{
-				currentOffset = buf->OnWrite(inBuf[samp*numChannels + chan], currentOffset);
+				currentOffset = buf->OnOverwrite(inBuf[samp*numChannels + chan], currentOffset);
 			}
 
-			buf->Offset(numSamps);
+			buf->EndWrite(numSamps, true);
 		}
 	}
 }
@@ -56,7 +56,7 @@ void ChannelMixer::ToDac(float* outBuf, unsigned int numChannels, unsigned int n
 		{
 			if ((numChannels > chan) && (buf->BufSize() > 0))
 			{
-				auto bufIter = buf->Delay(numSamps);
+				auto bufIter = buf->Delay(0);
 				for (auto samp = 0u; samp < numSamps; samp++)
 				{
 					if (bufIter == buf->End())
@@ -67,11 +67,6 @@ void ChannelMixer::ToDac(float* outBuf, unsigned int numChannels, unsigned int n
 			}
 		}
 	}
-}
-
-void ChannelMixer::Offset(unsigned int numSamps)
-{
-	_dacMixer->Offset(numSamps);
 }
 
 void ChannelMixer::BufferMixer::SetNumChannels(unsigned int numChans, unsigned int bufSize)
@@ -91,12 +86,35 @@ void ChannelMixer::BufferMixer::SetNumChannels(unsigned int numChans, unsigned i
 		buf->SetSize(bufSize);
 }
 
-unsigned int ChannelMixer::DacChannelMixer::NumInputChannels() const
+void ChannelMixer::AdcChannelMixer::EndMultiPlay(unsigned int numSamps)
+{
+	for (unsigned int chan = 0; chan < NumOutputChannels(); chan++)
+	{
+		auto channel = OutputChannel(chan);
+		channel->EndPlay(numSamps);
+	}
+}
+
+unsigned int ChannelMixer::AdcChannelMixer::NumOutputChannels() const
 {
 	return (unsigned int)_buffers.size();
 }
 
-unsigned int ChannelMixer::AdcChannelMixer::NumOutputChannels() const
+void ChannelMixer::DacChannelMixer::EndMultiWrite(unsigned int numSamps)
+{
+	EndMultiWrite(numSamps, true);
+}
+
+void ChannelMixer::DacChannelMixer::EndMultiWrite(unsigned int numSamps, bool updateIndex)
+{
+	for (unsigned int chan = 0; chan < NumInputChannels(); chan++)
+	{
+		auto channel = InputChannel(chan);
+		channel->EndWrite(numSamps, updateIndex);
+	}
+}
+
+unsigned int ChannelMixer::DacChannelMixer::NumInputChannels() const
 {
 	return (unsigned int)_buffers.size();
 }
@@ -109,20 +127,20 @@ const std::shared_ptr<AudioBuffer> ChannelMixer::BufferMixer::Channel(unsigned i
 	return std::shared_ptr<AudioBuffer>();
 }
 
-const std::shared_ptr<AudioSink> ChannelMixer::DacChannelMixer::InputChannel(unsigned int channel)
-{
-	if (channel < _buffers.size())
-		return _buffers[channel];
-
-	return std::shared_ptr<AudioSink>();
-}
-
 const std::shared_ptr<AudioSource> ChannelMixer::AdcChannelMixer::OutputChannel(unsigned int channel)
 {
 	if (channel < _buffers.size())
 		return _buffers[channel];
 
 	return std::shared_ptr<AudioSource>();
+}
+
+const std::shared_ptr<AudioSink> ChannelMixer::DacChannelMixer::InputChannel(unsigned int channel)
+{
+	if (channel < _buffers.size())
+		return _buffers[channel];
+
+	return std::shared_ptr<AudioSink>();
 }
 
 const std::shared_ptr<MultiAudioSource> ChannelMixer::Source()

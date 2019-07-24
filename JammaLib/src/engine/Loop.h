@@ -102,8 +102,10 @@ namespace engine
 	public:
 		virtual MultiAudioDirection MultiAudibleDirection() const override { return MULTIAUDIO_BOTH; }
 		virtual void OnPlay(const std::shared_ptr<base::MultiAudioSink> dest, unsigned int numSamps) override;
-		virtual int OnWrite(float samp, int indexOffset) override;
-		//virtual void Offset(int indexOffset) override;
+		virtual void EndMultiPlay(unsigned int numSamps) override;
+		inline virtual int OnWrite(float samp, int indexOffset) override;
+		inline virtual int OnOverwrite(float samp, int indexOffset) override;
+		virtual void EndWrite(unsigned int numSamps, bool updateIndex) override;
 		void OnPlayRaw(const std::shared_ptr<base::MultiAudioSink> dest, unsigned int channel, unsigned int delaySamps, unsigned int numSamps);
 
 		unsigned int InputChannel();

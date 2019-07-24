@@ -33,6 +33,12 @@ void LoopTake::OnPlay(const std::shared_ptr<MultiAudioSink> dest,
 		loop->OnPlay(dest, numSamps);
 }
 
+void LoopTake::EndMultiPlay(unsigned int numSamps)
+{
+	for (auto& loop : _loops)
+		loop->EndMultiPlay(numSamps);
+}
+
 void LoopTake::OnWrite(const std::shared_ptr<MultiAudioSource> src,
 	unsigned int numSamps)
 {
@@ -45,10 +51,10 @@ void LoopTake::OnWrite(const std::shared_ptr<MultiAudioSource> src,
 	_recordedSampCount += numSamps;
 }
 
-void LoopTake::Offset(unsigned int numSamps)
+void LoopTake::EndMultiWrite(unsigned int numSamps, bool updateIndex)
 {
 	for (auto& loop : _loops)
-		loop->Offset(numSamps);
+		loop->EndWrite(numSamps, updateIndex);
 }
 
 void LoopTake::OnPlayRaw(const std::shared_ptr<MultiAudioSink> dest,

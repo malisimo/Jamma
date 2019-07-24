@@ -17,6 +17,9 @@
     <ClCompile Include="src\engine\UndoHistory_Tests.cpp">
       <Filter>src\engine</Filter>
     </ClCompile>
+    <ClCompile Include="src\audio\AudioBuffer_Tests.cpp" />
+    <ClCompile Include="src\audio\Loop_Tests.cpp" />
+    <ClCompile Include="src\audio\ChannelMixer_Tests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

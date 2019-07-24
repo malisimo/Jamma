@@ -23,16 +23,24 @@ namespace base
 			for (unsigned int chan = 0; chan < NumOutputChannels(); chan++)
 			{
 				auto channel = OutputChannel(chan);
-				if (channel)
-					dest->OnWriteChannel(chan, channel, numSamps);
+				dest->OnWriteChannel(chan, channel, numSamps);
 			}
 		}
+		virtual void EndMultiPlay(unsigned int numSamps)
+		{
+			for (auto chan = 0u; chan < NumOutputChannels(); chan++)
+			{
+				auto channel = OutputChannel(chan);
+				channel->EndPlay(numSamps);
+			}
+		};
 		virtual void OnPlayChannel(unsigned int channel,
 			const std::shared_ptr<base::AudioSink> dest,
 			unsigned int numSamps)
 		{
 			auto chan = OutputChannel(channel);
-			chan->OnPlay(dest, numSamps);
+			if (chan)
+				chan->OnPlay(dest, numSamps);
 		}
 		virtual unsigned int NumOutputChannels() const { return 0; };
 

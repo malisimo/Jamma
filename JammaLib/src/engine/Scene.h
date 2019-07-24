@@ -144,5 +144,6 @@ namespace engine
 		UndoHistory _undoHistory;
 		std::weak_ptr<base::GuiElement> _touchDownElement;
 		std::shared_ptr<Loop> _masterLoop;
+		unsigned int _audioCallbackCount;
 	};
 }
