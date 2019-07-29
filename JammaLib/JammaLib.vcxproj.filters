@@ -92,9 +92,6 @@
     <ClInclude Include="src\engine\Loop.h">
       <Filter>src\engine</Filter>
     </ClInclude>
-    <ClInclude Include="src\io\LoopFile.h">
-      <Filter>src\io</Filter>
-    </ClInclude>
     <ClInclude Include="src\gui\GuiModel.h">
       <Filter>src\gui</Filter>
     </ClInclude>
@@ -314,6 +311,9 @@
     <ClInclude Include="src\base\Sharable.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="src\io\JamFile.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lib\glew\glew.c">
@@ -324,9 +324,6 @@
     </ClCompile>
     <ClCompile Include="src\vst\Vst.cpp">
       <Filter>src\vst</Filter>
-    </ClCompile>
-    <ClCompile Include="src\io\LoopFile.cpp">
-      <Filter>src\io</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\Station.cpp">
       <Filter>src\engine</Filter>
@@ -455,6 +452,9 @@
       <Filter>lib\rtaudio\include</Filter>
     </ClCompile>
     <ClCompile Include="src\stdafx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\JamFile.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

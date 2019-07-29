@@ -269,7 +269,6 @@
     <ClInclude Include="src\graphics\Shader.h" />
     <ClInclude Include="src\graphics\Image.h" />
     <ClInclude Include="src\base\ActionSender.h" />
-    <ClInclude Include="src\io\LoopFile.h" />
     <ClInclude Include="src\audio\InterpolatedValue.h" />
     <ClInclude Include="src\gui\GuiButton.h" />
     <ClInclude Include="src\gui\GuiModel.h" />
@@ -282,6 +281,7 @@
     <ClInclude Include="include\targetver.h" />
     <ClInclude Include="src\utils\StringUtils.h" />
     <ClInclude Include="src\engine\Station.h" />
+    <ClInclude Include="src\io\JamFile.h" />
     <ClInclude Include="src\vst\Vst.h" />
     <ClInclude Include="src\engine\Trigger.h" />
     <ClInclude Include="src\engine\UndoHistory.h" />
@@ -327,7 +327,6 @@
     <ClCompile Include="src\engine\Scene.cpp" />
     <ClCompile Include="src\graphics\Shader.cpp" />
     <ClCompile Include="src\graphics\Image.cpp" />
-    <ClCompile Include="src\io\LoopFile.cpp" />
     <ClCompile Include="src\audio\InterpolatedValue.cpp" />
     <ClCompile Include="src\gui\GuiButton.cpp" />
     <ClCompile Include="src\gui\GuiModel.cpp" />
@@ -335,6 +334,7 @@
     <ClCompile Include="lib\glew\glew.c" />
     <ClCompile Include="lib\rtaudio\RtAudio.cpp" />
     <ClCompile Include="src\engine\Station.cpp" />
+    <ClCompile Include="src\io\JamFile.cpp" />
     <ClCompile Include="src\vst\Vst.cpp" />
     <ClCompile Include="src\engine\Trigger.cpp" />
     <ClCompile Include="src\engine\UndoHistory.cpp" />
