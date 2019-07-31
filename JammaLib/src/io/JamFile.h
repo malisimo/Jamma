@@ -77,7 +77,7 @@ namespace io
 		static std::optional<JamFile> FromFile(std::wstring file);
 		static bool ToFile(std::wstring file, JamFile jam);
 		
-	protected:
+	public:
 		enum JsonScalarType
 		{
 			JSON_UNKNOWN,
