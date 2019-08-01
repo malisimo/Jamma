@@ -122,7 +122,7 @@ namespace io
 			std::optional<JsonPart> Part;
 		};
 
-		static std::optional<JsonPart> FromStream(std::stringstream ss);
+		static std::optional<JsonValue> FromStream(std::stringstream ss);
 		static bool ToStream(JsonPart json, std::stringstream ss);
 
 		static KeyResult ParseKey(std::stringstream ss);

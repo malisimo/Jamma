@@ -52,10 +52,10 @@ bool JamFile::ToFile(std::wstring file, JamFile jam)
 	return false;
 }
 
-std::optional<JamFile::JsonPart> JamFile::FromStream(std::stringstream ss)
+std::optional<JamFile::JsonValue> JamFile::FromStream(std::stringstream ss)
 {
-	auto root = ParseJsonPart(std::move(ss));
-	return root.Part;
+	auto root = ParseValue(std::move(ss));
+	return root.Value;
 }
 
 bool JamFile::ToStream(JamFile::JsonPart json, std::stringstream ss)
@@ -67,28 +67,28 @@ JamFile::KeyResult JamFile::ParseKey(std::stringstream ss)
 {	
 	std::string key;
 	char c;
-	bool isInsideQuotes = false;
+	//bool isInsideQuotes = false;
 	std::vector<char> charBuf;
 
 	while (ss >> c)
 	{
-		if (!isInsideQuotes)
+		/*if (!isInsideQuotes)
 		{
 			if ('"' == c)
 				isInsideQuotes = true;
 		}
 		else
-		{
+		{*/
 			if ('"' == c)
 			{
-				isInsideQuotes = false;
+				//isInsideQuotes = false;
 				charBuf.push_back('\0');
 				key = std::string(charBuf.data());
 				break;
 			}
 			else
 				charBuf.push_back(c);
-		}
+		//}
 	}
 
 	if (key.empty())
@@ -123,31 +123,22 @@ JamFile::ValueResult JamFile::ParseValue(std::stringstream ss)
 
 			while (ss >> c)
 			{
-				if (isInsideQuotes)
+				if ('"' == c)
+					continue;
+
+				auto isArrayEnd = ']' == c;
+				if ((',' == c) || isArrayEnd)
 				{
-					if ('"' == c)
-						isInsideQuotes = false;
-					else
-						charBuf.push_back(c);
-				}
-				else
-				{
-					if ('"' == c)
-						isInsideQuotes = true;
-					else if (']' == c)
+					charBuf.push_back('\0');
+					values.push_back(std::string(charBuf.data()));
+
+					if (isArrayEnd)
 						break;
 					else
-					{
-						if (',' == c)
-						{
-							charBuf.push_back('\0');
-							values.push_back(std::string(charBuf.data()));
-							charBuf.clear();
-						}
-						else
-							charBuf.push_back(c);
-					}
+						charBuf.clear();
 				}
+				else
+					charBuf.push_back(c);
 			}
 
 			return { std::move(ss), ParseJsonArray(values) };
@@ -234,7 +225,7 @@ JamFile::PartResult JamFile::ParseJsonPart(std::stringstream ss)
 	{
 		if ('}' == c)
 			return { std::move(ss), part };
-		else
+		else if ('\"' == c)
 		{
 			auto keyRes = ParseKey(std::move(ss));
 			if (keyRes.Key.has_value())
@@ -247,7 +238,10 @@ JamFile::PartResult JamFile::ParseJsonPart(std::stringstream ss)
 					{
 						auto valueRes = ParseValue(std::move(ss));
 						if (valueRes.Value.has_value())
+						{
 							part.KeyValues[keyRes.Key.value()] = valueRes.Value.value();
+							ss = std::move(valueRes.Stream);
+						}
 						
 						break;
 					}
@@ -272,9 +266,7 @@ JamFile::JsonArray JamFile::ParseJsonArray(std::vector<std::string> values)
 		auto firstValue = values[0];
 		if (!firstValue.empty())
 		{
-			if (values[0].find('"') >= 0)
-				jsonType = JSON_STRING;
-			else if (IsAllDigits(values[0], false))
+			if (IsAllDigits(values[0], false))
 				jsonType = JSON_INT;
 			else if (IsAllDigits(values[0], true))
 				jsonType = JSON_DOUBLE;
@@ -288,6 +280,8 @@ JamFile::JsonArray JamFile::ParseJsonArray(std::vector<std::string> values)
 				firstValue = std::string(charBuf.data());
 				if (("true" == firstValue) || ("false" == firstValue))
 					jsonType = JSON_BOOL;
+				else
+					jsonType = JSON_STRING;
 			}
 		}
 	}
