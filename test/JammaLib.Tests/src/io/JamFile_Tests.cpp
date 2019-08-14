@@ -1,5 +1,6 @@
 
 #include "gtest/gtest.h"
+#include <regex>
 #include "resources/ResourceLib.h"
 #include "io/JamFile.h"
 
@@ -11,13 +12,23 @@ class JamFileMock :
 public:
 	static std::optional<JamFileMock::JsonPart> JsonFromStream(std::stringstream ss)
 	{
-		return std::get<JamFile::JsonPart>(FromStream(std::move(ss)).value());
+		return std::get<JamFile::JsonPart>(JamFile::JsonFromStream(std::move(ss)).value());
 	}
 	static std::optional<Loop> LoopFromJson(JamFile::JsonPart json)
 	{
 		return Loop::FromJson(json);
 	}
+	static std::optional<LoopTake> LoopTakeFromJson(JamFile::JsonPart json)
+	{
+		return LoopTake::FromJson(json);
+	}
+	static std::optional<Station> StationFromJson(JamFile::JsonPart json)
+	{
+		return Station::FromJson(json);
+	}
 };
+
+const std::string LoopString = "{\"name\":\"%NAME%\",\"length\":220,\"index\":%INDEX%,\"masterloopcount\":7,\"level\":0.56,\"speed\":1.2,\"mutegroups\":11,\"selectgroups\":15,\"muted\":false,\"mix\":{\"type\":\"pan\",\"chans\":[0.2,0.8]}}";
 
 TEST(JamFile, ParsesBool) {
 	auto str = "{\"bool\":true}";
@@ -208,14 +219,14 @@ TEST(JamFile, ParsesStruct) {
 	ASSERT_EQ("monkeying", res2);
 }
 
-
 TEST(JamFile, ParsesLoop) {
-	auto str = "{\"name\":\"loop\",\"length\":220,\"index\":2,\"masterloopcount\":7,\"level\":0.56,\"speed\":1.2,\"mutegroups\":11,\"selectgroups\":15,\"muted\":false,\"mix\":{\"type\":\"pan\",\"chans\":[0.2,0.8]}}";
+	auto str = std::regex_replace(std::regex_replace(LoopString, std::regex("%NAME%"), "loop"), std::regex("%INDEX%"), "2");
 	auto testStream = std::stringstream(str);
 	auto json = JamFileMock::JsonFromStream(std::move(testStream));
 	auto loop = JamFileMock::LoopFromJson(json.value());
 
 	ASSERT_TRUE(loop.has_value());
+	ASSERT_EQ(0, loop.value().Name.compare("loop"));
 	ASSERT_EQ(2, loop.value().Index);
 	ASSERT_EQ(7, loop.value().MasterLoopCount);
 	ASSERT_EQ(0.56, loop.value().Level);
@@ -230,4 +241,151 @@ TEST(JamFile, ParsesLoop) {
 	ASSERT_EQ(2, loopMixParams.size());
 	ASSERT_EQ(0.2, loopMixParams[0]);
 	ASSERT_EQ(0.8, loopMixParams[1]);
+}
+
+TEST(JamFile, ParsesLoopTake) {
+	auto loop1 = std::regex_replace(std::regex_replace(LoopString, std::regex("%NAME%"), "loop1"), std::regex("%INDEX%"), "1");
+	auto loop2 = std::regex_replace(std::regex_replace(LoopString, std::regex("%NAME%"), "loop2"), std::regex("%INDEX%"), "2");
+	auto loop3 = std::regex_replace(std::regex_replace(LoopString, std::regex("%NAME%"), "loop3"), std::regex("%INDEX%"), "3");
+
+	auto str = "{\"name\":\"take\",\"loops\":[" + loop1 + "," + loop2 + "," + loop3 + "]}";
+	auto testStream = std::stringstream(str);
+	auto json = JamFileMock::JsonFromStream(std::move(testStream));
+	auto take = JamFileMock::LoopTakeFromJson(json.value());
+
+	ASSERT_TRUE(take.has_value());
+	ASSERT_EQ(0, take.value().Name.compare("take"));
+	ASSERT_EQ(3, take.value().Loops.size());
+
+	ASSERT_EQ(0, take.value().Loops[0].Name.compare("loop1"));
+	ASSERT_EQ(1, take.value().Loops[0].Index);
+	ASSERT_EQ(1.2, take.value().Loops[0].Speed);
+
+	ASSERT_EQ(0, take.value().Loops[1].Name.compare("loop2"));
+	ASSERT_EQ(2, take.value().Loops[1].Index);
+	ASSERT_EQ(1.2, take.value().Loops[1].Speed);
+
+	ASSERT_EQ(0, take.value().Loops[2].Name.compare("loop3"));
+	ASSERT_EQ(3, take.value().Loops[2].Index);
+	ASSERT_EQ(1.2, take.value().Loops[2].Speed);
+}
+
+TEST(JamFile, ParsesStation) {
+	auto loop1 = std::regex_replace(std::regex_replace(LoopString, std::regex("%NAME%"), "loop1"), std::regex("%INDEX%"), "1");
+	auto loop2 = std::regex_replace(std::regex_replace(LoopString, std::regex("%NAME%"), "loop2"), std::regex("%INDEX%"), "2");
+	auto take1 = "{\"name\":\"take1\",\"loops\":[" + loop1 + "," + loop2 + "]}";
+
+	auto loop3 = std::regex_replace(std::regex_replace(LoopString, std::regex("%NAME%"), "loop3"), std::regex("%INDEX%"), "3");
+	auto take2 = "{\"name\":\"take2\",\"loops\":[" + loop3 + "]}";
+
+	auto str = "{\"name\":\"station\",\"takes\":[" + take1 + "," + take2 + "]}";
+	auto testStream = std::stringstream(str);
+	auto json = JamFileMock::JsonFromStream(std::move(testStream));
+	auto station = JamFileMock::StationFromJson(json.value());
+
+	ASSERT_TRUE(station.has_value());
+	ASSERT_EQ(0, station.value().Name.compare("station"));
+	ASSERT_EQ(2, station.value().LoopTakes.size());
+
+	ASSERT_EQ(0, station.value().LoopTakes[0].Name.compare("take1"));
+	ASSERT_EQ(2, station.value().LoopTakes[0].Loops.size());
+
+	ASSERT_EQ(0, station.value().LoopTakes[0].Loops[0].Name.compare("loop1"));
+	ASSERT_EQ(1, station.value().LoopTakes[0].Loops[0].Index);
+	ASSERT_EQ(1.2, station.value().LoopTakes[0].Loops[0].Speed);
+
+	ASSERT_EQ(0, station.value().LoopTakes[0].Loops[1].Name.compare("loop2"));
+	ASSERT_EQ(2, station.value().LoopTakes[0].Loops[1].Index);
+	ASSERT_EQ(1.2, station.value().LoopTakes[0].Loops[1].Speed);
+
+	ASSERT_EQ(0, station.value().LoopTakes[1].Name.compare("take2"));
+	ASSERT_EQ(1, station.value().LoopTakes[1].Loops.size());
+
+	ASSERT_EQ(0, station.value().LoopTakes[1].Loops[0].Name.compare("loop3"));
+	ASSERT_EQ(3, station.value().LoopTakes[1].Loops[0].Index);
+	ASSERT_EQ(1.2, station.value().LoopTakes[1].Loops[0].Speed);
+}
+
+TEST(JamFile, ParsesFile) {
+
+	auto loop1 = std::regex_replace(std::regex_replace(LoopString, std::regex("%NAME%"), "loop1"), std::regex("%INDEX%"), "1");
+	auto loop2 = std::regex_replace(std::regex_replace(LoopString, std::regex("%NAME%"), "loop2"), std::regex("%INDEX%"), "2");
+	auto take1 = "{\"name\":\"take1\",\"loops\":[" + loop1 + "," + loop2 + "]}";
+
+	auto loop3 = std::regex_replace(std::regex_replace(LoopString, std::regex("%NAME%"), "loop3"), std::regex("%INDEX%"), "3");
+	auto take2 = "{\"name\":\"take2\",\"loops\":[" + loop3 + "]}";
+
+	auto station1 = "{\"name\":\"station1\",\"takes\":[" + take1 + "," + take2 + "]}";
+
+	auto loop4 = std::regex_replace(std::regex_replace(LoopString, std::regex("%NAME%"), "loop4"), std::regex("%INDEX%"), "4");
+	auto loop5 = std::regex_replace(std::regex_replace(LoopString, std::regex("%NAME%"), "loop5"), std::regex("%INDEX%"), "5");
+	auto take3 = "{\"name\":\"take3\",\"loops\":[" + loop4 + "," + loop5 + "]}";
+	
+	auto loop6 = std::regex_replace(std::regex_replace(LoopString, std::regex("%NAME%"), "loop6"), std::regex("%INDEX%"), "6");
+	auto take4 = "{\"name\":\"take4\",\"loops\":[" + loop6 + "]}";
+
+	auto loop7 = std::regex_replace(std::regex_replace(LoopString, std::regex("%NAME%"), "loop7"), std::regex("%INDEX%"), "7");
+	auto take5 = "{\"name\":\"take5\",\"loops\":[" + loop7 + "]}";
+
+	auto station2 = "{\"name\":\"station2\",\"takes\":[" + take3 + "," + take4 + "," + take5 + "]}";
+
+	auto str = "{\"name\":\"jam\",\"stations\":[" + station1 + "," + station2 + "]}";
+	auto testStream = std::stringstream(str);
+	auto jam = JamFile::FromStream(std::move(testStream));
+
+	ASSERT_TRUE(jam.has_value());
+	ASSERT_EQ(JamFile::VERSION_V, jam.value().Version);
+	ASSERT_EQ(0, jam.value().Name.compare("jam"));
+	ASSERT_EQ(2, jam.value().Stations.size());
+
+
+	ASSERT_EQ(0, jam.value().Stations[0].Name.compare("station1"));
+	ASSERT_EQ(2, jam.value().Stations[0].LoopTakes.size());
+
+	ASSERT_EQ(0, jam.value().Stations[0].LoopTakes[0].Name.compare("take1"));
+	ASSERT_EQ(2, jam.value().Stations[0].LoopTakes[0].Loops.size());
+
+	ASSERT_EQ(0, jam.value().Stations[0].LoopTakes[0].Loops[0].Name.compare("loop1"));
+	ASSERT_EQ(1, jam.value().Stations[0].LoopTakes[0].Loops[0].Index);
+	ASSERT_EQ(1.2, jam.value().Stations[0].LoopTakes[0].Loops[0].Speed);
+
+	ASSERT_EQ(0, jam.value().Stations[0].LoopTakes[0].Loops[1].Name.compare("loop2"));
+	ASSERT_EQ(2, jam.value().Stations[0].LoopTakes[0].Loops[1].Index);
+	ASSERT_EQ(1.2, jam.value().Stations[0].LoopTakes[0].Loops[1].Speed);
+
+	ASSERT_EQ(0, jam.value().Stations[0].LoopTakes[1].Name.compare("take2"));
+	ASSERT_EQ(1, jam.value().Stations[0].LoopTakes[1].Loops.size());
+
+	ASSERT_EQ(0, jam.value().Stations[0].LoopTakes[1].Loops[0].Name.compare("loop3"));
+	ASSERT_EQ(3, jam.value().Stations[0].LoopTakes[1].Loops[0].Index);
+	ASSERT_EQ(1.2, jam.value().Stations[0].LoopTakes[1].Loops[0].Speed);
+
+
+	ASSERT_EQ(0, jam.value().Stations[1].Name.compare("station2"));
+	ASSERT_EQ(3, jam.value().Stations[1].LoopTakes.size());
+
+	ASSERT_EQ(0, jam.value().Stations[1].LoopTakes[0].Name.compare("take3"));
+	ASSERT_EQ(2, jam.value().Stations[1].LoopTakes[0].Loops.size());
+
+	ASSERT_EQ(0, jam.value().Stations[1].LoopTakes[0].Loops[0].Name.compare("loop4"));
+	ASSERT_EQ(4, jam.value().Stations[1].LoopTakes[0].Loops[0].Index);
+	ASSERT_EQ(1.2, jam.value().Stations[1].LoopTakes[0].Loops[0].Speed);
+
+	ASSERT_EQ(0, jam.value().Stations[1].LoopTakes[0].Loops[1].Name.compare("loop5"));
+	ASSERT_EQ(5, jam.value().Stations[1].LoopTakes[0].Loops[1].Index);
+	ASSERT_EQ(1.2, jam.value().Stations[1].LoopTakes[0].Loops[1].Speed);
+
+	ASSERT_EQ(0, jam.value().Stations[1].LoopTakes[1].Name.compare("take4"));
+	ASSERT_EQ(1, jam.value().Stations[1].LoopTakes[1].Loops.size());
+
+	ASSERT_EQ(0, jam.value().Stations[1].LoopTakes[1].Loops[0].Name.compare("loop6"));
+	ASSERT_EQ(6, jam.value().Stations[1].LoopTakes[1].Loops[0].Index);
+	ASSERT_EQ(1.2, jam.value().Stations[1].LoopTakes[1].Loops[0].Speed);
+
+	ASSERT_EQ(0, jam.value().Stations[1].LoopTakes[2].Name.compare("take5"));
+	ASSERT_EQ(1, jam.value().Stations[1].LoopTakes[2].Loops.size());
+
+	ASSERT_EQ(0, jam.value().Stations[1].LoopTakes[2].Loops[0].Name.compare("loop7"));
+	ASSERT_EQ(7, jam.value().Stations[1].LoopTakes[2].Loops[0].Index);
+	ASSERT_EQ(1.2, jam.value().Stations[1].LoopTakes[2].Loops[0].Speed);
 }

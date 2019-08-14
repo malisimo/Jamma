@@ -186,7 +186,7 @@ std::optional<JamFile::LoopTake> JamFile::LoopTake::FromJson(JsonPart json)
 		{
 			auto jsonArray = std::get<JsonArray>(json.KeyValues["loops"]);
 			
-			if (jsonArray.Array.index() == 4)
+			if (jsonArray.Array.index() == 5)
 			{
 				auto loopArray = std::get<std::vector<JsonPart>>(jsonArray.Array);
 				for (auto loopJson : loopArray)
@@ -225,9 +225,9 @@ std::optional<JamFile::Station> JamFile::Station::FromJson(JsonPart json)
 	{
 		if (json.KeyValues["takes"].index() == 5)
 		{
-			auto jsonArray = std::get<JsonArray>(json.KeyValues["loops"]);
+			auto jsonArray = std::get<JsonArray>(json.KeyValues["takes"]);
 
-			if (jsonArray.Array.index() == 4)
+			if (jsonArray.Array.index() == 5)
 			{
 				auto takeArray = std::get<std::vector<JsonPart>>(jsonArray.Array);
 				for (auto takeJson : takeArray)
@@ -268,13 +268,60 @@ bool JamFile::ToFile(std::wstring file, JamFile jam)
 	return false;
 }
 
-std::optional<JamFile::JsonValue> JamFile::FromStream(std::stringstream ss)
+std::optional<JamFile::JsonValue> JamFile::JsonFromStream(std::stringstream ss)
 {
 	auto root = ParseValue(std::move(ss));
+
 	return root.Value;
 }
 
-bool JamFile::ToStream(JamFile::JsonPart json, std::stringstream ss)
+std::optional<JamFile> JamFile::FromStream(std::stringstream ss)
+{
+	auto root = JsonFromStream(std::move(ss));
+
+	if (!root.has_value())
+		return std::nullopt;
+
+	if (root.value().index() != 6)
+		return std::nullopt;
+
+	auto jamParams = std::get<JsonPart>(root.value());
+
+	if (jamParams.KeyValues.find("name") == jamParams.KeyValues.end())
+		return std::nullopt;
+
+	if (jamParams.KeyValues["name"].index() != 4)
+		return std::nullopt;
+
+	JamFile jam;
+	jam.Version = VERSION_V;
+	jam.TimerTicks = 0;
+	jam.Name = std::get<std::string>(jamParams.KeyValues["name"]);
+	
+	auto iter = jamParams.KeyValues.find("stations");
+	if (iter != jamParams.KeyValues.end())
+	{
+		if (jamParams.KeyValues["stations"].index() == 5)
+		{
+			auto stationArr = std::get<JsonArray>(jamParams.KeyValues["stations"]);
+			if (stationArr.Array.index() == 5)
+			{
+				auto stations = std::get<std::vector<JsonPart>>(stationArr.Array);
+
+				for (auto stationJson : stations)
+				{
+					auto stationOpt = Station::FromJson(stationJson);
+					if (stationOpt.has_value())
+						jam.Stations.push_back(stationOpt.value());
+				}
+			}
+		}
+	}
+
+	return jam;
+}
+
+bool JamFile::ToStream(JamFile jam, std::stringstream ss)
 {
 	return false;
 }
@@ -283,28 +330,18 @@ JamFile::KeyResult JamFile::ParseKey(std::stringstream ss)
 {	
 	std::string key;
 	char c;
-	//bool isInsideQuotes = false;
 	std::vector<char> charBuf;
 
 	while (ss >> c)
 	{
-		/*if (!isInsideQuotes)
+		if ('"' == c)
 		{
-			if ('"' == c)
-				isInsideQuotes = true;
+			charBuf.push_back('\0');
+			key = std::string(charBuf.data());
+			break;
 		}
 		else
-		{*/
-			if ('"' == c)
-			{
-				//isInsideQuotes = false;
-				charBuf.push_back('\0');
-				key = std::string(charBuf.data());
-				break;
-			}
-			else
-				charBuf.push_back(c);
-		//}
+			charBuf.push_back(c);
 	}
 
 	if (key.empty())
@@ -355,6 +392,8 @@ JamFile::ValueResult JamFile::ParseValue(std::stringstream ss)
 							auto part = ParseJsonPart(std::move(ss));
 							if (part.Part.has_value())
 								parts.push_back(part.Part.value());
+
+							ss = std::move(part.Stream);
 
 							while (ss >> c)
 							{
@@ -497,11 +536,9 @@ JamFile::PartResult JamFile::ParseJsonPart(std::stringstream ss)
 					{
 						auto valueRes = ParseValue(std::move(ss));
 						if (valueRes.Value.has_value())
-						{
 							part.KeyValues[keyRes.Key.value()] = valueRes.Value.value();
-							ss = std::move(valueRes.Stream);
-						}
 						
+						ss = std::move(valueRes.Stream);
 						break;
 					}
 				}

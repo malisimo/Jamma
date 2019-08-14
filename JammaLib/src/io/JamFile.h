@@ -145,8 +145,11 @@ namespace io
 			std::optional<JsonPart> Part;
 		};
 
-		static std::optional<JsonValue> FromStream(std::stringstream ss);
-		static bool ToStream(JsonPart json, std::stringstream ss);
+		static std::optional<JamFile::JsonValue> JsonFromStream(std::stringstream ss);
+		static bool JsonToStream(JamFile::JsonValue json, std::stringstream ss);
+
+		static std::optional<JamFile> FromStream(std::stringstream ss);
+		static bool ToStream(JamFile jam, std::stringstream ss);
 
 		static KeyResult ParseKey(std::stringstream ss);
 		static ValueResult ParseValue(std::stringstream ss);
@@ -158,6 +161,7 @@ namespace io
 
 	public:
 		Version Version;
+		std::string Name;
 		std::vector<Station> Stations;
 		unsigned long TimerTicks;
 	};
