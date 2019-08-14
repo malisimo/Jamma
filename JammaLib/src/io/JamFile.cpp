@@ -10,8 +10,58 @@
 using namespace io;
 using audio::BehaviourParams;
 
+std::optional<JamFile> JamFile::FromStream(std::stringstream ss)
+{
+	auto root = Json::FromStream(std::move(ss));
 
-std::optional<JamFile::LoopMix> JamFile::LoopMix::FromJson(JsonPart json)
+	if (!root.has_value())
+		return std::nullopt;
+
+	if (root.value().index() != 6)
+		return std::nullopt;
+
+	auto jamParams = std::get<Json::JsonPart>(root.value());
+
+	if (jamParams.KeyValues.find("name") == jamParams.KeyValues.end())
+		return std::nullopt;
+
+	if (jamParams.KeyValues["name"].index() != 4)
+		return std::nullopt;
+
+	JamFile jam;
+	jam.Version = VERSION_V;
+	jam.TimerTicks = 0;
+	jam.Name = std::get<std::string>(jamParams.KeyValues["name"]);
+
+	auto iter = jamParams.KeyValues.find("stations");
+	if (iter != jamParams.KeyValues.end())
+	{
+		if (jamParams.KeyValues["stations"].index() == 5)
+		{
+			auto stationArr = std::get<Json::JsonArray>(jamParams.KeyValues["stations"]);
+			if (stationArr.Array.index() == 5)
+			{
+				auto stations = std::get<std::vector<Json::JsonPart>>(stationArr.Array);
+
+				for (auto stationJson : stations)
+				{
+					auto stationOpt = Station::FromJson(stationJson);
+					if (stationOpt.has_value())
+						jam.Stations.push_back(stationOpt.value());
+				}
+			}
+		}
+	}
+
+	return jam;
+}
+
+bool JamFile::ToStream(JamFile jam, std::stringstream ss)
+{
+	return false;
+}
+
+std::optional<JamFile::LoopMix> JamFile::LoopMix::FromJson(Json::JsonPart json)
 {
 	std::string typeStr;
 	std::vector<Loop> loops;
@@ -41,7 +91,7 @@ std::optional<JamFile::LoopMix> JamFile::LoopMix::FromJson(JsonPart json)
 
 		if (json.KeyValues["chans"].index() == 5)
 		{
-			auto arr = std::get<JsonArray>(json.KeyValues["chans"]);
+			auto arr = std::get<Json::JsonArray>(json.KeyValues["chans"]);
 			if (arr.Array.index() == 2)
 				mix.Params = std::get<std::vector<unsigned long>>(arr.Array);
 		}
@@ -53,7 +103,7 @@ std::optional<JamFile::LoopMix> JamFile::LoopMix::FromJson(JsonPart json)
 
 		if (json.KeyValues["chans"].index() == 5)
 		{
-			auto arr = std::get<JsonArray>(json.KeyValues["chans"]);
+			auto arr = std::get<Json::JsonArray>(json.KeyValues["chans"]);
 			if (arr.Array.index() == 3)
 				mix.Params = std::get<std::vector<double>>(arr.Array);
 		}
@@ -63,7 +113,7 @@ std::optional<JamFile::LoopMix> JamFile::LoopMix::FromJson(JsonPart json)
 	return mix;
 }
 
-std::optional<JamFile::Loop> JamFile::Loop::FromJson(JsonPart json)
+std::optional<JamFile::Loop> JamFile::Loop::FromJson(Json::JsonPart json)
 {
 	std::string name;
 	unsigned long length = 0;
@@ -147,7 +197,7 @@ std::optional<JamFile::Loop> JamFile::Loop::FromJson(JsonPart json)
 	{
 		if (json.KeyValues["mix"].index() == 6)
 		{
-			auto mixOpt = LoopMix::FromJson(std::get<JsonPart>(json.KeyValues["mix"]));
+			auto mixOpt = LoopMix::FromJson(std::get<Json::JsonPart>(json.KeyValues["mix"]));
 			if (mixOpt.has_value())
 				mix = mixOpt.value();
 		}
@@ -167,7 +217,7 @@ std::optional<JamFile::Loop> JamFile::Loop::FromJson(JsonPart json)
 	return loop;
 }
 
-std::optional<JamFile::LoopTake> JamFile::LoopTake::FromJson(JsonPart json)
+std::optional<JamFile::LoopTake> JamFile::LoopTake::FromJson(Json::JsonPart json)
 {
 	std::string name;
 	std::vector<Loop> loops;
@@ -184,11 +234,11 @@ std::optional<JamFile::LoopTake> JamFile::LoopTake::FromJson(JsonPart json)
 	{
 		if (json.KeyValues["loops"].index() == 5)
 		{
-			auto jsonArray = std::get<JsonArray>(json.KeyValues["loops"]);
+			auto jsonArray = std::get<Json::JsonArray>(json.KeyValues["loops"]);
 			
 			if (jsonArray.Array.index() == 5)
 			{
-				auto loopArray = std::get<std::vector<JsonPart>>(jsonArray.Array);
+				auto loopArray = std::get<std::vector<Json::JsonPart>>(jsonArray.Array);
 				for (auto loopJson : loopArray)
 				{
 					auto loop = Loop::FromJson(loopJson);
@@ -208,9 +258,10 @@ std::optional<JamFile::LoopTake> JamFile::LoopTake::FromJson(JsonPart json)
 	return take;
 }
 
-std::optional<JamFile::Station> JamFile::Station::FromJson(JsonPart json)
+std::optional<JamFile::Station> JamFile::Station::FromJson(Json::JsonPart json)
 {
 	std::string name;
+	unsigned int stationType = 0;
 	std::vector<LoopTake> takes;
 
 	auto iter = json.KeyValues.find("name");
@@ -220,16 +271,23 @@ std::optional<JamFile::Station> JamFile::Station::FromJson(JsonPart json)
 			name = std::get<std::string>(json.KeyValues["name"]);
 	}
 
+	iter = json.KeyValues.find("stationtype");
+	if (iter != json.KeyValues.end())
+	{
+		if (json.KeyValues["stationtype"].index() == 2)
+			stationType = std::get<unsigned long>(json.KeyValues["stationtype"]);
+	}
+
 	iter = json.KeyValues.find("takes");
 	if (iter != json.KeyValues.end())
 	{
 		if (json.KeyValues["takes"].index() == 5)
 		{
-			auto jsonArray = std::get<JsonArray>(json.KeyValues["takes"]);
+			auto jsonArray = std::get<Json::JsonArray>(json.KeyValues["takes"]);
 
 			if (jsonArray.Array.index() == 5)
 			{
-				auto takeArray = std::get<std::vector<JsonPart>>(jsonArray.Array);
+				auto takeArray = std::get<std::vector<Json::JsonPart>>(jsonArray.Array);
 				for (auto takeJson : takeArray)
 				{
 					auto take = LoopTake::FromJson(takeJson);
@@ -245,442 +303,7 @@ std::optional<JamFile::Station> JamFile::Station::FromJson(JsonPart json)
 
 	Station station;
 	station.Name = name;
+	station.StationType = stationType;
 	station.LoopTakes = takes;
 	return station;
-}
-
-std::optional<JamFile> JamFile::FromFile(std::wstring file)
-{
-	std::ifstream ifstream(file);
-
-	if (!ifstream.good())
-		return std::nullopt;
-
-	std::stringstream stream;
-	stream << ifstream.rdbuf();
-
-	auto json = FromStream(std::move(stream));
-	return std::nullopt;
-}
-
-bool JamFile::ToFile(std::wstring file, JamFile jam)
-{
-	return false;
-}
-
-std::optional<JamFile::JsonValue> JamFile::JsonFromStream(std::stringstream ss)
-{
-	auto root = ParseValue(std::move(ss));
-
-	return root.Value;
-}
-
-std::optional<JamFile> JamFile::FromStream(std::stringstream ss)
-{
-	auto root = JsonFromStream(std::move(ss));
-
-	if (!root.has_value())
-		return std::nullopt;
-
-	if (root.value().index() != 6)
-		return std::nullopt;
-
-	auto jamParams = std::get<JsonPart>(root.value());
-
-	if (jamParams.KeyValues.find("name") == jamParams.KeyValues.end())
-		return std::nullopt;
-
-	if (jamParams.KeyValues["name"].index() != 4)
-		return std::nullopt;
-
-	JamFile jam;
-	jam.Version = VERSION_V;
-	jam.TimerTicks = 0;
-	jam.Name = std::get<std::string>(jamParams.KeyValues["name"]);
-	
-	auto iter = jamParams.KeyValues.find("stations");
-	if (iter != jamParams.KeyValues.end())
-	{
-		if (jamParams.KeyValues["stations"].index() == 5)
-		{
-			auto stationArr = std::get<JsonArray>(jamParams.KeyValues["stations"]);
-			if (stationArr.Array.index() == 5)
-			{
-				auto stations = std::get<std::vector<JsonPart>>(stationArr.Array);
-
-				for (auto stationJson : stations)
-				{
-					auto stationOpt = Station::FromJson(stationJson);
-					if (stationOpt.has_value())
-						jam.Stations.push_back(stationOpt.value());
-				}
-			}
-		}
-	}
-
-	return jam;
-}
-
-bool JamFile::ToStream(JamFile jam, std::stringstream ss)
-{
-	return false;
-}
-
-JamFile::KeyResult JamFile::ParseKey(std::stringstream ss)
-{	
-	std::string key;
-	char c;
-	std::vector<char> charBuf;
-
-	while (ss >> c)
-	{
-		if ('"' == c)
-		{
-			charBuf.push_back('\0');
-			key = std::string(charBuf.data());
-			break;
-		}
-		else
-			charBuf.push_back(c);
-	}
-
-	if (key.empty())
-		return { std::move(ss), std::nullopt };
-
-	return { std::move(ss), key };
-}
-
-JamFile::ValueResult JamFile::ParseValue(std::stringstream ss)
-{
-	char c;
-	bool isInsideQuotes = false;
-	std::vector<char> charBuf;
-
-	while (ss >> c)
-	{
-		if ('{' == c)
-		{
-			// Value is a JsonPart (map of key values)
-			auto res = ParseJsonPart(std::move(ss));
-
-			if (std::nullopt != res.Part)
-				return { std::move(res.Stream), res.Part };
-			else
-				return { std::move(res.Stream), std::nullopt };
-		}
-		else if ('[' == c)
-		{
-			charBuf.clear();
-			// Value is array
-			auto isArrayEnd = false;
-			auto isFirstIt = true;
-			std::vector<std::string> values;
-
-			while (ss >> c)
-			{
-				if (' ' == c)
-					continue;
-
-				if (isFirstIt)
-				{
-					if ('{' == c)
-					{
-						std::vector<JsonPart> parts;
-
-						while (ss && !isArrayEnd)
-						{
-							auto part = ParseJsonPart(std::move(ss));
-							if (part.Part.has_value())
-								parts.push_back(part.Part.value());
-
-							ss = std::move(part.Stream);
-
-							while (ss >> c)
-							{
-								isArrayEnd = ']' == c;
-								if ((',' == c) || isArrayEnd)
-									break;
-							}
-						}
-
-						JsonArray jsonArray;
-						jsonArray.Length = (unsigned int)parts.size();
-						jsonArray.Array = parts;
-						return { std::move(ss), jsonArray };
-					}
-
-					isFirstIt = false;
-				}
-
-				if ('"' == c)
-					continue;
-
-				isArrayEnd = ']' == c;
-				if ((',' == c) || isArrayEnd)
-				{
-					charBuf.push_back('\0');
-					values.push_back(std::string(charBuf.data()));
-
-					if (isArrayEnd)
-						break;
-					else
-						charBuf.clear();
-				}
-				else
-					charBuf.push_back(c);
-			}
-
-			return { std::move(ss), ParseJsonArray(values) };
-		}
-		else if ('"' == c)
-		{
-			charBuf.clear();
-
-			while (ss >> c)
-			{
-				if ('"' == c)
-				{
-					charBuf.push_back('\0');
-					return { std::move(ss), std::string(charBuf.data()) };
-				}
-				else
-					charBuf.push_back(c);
-			}
-		}
-		else
-		{
-			charBuf.clear();
-			charBuf.push_back(c);
-
-			bool finished = false;
-
-			while (!finished)
-			{
-				if ('}' == ss.peek())
-					finished = true;
-				else if (ss >> c)
-					finished = (',' == c);
-
-				if (finished)
-				{
-					charBuf.push_back('\0');
-					std::string str(charBuf.data());
-					std::stringstream ss2(str);
-
-					if ((str.size() > 0) && IsAllDigits(str, false))
-					{
-						if ('-' == str[0])
-						{
-							long v;
-							if (ss2 >> v)
-								return { std::move(ss), v };
-						}
-						else
-						{
-							unsigned long v;
-							if (ss2 >> v)
-								return { std::move(ss), unsigned long(v) };
-						}
-					}
-					else if (IsAllDigits(str, true))
-					{
-						double v;
-						if (ss2 >> v)
-							return { std::move(ss), v };
-					}
-					else
-					{
-						std::vector<char> charBuf2;
-						for (auto letter : str)
-							charBuf2.push_back(std::tolower(letter));
-
-						charBuf2.push_back('\0');
-						std::string strLower(charBuf2.data());
-						if ("true" == strLower)
-							return { std::move(ss), true };
-						else if ("false" == strLower)
-							return { std::move(ss), false };
-					}
-
-					charBuf.push_back('\0');
-					return { std::move(ss), std::string(charBuf.data()) };
-				}
-				else
-					charBuf.push_back(c);
-			}
-		}
-	}
-
-	return { std::move(ss), std::nullopt };
-}
-
-JamFile::PartResult JamFile::ParseJsonPart(std::stringstream ss)
-{
-	char c;
-	JsonPart part;
-
-	while (ss >> c)
-	{
-		if ('}' == c)
-			return { std::move(ss), part };
-		else if ('\"' == c)
-		{
-			auto keyRes = ParseKey(std::move(ss));
-			if (keyRes.Key.has_value())
-			{
-				ss = std::move(keyRes.Stream);
-
-				while (ss >> c)
-				{
-					if (':' == c)
-					{
-						auto valueRes = ParseValue(std::move(ss));
-						if (valueRes.Value.has_value())
-							part.KeyValues[keyRes.Key.value()] = valueRes.Value.value();
-						
-						ss = std::move(valueRes.Stream);
-						break;
-					}
-				}
-			}
-		}
-	}
-
-	return { std::move(ss), part };
-}
-
-JamFile::JsonArray JamFile::ParseJsonArray(std::vector<std::string> values)
-{
-	// Try to parse as bool, long, unsigned long, double, string or struct
-	JsonArray jsonArray;
-	jsonArray.Length = (unsigned int)values.size();
-
-	// Work out type of the first entry
-	auto jsonType = JSON_UNKNOWN;
-	if (!values.empty())
-	{
-		auto firstValue = values[0];
-		if (!firstValue.empty())
-		{
-			if (IsAllDigits(firstValue, false))
-			{
-				if ('-' == firstValue[0])
-					jsonType = JSON_LONG;
-				else
-					jsonType = JSON_ULONG;
-			}
-			else if (IsAllDigits(firstValue, true))
-				jsonType = JSON_DOUBLE;
-			else
-			{
-				std::vector<char> charBuf;
-				for (auto letter : firstValue)
-					charBuf.push_back(std::tolower(letter));
-
-				charBuf.push_back('\0');
-				firstValue = std::string(charBuf.data());
-				if (("true" == firstValue) || ("false" == firstValue))
-					jsonType = JSON_BOOL;
-				else
-					jsonType = JSON_STRING;
-			}
-		}
-	}
-
-	std::vector<bool> boolVec;
-	std::vector<long> longVec;
-	std::vector<unsigned long> ulongVec;
-	std::vector<double> doubleVec;
-
-	switch (jsonType)
-	{
-	case JSON_BOOL:
-		for (auto str : values)
-		{
-			boolVec.push_back(IsTrue(str));
-		}
-		jsonArray.Array = boolVec;
-		break;
-	case JSON_LONG:
-		for (auto str : values)
-		{
-			std::stringstream ss(str);
-			long v;
-			if (ss >> v)
-				longVec.push_back(v);
-			else
-				longVec.push_back(0);
-		}
-		jsonArray.Array = longVec;
-		break;
-	case JSON_ULONG:
-		for (auto str : values)
-		{
-			std::stringstream ss(str);
-			unsigned long v;
-			if (ss >> v)
-				ulongVec.push_back(v);
-			else
-				ulongVec.push_back(0);
-		}
-		jsonArray.Array = ulongVec;
-		break;
-	case JSON_DOUBLE:
-		for (auto str : values)
-		{
-			std::stringstream ss(str);
-			double v;
-			if (ss >> v)
-				doubleVec.push_back(v);
-			else
-				doubleVec.push_back(0.0);
-		}
-		jsonArray.Array = doubleVec;
-		break;
-	case JSON_STRING:
-		jsonArray.Array = values;
-		break;
-	}
-
-	return jsonArray;
-}
-
-bool JamFile::IsAllDigits(std::string str, bool includePeriod)
-{
-	auto isFirstChar = true;
-
-	for (auto ch : str)
-	{
-		if (!std::isdigit(ch))
-		{
-			if (includePeriod)
-			{
-				if ('.' == ch)
-					continue;
-			}
-			
-			if (isFirstChar)
-			{
-				if ('-' != ch)
-					return false;
-			}
-			else
-				return false;
-		}
-
-		isFirstChar = false;
-	}
-
-	return true;
-}
-
-bool JamFile::IsTrue(std::string str)
-{
-	std::vector<char> charBuf;
-	for (auto letter : str)
-		charBuf.push_back(std::tolower(letter));
-
-	charBuf.push_back('\0');
-	auto strLower = std::string(charBuf.data());
-	return "true" == strLower;
 }

@@ -9,6 +9,7 @@
 #include "../gui/GuiLabel.h"
 #include "../gui/GuiSlider.h"
 #include "Tickable.h"
+#include "../io/JamFile.h"
 #include "Drawable.h"
 #include "ActionReceiver.h"
 #include "AudioSource.h"
@@ -106,6 +107,8 @@ namespace engine
 			return *this;
 		}*/
 
+		static std::optional<std::unique_ptr<Scene>> FromJamFile(io::JamFile jam, std::vector<Trigger> rig);
+
 		virtual void Draw(base::DrawContext& ctx) override;
 
 		virtual void SetSize(utils::Size2d size) override
@@ -122,7 +125,7 @@ namespace engine
 		virtual void OnTick(Time curTime, unsigned int samps) override;
 
 		void InitAudio();
-
+		
 	protected:
 		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
 		virtual bool _ReleaseResources() override;

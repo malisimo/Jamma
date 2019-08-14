@@ -2,228 +2,19 @@
 #include "gtest/gtest.h"
 #include <regex>
 #include "resources/ResourceLib.h"
+#include "io/Json.h"
 #include "io/JamFile.h"
 
+using io::Json;
 using io::JamFile;
 
-class JamFileMock :
-	public JamFile
-{
-public:
-	static std::optional<JamFileMock::JsonPart> JsonFromStream(std::stringstream ss)
-	{
-		return std::get<JamFile::JsonPart>(JamFile::JsonFromStream(std::move(ss)).value());
-	}
-	static std::optional<Loop> LoopFromJson(JamFile::JsonPart json)
-	{
-		return Loop::FromJson(json);
-	}
-	static std::optional<LoopTake> LoopTakeFromJson(JamFile::JsonPart json)
-	{
-		return LoopTake::FromJson(json);
-	}
-	static std::optional<Station> StationFromJson(JamFile::JsonPart json)
-	{
-		return Station::FromJson(json);
-	}
-};
-
 const std::string LoopString = "{\"name\":\"%NAME%\",\"length\":220,\"index\":%INDEX%,\"masterloopcount\":7,\"level\":0.56,\"speed\":1.2,\"mutegroups\":11,\"selectgroups\":15,\"muted\":false,\"mix\":{\"type\":\"pan\",\"chans\":[0.2,0.8]}}";
-
-TEST(JamFile, ParsesBool) {
-	auto str = "{\"bool\":true}";
-	auto testStream = std::stringstream(str);
-	auto json = JamFileMock::JsonFromStream(std::move(testStream));
-
-	ASSERT_TRUE(json.has_value());
-	ASSERT_FALSE(json.value().KeyValues.empty());
-
-	auto kv = json.value().KeyValues["bool"];
-	auto res = std::get<bool>(kv);
-
-	ASSERT_EQ(true,res);
-}
-
-TEST(JamFile, ParsesInt) {
-	auto str = "{\"int\":-12}";
-	auto testStream = std::stringstream(str);
-	auto json = JamFileMock::JsonFromStream(std::move(testStream));
-
-	ASSERT_TRUE(json.has_value());
-	ASSERT_FALSE(json.value().KeyValues.empty());
-
-	auto kv = json.value().KeyValues["int"];
-	auto res = (int)std::get<long>(kv);
-
-	ASSERT_EQ(-12, res);
-}
-
-TEST(JamFile, ParsesUnsignedLong) {
-	auto str = "{\"ulong\":2147483648}";
-	auto testStream = std::stringstream(str);
-	auto json = JamFileMock::JsonFromStream(std::move(testStream));
-
-	ASSERT_TRUE(json.has_value());
-	ASSERT_FALSE(json.value().KeyValues.empty());
-
-	auto kv = json.value().KeyValues["ulong"];
-	auto res = std::get<unsigned long>(kv);
-
-	ASSERT_EQ(2147483648ul, res);
-}
-
-TEST(JamFile, ParsesDouble) {
-	auto str = "{\"double\":0.34}";
-	auto testStream = std::stringstream(str);
-	auto json = JamFileMock::JsonFromStream(std::move(testStream));
-
-	ASSERT_TRUE(json.has_value());
-	ASSERT_FALSE(json.value().KeyValues.empty());
-
-	auto kv = json.value().KeyValues["double"];
-	auto res = std::get<double>(kv);
-
-	ASSERT_EQ(0.34, res);
-}
-
-TEST(JamFile, ParsesString) {
-	auto str = "{\"string\":\"hello\"}";
-	auto testStream = std::stringstream(str);
-	auto json = JamFileMock::JsonFromStream(std::move(testStream));
-
-	ASSERT_TRUE(json.has_value());
-	ASSERT_FALSE(json.value().KeyValues.empty());
-
-	auto kv = json.value().KeyValues["string"];
-	auto res = std::get<std::string>(kv);
-
-	ASSERT_EQ("hello", res);
-}
-
-TEST(JamFile, ParsesStringInt) {
-	auto str = "{\"string\":\"hello\",\"int\":-7}";
-	auto testStream = std::stringstream(str);
-	auto json = JamFileMock::JsonFromStream(std::move(testStream));
-
-	ASSERT_TRUE(json.has_value());
-	ASSERT_FALSE(json.value().KeyValues.empty());
-
-	auto kv1 = json.value().KeyValues["string"];
-	auto res1 = std::get<std::string>(kv1);
-	auto kv2 = json.value().KeyValues["int"];
-	auto res2 = (int)std::get<long>(kv2);
-
-	ASSERT_EQ("hello", res1);
-	ASSERT_EQ(-7, res2);
-}
-
-TEST(JamFile, ParsesBoolArray) {
-	auto str = "{\"arr\":[TrUe,fAlsE]}";
-	auto testStream = std::stringstream(str);
-	auto json = JamFileMock::JsonFromStream(std::move(testStream));
-
-	ASSERT_TRUE(json.has_value());
-	ASSERT_FALSE(json.value().KeyValues.empty());
-
-	auto kv = json.value().KeyValues["arr"];
-	auto g = std::get<JamFile::JsonArray>(kv);
-	auto res = std::get<std::vector<bool>>(g.Array);
-
-	ASSERT_EQ(2, res.size());
-	ASSERT_EQ(true, res[0]);
-	ASSERT_EQ(false, res[1]);
-}
-
-TEST(JamFile, ParsesIntArray) {
-	auto str = "{\"arr\":[-3,4]}";
-	auto testStream = std::stringstream(str);
-	auto json = JamFileMock::JsonFromStream(std::move(testStream));
-
-	ASSERT_TRUE(json.has_value());
-	ASSERT_FALSE(json.value().KeyValues.empty());
-
-	auto kv = json.value().KeyValues["arr"];
-	auto g = std::get<JamFile::JsonArray>(kv);
-	auto res = std::get<std::vector<long>>(g.Array);
-
-	ASSERT_EQ(2, res.size());
-	ASSERT_EQ(-3, (int)res[0]);
-	ASSERT_EQ(4, (int)res[1]);
-}
-
-TEST(JamFile, ParsesUnsignedLongArray) {
-	auto str = "{\"arr\":[333,444]}";
-	auto testStream = std::stringstream(str);
-	auto json = JamFileMock::JsonFromStream(std::move(testStream));
-
-	ASSERT_TRUE(json.has_value());
-	ASSERT_FALSE(json.value().KeyValues.empty());
-
-	auto kv = json.value().KeyValues["arr"];
-	auto g = std::get<JamFile::JsonArray>(kv);
-	auto res = std::get<std::vector<unsigned long>>(g.Array);
-
-	ASSERT_EQ(2, res.size());
-	ASSERT_EQ(333ul, res[0]);
-	ASSERT_EQ(444ul, res[1]);
-}
-
-TEST(JamFile, ParsesDoubleArray) {
-	auto str = "{\"arr\":[1.1,2.2]}";
-	auto testStream = std::stringstream(str);
-	auto json = JamFileMock::JsonFromStream(std::move(testStream));
-
-	ASSERT_TRUE(json.has_value());
-	ASSERT_FALSE(json.value().KeyValues.empty());
-
-	auto kv = json.value().KeyValues["arr"];
-	auto g = std::get<JamFile::JsonArray>(kv);
-	auto res = std::get<std::vector<double>>(g.Array);
-
-	ASSERT_EQ(2, res.size());
-	ASSERT_EQ(1.1, res[0]);
-	ASSERT_EQ(2.2, res[1]);
-}
-
-TEST(JamFile, ParsesStringArray) {
-	auto str = "{\"arr\":[\"hello\",\"you\"]}";
-	auto testStream = std::stringstream(str);
-	auto json = JamFileMock::JsonFromStream(std::move(testStream));
-
-	ASSERT_TRUE(json.has_value());
-	ASSERT_FALSE(json.value().KeyValues.empty());
-
-	auto kv = json.value().KeyValues["arr"];
-	auto g = std::get<JamFile::JsonArray>(kv);
-	auto res = std::get<std::vector<std::string>>(g.Array);
-
-	ASSERT_EQ(2, res.size());
-	ASSERT_EQ("hello", res[0]);
-	ASSERT_EQ("you", res[1]);
-}
-
-TEST(JamFile, ParsesStruct) {
-	auto str = "{\"struct\":{\"name\":\"you\",\"business\":\"monkeying\"}}";
-	auto testStream = std::stringstream(str);
-	auto json = JamFileMock::JsonFromStream(std::move(testStream));
-
-	ASSERT_TRUE(json.has_value());
-	ASSERT_FALSE(json.value().KeyValues.empty());
-
-	auto kv = json.value().KeyValues["struct"];
-	auto h = std::get<JamFile::JsonPart>(kv);
-	auto res1 = std::get<std::string>(h.KeyValues["name"]);
-	auto res2 = std::get<std::string>(h.KeyValues["business"]);
-
-	ASSERT_EQ("you", res1);
-	ASSERT_EQ("monkeying", res2);
-}
 
 TEST(JamFile, ParsesLoop) {
 	auto str = std::regex_replace(std::regex_replace(LoopString, std::regex("%NAME%"), "loop"), std::regex("%INDEX%"), "2");
 	auto testStream = std::stringstream(str);
-	auto json = JamFileMock::JsonFromStream(std::move(testStream));
-	auto loop = JamFileMock::LoopFromJson(json.value());
+	auto json = std::get<Json::JsonPart>(Json::FromStream(std::move(testStream)).value());
+	auto loop = JamFile::Loop::FromJson(json);
 
 	ASSERT_TRUE(loop.has_value());
 	ASSERT_EQ(0, loop.value().Name.compare("loop"));
@@ -250,8 +41,8 @@ TEST(JamFile, ParsesLoopTake) {
 
 	auto str = "{\"name\":\"take\",\"loops\":[" + loop1 + "," + loop2 + "," + loop3 + "]}";
 	auto testStream = std::stringstream(str);
-	auto json = JamFileMock::JsonFromStream(std::move(testStream));
-	auto take = JamFileMock::LoopTakeFromJson(json.value());
+	auto json = std::get<Json::JsonPart>(Json::FromStream(std::move(testStream)).value());
+	auto take = JamFile::LoopTake::FromJson(json);
 
 	ASSERT_TRUE(take.has_value());
 	ASSERT_EQ(0, take.value().Name.compare("take"));
@@ -280,8 +71,8 @@ TEST(JamFile, ParsesStation) {
 
 	auto str = "{\"name\":\"station\",\"takes\":[" + take1 + "," + take2 + "]}";
 	auto testStream = std::stringstream(str);
-	auto json = JamFileMock::JsonFromStream(std::move(testStream));
-	auto station = JamFileMock::StationFromJson(json.value());
+	auto json = std::get<Json::JsonPart>(Json::FromStream(std::move(testStream)).value());
+	auto station = JamFile::Station::FromJson(json);
 
 	ASSERT_TRUE(station.has_value());
 	ASSERT_EQ(0, station.value().Name.compare("station"));

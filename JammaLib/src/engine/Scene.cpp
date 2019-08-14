@@ -112,6 +112,12 @@ Scene::Scene(SceneParams params) :
 		stat->Init();
 }
 
+std::optional<std::unique_ptr<Scene>> Scene::FromJamFile(io::JamFile jam, std::vector<Trigger> rig)
+{
+	Scene scene(SceneParams(DrawableParams{ "" }, SizeableParams{ 1400, 1000 }, AudioSourceParams{}));
+	return std::optional<std::unique_ptr<Scene>>();
+}
+
 void Scene::Draw(DrawContext& ctx)
 {
 	// Draw scene

@@ -222,6 +222,8 @@
     <ClInclude Include="src\base\AudioSink.h" />
     <ClInclude Include="src\base\ActionUndo.h" />
     <ClInclude Include="src\base\Sharable.h" />
+    <ClInclude Include="src\io\RigFile.h" />
+    <ClInclude Include="src\io\Json.h" />
     <ClInclude Include="src\engine\LoopTake.h" />
     <ClInclude Include="src\base\MultiAudioSource.h" />
     <ClInclude Include="src\audio\AudioBuffer.h" />
@@ -302,6 +304,8 @@
     <ClCompile Include="src\audio\ChannelMixer.cpp" />
     <ClCompile Include="src\actions\DoubleAction.cpp" />
     <ClCompile Include="src\actions\TriggerAction.cpp" />
+    <ClCompile Include="src\io\RigFile.cpp" />
+    <ClCompile Include="src\io\Json.cpp" />
     <ClCompile Include="src\engine\LoopTake.cpp" />
     <ClCompile Include="src\audio\AudioBuffer.cpp" />
     <ClCompile Include="src\audio\AudioMixer.cpp" />
