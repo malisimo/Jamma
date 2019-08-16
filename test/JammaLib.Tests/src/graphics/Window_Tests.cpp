@@ -11,8 +11,7 @@ using engine::SceneParams;
 
 TEST(Window, IsInitiallyWindowed) {
 	auto sceneParams = SceneParams(base::DrawableParams(),
-		base::SizeableParams(),
-		base::AudioSourceParams());
+		base::SizeableParams());
 	auto scene = Scene(sceneParams);
 
 	ResourceLib resourceLib;

@@ -12,6 +12,9 @@ using actions::ActionResult;
 using actions::TriggerAction;
 using audio::AudioMixer;
 using audio::AudioMixerParams;
+using utils::Size2d;
+
+const utils::Size2d LoopTake::_Gap = { 6, 6 };
 
 LoopTake::LoopTake(LoopTakeParams params) :
 	GuiElement(params),
@@ -24,6 +27,32 @@ LoopTake::LoopTake(LoopTakeParams params) :
 
 LoopTake::~LoopTake()
 {
+}
+
+std::optional<std::shared_ptr<LoopTake>> LoopTake::FromFile(LoopTakeParams takeParams, io::JamFile::LoopTake takeStruct)
+{
+	auto take = std::make_shared<LoopTake>(takeParams);
+
+	auto loopHeight = 20u;
+	Size2d gap = { 2, 2 };
+	LoopParams loopParams;
+	loopParams.Wav = "hh";
+	loopParams.Size = { 80, 80 };
+	loopParams.Position = { 10, 22 };
+
+	auto loopCount = 0u;
+	for (auto loopStruct : takeStruct.Loops)
+	{
+		loopParams.Position = { (int)gap.Width, (int)(loopCount * loopHeight + gap.Height) };
+		auto loop = Loop::FromFile(loopParams, loopStruct);
+		
+		if (loop.has_value())
+			take->AddLoop(loop.value());
+
+		loopCount++;
+	}
+
+	return take;
 }
 
 void LoopTake::OnPlay(const std::shared_ptr<MultiAudioSink> dest,
@@ -84,9 +113,39 @@ LoopTake::LoopTakeSource LoopTake::SourceType() const
 	return _sourceType;
 }
 
-void LoopTake::AddLoop(LoopParams loopParams)
+std::shared_ptr<Loop> LoopTake::AddLoop(unsigned int chan)
 {
-	auto loop = std::make_shared<Loop>(loopParams);
+	auto newNumLoops = (unsigned int)_loops.size() + 1;
+
+	auto loopHeight = CalcLoopHeight(_sizeParams.Size.Height, newNumLoops);
+	utils::Size2d loopSize = { _sizeParams.Size.Width - (2 * _Gap.Width), _sizeParams.Size.Height - (2 * _Gap.Height) };
+
+	auto loopCount = 0;
+	for (auto& loop : _loops)
+	{
+		loop->SetSize(loopSize);
+		loop->SetPosition({ (int)_Gap.Width, (int)(_Gap.Height + (loopCount * loopHeight)) });
+
+		loopCount++;
+	}
+
+	audio::WireMixBehaviourParams wire;
+	wire.Channels = { chan };
+	auto mixerParams = Loop::GetMixerParams({ 110, loopHeight }, wire);
+
+	LoopParams loopParams;
+	loopParams.Size = loopSize;
+	loopParams.Position = { (int)_Gap.Width, (int)(_Gap.Height + (newNumLoops-1) * loopHeight) };
+
+	auto loop = std::make_shared<Loop>(loopParams, mixerParams);
+
+	AddLoop(loop);
+
+	return loop;
+}
+
+void LoopTake::AddLoop(std::shared_ptr<Loop> loop)
+{
 	_loops.push_back(loop);
 	_children.push_back(loop);
 }
@@ -97,33 +156,9 @@ void LoopTake::Record(std::vector<unsigned int> channels)
 	_loops.clear();
 	auto loopNum = 0;
 
-	for (auto& chan : channels)
+	for (auto chan : channels)
 	{
-		gui::GuiSliderParams sliderParams;
-		sliderParams.Position = { 2,4 };
-		sliderParams.Size = { 40,312 };
-		sliderParams.MinSize = { 40,312 };
-		sliderParams.DragLength = 270;
-		sliderParams.DragControlOffset = { 4,5 };
-		sliderParams.DragControlSize = { 32,32 };
-		sliderParams.Texture = "fader_back";
-		sliderParams.DragTexture = "fader";
-		sliderParams.DragOverTexture = "fader_over";
-
-		audio::WireMixBehaviourParams bParams;
-		bParams.Channels = { chan };
-		AudioMixerParams mixerParams;
-		mixerParams.Size = { 160, 320 };
-		mixerParams.Position = { 6, 6 };
-		mixerParams.SliderParams = sliderParams;
-		mixerParams.Behaviour = bParams;
-
-		LoopParams loopParams;
-		loopParams.Size = { 110, 80 };
-		loopParams.Position = { 5, 5 + loopNum * 90 };
-		loopParams.MixerParams = mixerParams;
-
-		auto loop = std::make_shared<Loop>(loopParams);
+		auto loop = AddLoop(chan);
 		loop->Record();
 
 		_loops.push_back(loop);
@@ -154,4 +189,12 @@ void LoopTake::Ditch()
 	}
 
 	_loops.clear();
+}
+
+unsigned int engine::LoopTake::CalcLoopHeight(unsigned int takeHeight, unsigned int numLoops)
+{
+	if (0 == numLoops)
+		return 0;
+
+	return (takeHeight - ((2 + (numLoops - 1)) * _Gap.Width)) / numLoops;
 }

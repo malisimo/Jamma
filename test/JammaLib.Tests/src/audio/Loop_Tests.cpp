@@ -150,9 +150,8 @@ TEST(Loop, PlayWrapsAround) {
 	loopParams.Wav = "hh";
 	loopParams.Size = { 80, 80 };
 	loopParams.Position = { 10, 22 };
-	loopParams.MixerParams = mixerParams;
 
-	auto loop = Loop(loopParams);
+	auto loop = Loop(loopParams, mixerParams);
 
 	auto numBlocks = (bufSize * 2) / blockSize;
 

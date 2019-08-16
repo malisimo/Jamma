@@ -43,6 +43,8 @@ namespace engine
 		Station& operator=(const Station&) = delete;
 
 	public:
+		static std::optional<std::shared_ptr<Station>> FromFile(StationParams stationParams, io::JamFile::Station stationStruct);
+
 		virtual MultiAudioDirection MultiAudibleDirection() const override { return MULTIAUDIO_BOTH; }
 		virtual void OnPlay(const std::shared_ptr<base::MultiAudioSink> dest, unsigned int numSamps) override;
 		virtual void EndMultiPlay(unsigned int numSamps) override;
@@ -53,15 +55,19 @@ namespace engine
 		virtual actions::ActionResult OnAction(actions::TriggerAction action) override;
 		virtual void OnTick(Time curTime, unsigned int samps) override;
 		
-		void AddTake(LoopTakeParams takeParams);
-		void AddTrigger(TriggerParams trigParams);
+		std::shared_ptr<LoopTake> AddTake();
+		void AddTake(std::shared_ptr<LoopTake> take);
+		std::shared_ptr<Trigger> AddTrigger(TriggerParams trigParams);
 		void Reset();
 
 	protected:
-		std::shared_ptr<LoopTake> GetLoopTake(unsigned long id);
-		std::shared_ptr<LoopTake> AddLoopTake(actions::TriggerAction action);
+		static unsigned int CalcTakeHeight(unsigned int stationHeight, unsigned int numTakes);
+		
+		std::optional<std::shared_ptr<LoopTake>> TryGetTake(unsigned long id);
 
 	protected:
+		static const utils::Size2d _Gap;
+
 		std::shared_ptr<Timer> _globalClock;
 		std::vector<std::shared_ptr<LoopTake>> _loopTakes;
 		std::vector<std::shared_ptr<Trigger>> _triggers;

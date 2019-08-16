@@ -14,6 +14,9 @@ using actions::TriggerAction;
 using gui::GuiSliderParams;
 using audio::AudioMixerParams;
 using audio::WireMixBehaviourParams;
+using utils::Size2d;
+
+const utils::Size2d Station::_Gap = { 5, 5 };
 
 Station::Station(StationParams params) :
 	GuiElement(params),
@@ -26,6 +29,34 @@ Station::Station(StationParams params) :
 
 Station::~Station()
 {
+}
+
+std::optional<std::shared_ptr<Station>> Station::FromFile(StationParams stationParams, io::JamFile::Station stationStruct)
+{
+	auto station = std::make_shared<Station>(stationParams);
+
+	auto numTakes = (unsigned int)stationStruct.LoopTakes.size();
+	Size2d gap = { 4, 4 };
+	auto takeHeight = numTakes > 0 ?
+		stationParams.Size.Height - ((2 + numTakes - 1) * gap.Height) / numTakes :
+		stationParams.Size.Height - (2 * gap.Height);
+	Size2d takeSize = { stationParams.Size.Width - (2 * gap.Width), takeHeight };
+	LoopTakeParams takeParams;
+	takeParams.Size = { 80, 80 };
+	
+	auto takeCount = 0u;
+	for (auto takeStruct : stationStruct.LoopTakes)
+	{
+		takeParams.Position = { (int)gap.Width, (int)(takeCount * takeHeight + gap.Height) };
+		auto take = LoopTake::FromFile(takeParams, takeStruct);
+		
+		if (take.has_value())
+			station->AddTake(take.value());
+
+		takeCount++;
+	}
+		
+	return station;
 }
 
 void Station::OnPlay(const std::shared_ptr<base::MultiAudioSink> dest, unsigned int numSamps)
@@ -81,29 +112,35 @@ ActionResult Station::OnAction(TriggerAction action)
 	ActionResult res;
 	res.IsEaten = false;
 
-	std::shared_ptr<LoopTake> loopTake = nullptr;
+	LoopTakeParams takeParams;
+	auto loopCount = 0u;
+	auto loopTake = TryGetTake(action.TargetId);
 
 	switch (action.ActionType)
 	{
 	case TriggerAction::TRIGGER_REC_START:
-		loopTake->Record(action.InputChannels);
+		if (loopTake.has_value())
+			loopTake.value()->Record(action.InputChannels);
+
 		res.IsEaten = true;
 		break;
 	case TriggerAction::TRIGGER_REC_END:
-		loopTake = AddLoopTake(action);
 		if (_globalClock->IsMasterLengthSet())
 		{
 			auto [loopLength, errorSamps] = _globalClock->QuantiseLength(action.SampleCount);
-			loopTake->Play(0, loopLength);
+			
+			if (loopTake.has_value())
+				loopTake.value()->Play(0, loopLength);
 		}
 		else
-		{
 			_globalClock->SetMasterLength(action.SampleCount);
-		}
+
 		res.IsEaten = true;
 		break;
 	case TriggerAction::TRIGGER_DITCH:
-		loopTake->Ditch();
+		if (loopTake.has_value())
+			loopTake.value()->Ditch();
+
 		res.IsEaten = true;
 		break;
 	}
@@ -119,23 +156,47 @@ void Station::OnTick(Time curTime, unsigned int samps)
 	}
 }
 
-void Station::AddTake(LoopTakeParams takeParams)
+std::shared_ptr<LoopTake> Station::AddTake()
 {
+	auto newNumTakes = (unsigned int)_loopTakes.size() + 1;
+
+	auto takeHeight = CalcTakeHeight(_sizeParams.Size.Height, newNumTakes);
+	utils::Size2d takeSize = { _sizeParams.Size.Width - (2 * _Gap.Width), _sizeParams.Size.Height - (2 * _Gap.Height) };
+
+	auto takeCount = 0;
+	for (auto& take : _loopTakes)
+	{
+		take->SetSize(takeSize);
+		take->SetPosition({ (int)_Gap.Width, (int)(_Gap.Height + (takeCount * takeHeight)) });
+
+		takeCount++;
+	}
+
+	LoopTakeParams takeParams;
+	takeParams.Size = takeSize;
+	takeParams.Position = { (int)_Gap.Width, (int)(_Gap.Height + (newNumTakes - 1) * takeHeight) };
+
 	auto take = std::make_shared<LoopTake>(takeParams);
 
-	for (auto loop : takeParams.Loops)
-		take->AddLoop(loop);
+	AddTake(take);
 
+	return take;
+}
+
+void Station::AddTake(std::shared_ptr<LoopTake> take)
+{
 	_loopTakes.push_back(take);
 	_children.push_back(take);
 }
 
-void Station::AddTrigger(TriggerParams trigParams)
+std::shared_ptr<Trigger> Station::AddTrigger(TriggerParams trigParams)
 {
 	auto trigger = std::make_shared<Trigger>(trigParams);
 
 	_triggers.push_back(trigger);
 	_children.push_back(trigger);
+
+	return trigger;
 }
 
 void Station::Reset()
@@ -157,7 +218,17 @@ void Station::Reset()
 	_triggers.clear();
 }
 
-std::shared_ptr<LoopTake> engine::Station::GetLoopTake(unsigned long id)
+
+unsigned int Station::CalcTakeHeight(unsigned int stationHeight, unsigned int numTakes)
+{
+	if (0 == numTakes)
+		return 0;
+
+	return (stationHeight - ((2 + (numTakes - 1)) * _Gap.Width)) / numTakes;
+}
+
+
+std::optional<std::shared_ptr<LoopTake>> Station::TryGetTake(unsigned long id)
 {
 	for (auto& take : _loopTakes)
 	{
@@ -165,53 +236,5 @@ std::shared_ptr<LoopTake> engine::Station::GetLoopTake(unsigned long id)
 			return take;
 	}
 
-	return std::shared_ptr<LoopTake>();
-}
-
-std::shared_ptr<LoopTake> Station::AddLoopTake(TriggerAction action)
-{
-	// Nicer with default constructor
-	GuiSliderParams sliderParams;
-	sliderParams.Position = { 2,4 };
-	sliderParams.Size = { 40,312 };
-	sliderParams.MinSize = { 40,312 };
-	sliderParams.DragLength = 270;
-	sliderParams.DragControlOffset = { 4,5 };
-	sliderParams.DragControlSize = { 32,32 };
-	sliderParams.Texture = "fader_back";
-	sliderParams.DragTexture = "fader";
-	sliderParams.DragOverTexture = "fader_over";
-
-	WireMixBehaviourParams mixBehaviour;
-	mixBehaviour.Channels = { 0 };
-
-	std::vector<LoopParams> takeLoops;
-	for (auto chan : action.InputChannels)
-	{
-		AudioMixerParams mixerParams;
-		mixerParams.Size = { 160, 320 };
-		mixerParams.Position = { 6, 6 };
-		mixerParams.SliderParams = sliderParams;
-		mixerParams.Behaviour = mixBehaviour;
-		mixerParams.InputChannel = chan;
-
-		LoopParams loopParams;
-		loopParams.Size = { 80, 80 };
-		loopParams.Position = { 10, 22 };
-		loopParams.MixerParams = mixerParams;
-
-		takeLoops.push_back(loopParams);
-	}
-
-	LoopTakeParams takeParams;
-	takeParams.Size = { 140, 140 };
-	takeParams.Position = { 4, 4 };
-	takeParams.Loops = takeLoops;
-	
-	auto take = std::make_shared<LoopTake>(takeParams);
-
-	for (auto loop : takeParams.Loops)
-		take->AddLoop(loop);
-
-	return take;
+	return std::nullopt;
 }

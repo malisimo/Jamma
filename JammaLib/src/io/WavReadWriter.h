@@ -5,8 +5,9 @@
 #include <string>
 #include <optional>
 #include <memory>
+#include "FileReadWriter.h"
 
-namespace audio
+namespace io
 {
 	struct SoundHeader
 	{
@@ -25,20 +26,21 @@ namespace audio
 		long  dlength;        /* data length in bytes (filelength - 44)  */
 	};
 
-	class WavReadWriter
+	class WavReadWriter :
+		public FileReadWriter
 	{
-	public:
-		static std::optional<std::tuple<std::vector<float>, unsigned int, unsigned int>>
-			ReadWavFile(const std::string& fname, unsigned int maxsamps);
+	protected:
+		std::optional<std::tuple<std::vector<float>, unsigned int, unsigned int>>
+			_Read(const std::string& fileName, unsigned int maxSamps) const;
 
-		static bool WriteWavFile(std::string fname,
-			std::vector<float> data,
-			unsigned int numsamps,
-			unsigned int samplerate);
+		bool _Write(std::string fileName,
+			std::vector<float> buffer,
+			unsigned int numSamps,
+			unsigned int sampleRate) const;
 
-	private:
-		static FILE* OpenSoundIn(char* filename, struct SoundHeader* hdr);
-		static FILE* OpenSoundOut(char* filename, struct SoundHeader* hdr);
+	protected:
+		static FILE* OpenSoundIn(char* fileName, struct SoundHeader* hdr);
+		static FILE* OpenSoundOut(char* fileName, struct SoundHeader* hdr);
 		static void FillHeader(struct SoundHeader& hdr);
 
 		static void FloatToChar(float f, char* c);

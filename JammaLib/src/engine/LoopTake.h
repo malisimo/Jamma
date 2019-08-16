@@ -68,6 +68,8 @@ namespace engine
 		LoopTake& operator=(const LoopTake&) = delete;
 
 	public:
+		static std::optional<std::shared_ptr<LoopTake>> FromFile(LoopTakeParams takeParams, io::JamFile::LoopTake takeStruct);
+
 		virtual MultiAudioDirection MultiAudibleDirection() const override { return MULTIAUDIO_BOTH; }
 		virtual void OnPlay(const std::shared_ptr<base::MultiAudioSink> dest, unsigned int numSamps) override;
 		virtual void EndMultiPlay(unsigned int numSamps) override;
@@ -80,13 +82,19 @@ namespace engine
 		unsigned long SourceId() const;
 		LoopTakeSource SourceType() const;
 		unsigned long NumRecordedSamps() const;
-		void AddLoop(LoopParams loopParams);
+		std::shared_ptr<Loop> AddLoop(unsigned int chan);
+		void AddLoop(std::shared_ptr<Loop> loop);
 
 		void Record(std::vector<unsigned int> channels);
 		void Play(unsigned long index, unsigned long length);
 		void Ditch();
 
 	protected:
+		static unsigned int CalcLoopHeight(unsigned int takeHeight, unsigned int numLoops);
+
+	protected:
+		static const utils::Size2d _Gap;
+
 		unsigned long _id;
 		unsigned int _sourceId;
 		LoopTakeSource _sourceType;

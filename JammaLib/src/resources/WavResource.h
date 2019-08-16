@@ -4,7 +4,7 @@
 #include <string>
 #include <iostream>
 #include "Resource.h"
-#include "../audio/WavReadWriter.h"
+#include "../io/WavReadWriter.h"
 
 namespace resources
 {

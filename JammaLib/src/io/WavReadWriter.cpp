@@ -1,20 +1,20 @@
 #include "WavReadWriter.h"
 
-using namespace audio;
+using namespace io;
 
 std::optional<std::tuple<std::vector<float>, unsigned int, unsigned int>>
-	WavReadWriter::ReadWavFile(const std::string& fname, unsigned int maxsamps)
+	WavReadWriter::_Read(const std::string& fileName, unsigned int maxSamps) const
 {
 	struct SoundHeader info;
 	struct SoundHeader* pinfo = &info;
 
-	// The variable maxsamps represents the maximum
+	// The variable maxSamps represents the maximum
 	// number of 32 bit floats the array can contain.
-	if (maxsamps < 1)
+	if (maxSamps < 1)
 		return std::nullopt;
 
-	auto cname = new char[fname.size() + 1];
-	strcpy_s(cname, fname.size() + 1, fname.c_str());
+	auto cname = new char[fileName.size() + 1];
+	strcpy_s(cname, fileName.size() + 1, fileName.c_str());
 
 	auto fid = OpenSoundIn(cname, pinfo);
 
@@ -23,11 +23,11 @@ std::optional<std::tuple<std::vector<float>, unsigned int, unsigned int>>
 	if (fid == NULL)
 		return {};
 
-	size_t numSampsLoaded = maxsamps;
+	size_t numSampsLoaded = maxSamps;
 
 	// Only load the reported number of samples
 	// (but prevent loading more than the array can hold)
-	if (info.dlength < (long)(maxsamps * 2))
+	if (info.dlength < (long)(maxSamps * 2))
 		numSampsLoaded = info.dlength / 2; // Two 16 bit integers per sample (32 bit float)
 
 	if (numSampsLoaded < 1)
@@ -38,36 +38,39 @@ std::optional<std::tuple<std::vector<float>, unsigned int, unsigned int>>
 		return {};
 	}
 
-	auto datain = new char[numSampsLoaded * 2];  // Two bytes per wav file sample (16 bit integer)
-	auto bytesread = fread(datain, 1, numSampsLoaded * 2, fid);
+	auto bufferIn = new char[numSampsLoaded * 2];  // Two bytes per wav file sample (16 bit integer)
+	auto bytesRead = fread(bufferIn, 1, numSampsLoaded * 2, fid);
 
-	if ((bytesread / 2) < numSampsLoaded)
-		numSampsLoaded = bytesread / 2;  // Two bytes per wav file sample (16 bit integer)
+	if ((bytesRead / 2) < numSampsLoaded)
+		numSampsLoaded = bytesRead / 2;  // Two bytes per wav file sample (16 bit integer)
 
 	fclose(fid);
 
-	std::vector<float> data(numSampsLoaded);
+	std::vector<float> buffer(numSampsLoaded);
 
 	for (auto i=0U; i<numSampsLoaded; i++)
 	{
-		data[i] = CharToFloat(datain + (i * 2));
+		buffer[i] = CharToFloat(bufferIn + (i * 2));
 	}
 
-	delete datain;
+	delete bufferIn;
 
-	return std::make_tuple(std::move(data), (unsigned int)numSampsLoaded, info.srate);
+	return std::make_tuple(std::move(buffer), (unsigned int)numSampsLoaded, info.srate);
 }
 
-bool WavReadWriter::WriteWavFile(std::string fname, std::vector<float> data, unsigned int numSamps, unsigned int sampleRate)
+bool WavReadWriter::_Write(std::string fileName,
+	std::vector<float> buffer,
+	unsigned int numSamps,
+	unsigned int sampleRate) const
 {
 	char* cname;
-	char* dataout;
+	char* bufferOut;
 	struct SoundHeader info;
 	struct SoundHeader* pinfo = &info;
 	FILE* fid;
 
-	cname = new char[fname.size() + 1];
-	strcpy_s(cname, fname.size() + 1, fname.c_str());
+	cname = new char[fileName.size() + 1];
+	strcpy_s(cname, fileName.size() + 1, fileName.c_str());
 
 	if (numSamps < 1)
 	{
@@ -88,29 +91,29 @@ bool WavReadWriter::WriteWavFile(std::string fname, std::vector<float> data, uns
 	if (fid == NULL)
 		return false;
 
-	dataout = new char[numSamps * 2]; // Two bytes per wav file sample (16 bit integer)
+	bufferOut = new char[numSamps * 2]; // Two bytes per wav file sample (16 bit integer)
 
 	for (unsigned int i = 0; i < numSamps; i++)
 	{
-		FloatToChar(data[i], dataout + (i * 2));
+		FloatToChar(buffer[i], bufferOut + (i * 2));
 	}
 
-	fwrite(dataout, 1, numSamps * 2, fid);
+	fwrite(bufferOut, 1, numSamps * 2, fid);
 
 	fclose(fid);
-	delete dataout;
+	delete bufferOut;
 
 	return true;
 }
 
-FILE* WavReadWriter::OpenSoundIn(char *filename, struct SoundHeader *hdr)
+FILE* WavReadWriter::OpenSoundIn(char *fileName, struct SoundHeader *hdr)
 {
 	FILE *myfile;
 
 	// Check file name for .wav extension
-	if (filename[strlen(filename) - 1] == 'v')
+	if (fileName[strlen(fileName) - 1] == 'v')
 	{
-		myfile = _fsopen(filename, "rb", _SH_DENYNO);
+		myfile = _fsopen(fileName, "rb", _SH_DENYNO);
 
 		if (myfile == NULL)
 		{
@@ -128,15 +131,15 @@ FILE* WavReadWriter::OpenSoundIn(char *filename, struct SoundHeader *hdr)
 	return myfile;
 }
 
-FILE *WavReadWriter::OpenSoundOut(char *filename, struct SoundHeader *hdr)
+FILE *WavReadWriter::OpenSoundOut(char *fileName, struct SoundHeader *hdr)
 {
 	FILE *myfile;
 	errno_t err;
 
 	// Check file name for .wav extension
-	if (filename[strlen(filename) - 1] == 'v')
+	if (fileName[strlen(fileName) - 1] == 'v')
 	{
-		err = fopen_s(&myfile, filename, "wb");
+		err = fopen_s(&myfile, fileName, "wb");
 
 		if (err != 0)
 		{

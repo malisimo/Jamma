@@ -6,6 +6,8 @@
 #include "ActionReceiver.h"
 #include "ResourceUser.h"
 #include "GuiElement.h"
+#include "../io/FileReadWriter.h"
+#include "../io/JamFile.h"
 #include "../audio/AudioMixer.h"
 #include "../resources/WavResource.h"
 
@@ -23,17 +25,14 @@ namespace engine
 				"",
 				"",
 				{}),
-			Wav(""),
-			MixerParams(audio::AudioMixerParams())
+			Wav("")
 		{
 		}
 
 		LoopParams(base::GuiElementParams params,
-			std::string wav,
-			audio::AudioMixerParams mixerParams) :
+			std::string wav) :
 			base::GuiElementParams(params),
-			Wav(wav),
-			MixerParams(mixerParams)
+			Wav(wav)
 		{
 		}
 
@@ -43,7 +42,6 @@ namespace engine
 		std::string RecordTexture;
 		std::string OverdubTexture;
 		std::string PunchTexture;
-		audio::AudioMixerParams MixerParams;
 	};
 
 	class Loop :
@@ -62,7 +60,8 @@ namespace engine
 		};
 
 	public:
-		Loop(LoopParams loopParams);
+		Loop(LoopParams loopParams,
+			audio::AudioMixerParams mixerParams);
 		~Loop() { ReleaseResources(); }
 
 		// Copy
@@ -100,6 +99,9 @@ namespace engine
 		}
 
 	public:
+		static std::optional<std::shared_ptr<Loop>> FromFile(LoopParams loopParams, io::JamFile::Loop loopStruct);
+		static audio::AudioMixerParams GetMixerParams(utils::Size2d loopSize, audio::BehaviourParams behaviour);
+
 		virtual MultiAudioDirection MultiAudibleDirection() const override { return MULTIAUDIO_BOTH; }
 		virtual void OnPlay(const std::shared_ptr<base::MultiAudioSink> dest, unsigned int numSamps) override;
 		virtual void EndMultiPlay(unsigned int numSamps) override;
@@ -111,21 +113,25 @@ namespace engine
 		unsigned int InputChannel();
 		void SetInputChannel(unsigned int channel);
 
+		bool Load(const io::FileReadWriter& readWriter);
 		void Record();
 		void Play(unsigned long index, unsigned long length);
 		void Ditch();
 		void Overdub();
 		void PunchIn();
 		void PunchOut();
-
+		
 	protected:
 		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
 		virtual bool _ReleaseResources() override;
 
-	private:
+	protected:
 		static const unsigned int _MaxFadeSamps = 30000;
 		static const unsigned int _InitBufferSize = 1000000;
 		static const unsigned int _MaxBufferSize = 40000000;
+		static const utils::Size2d _Gap;
+		static const utils::Size2d _DragGap;
+		static const utils::Size2d _DragSize;
 
 		unsigned long _playPos;
 		unsigned long _recPos;

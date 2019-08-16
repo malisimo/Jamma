@@ -1,7 +1,7 @@
 #include "WavResource.h"
 
 using namespace resources;
-using audio::WavReadWriter;
+using io::WavReadWriter;
 
 WavResource::WavResource(std::string name, std::vector<float> audioBuf, unsigned int numSamps, unsigned int sampleRate) :
 	Resource(name),
@@ -27,5 +27,5 @@ const std::vector<float>& WavResource::Buffer()
 
 std::optional<std::tuple<std::vector<float>, unsigned int, unsigned int>> WavResource::Load(const std::string & wavFile)
 {
-	return WavReadWriter::ReadWavFile(wavFile, 80000000u);
+	return WavReadWriter().Read(wavFile, 80000000u);
 }

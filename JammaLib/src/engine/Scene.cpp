@@ -6,6 +6,7 @@ using namespace actions;
 using namespace audio;
 using namespace engine;
 using namespace gui;
+using namespace io;
 using namespace graphics;
 using namespace resources;
 using namespace utils;
@@ -23,6 +24,7 @@ Scene::Scene(SceneParams params) :
 	_touchDownElement(std::weak_ptr<GuiElement>()),
 	_audioCallbackCount(0)
 {
+
 	GuiLabelParams labelParams(GuiElementParams(
 		DrawableParams{ "" },
 		MoveableParams{ 10,10 },
@@ -33,42 +35,12 @@ Scene::Scene(SceneParams params) :
 		{}), "Jamma");
 	_label = std::make_unique<GuiLabel>(labelParams);
 
-	// Nicer with default constructor
-	GuiSliderParams sliderParams;
-	sliderParams.Position = { 2,4 };
-	sliderParams.Size = { 40,312 };
-	sliderParams.MinSize = { 40,312 };
-	sliderParams.DragLength = 270;
-	sliderParams.DragControlOffset = { 4,5 };
-	sliderParams.DragControlSize = { 32,32 };
-	sliderParams.Texture = "fader_back";
-	sliderParams.DragTexture = "fader";
-	sliderParams.DragOverTexture = "fader_over";
+	_audioDevice = std::make_unique<AudioDevice>();
+}
 
-	PanMixBehaviourParams mixBehaviour;
-	mixBehaviour.ChannelLevels = { 0.8f, 0.2f };
-	AudioMixerParams mixerParams;
-	mixerParams.Size = { 160, 320 };
-	mixerParams.Position = { 6, 6 };
-	mixerParams.SliderParams = sliderParams;
-	mixerParams.Behaviour = mixBehaviour;
-
-	StationParams stationParams;
-	stationParams.Size = { 240, 200 };
-	stationParams.Position = { 120, 45 };
-	auto station = std::make_shared<Station>(stationParams);
-
-	LoopParams loopParams;
-	loopParams.Wav = "hh";
-	loopParams.Size = { 80, 80 };
-	loopParams.Position = { 10, 22 };
-	loopParams.MixerParams = mixerParams;
-
-	LoopTakeParams takeParams;
-	takeParams.Size = { 140, 140 };
-	takeParams.Position = { 4, 4 };
-	takeParams.Loops = { loopParams };
-	station->AddTake(takeParams);
+std::optional<std::shared_ptr<Scene>> Scene::FromFile(SceneParams sceneParams, io::JamFile jamStruct, io::RigFile rigStruct)
+{
+	auto scene = std::make_shared<Scene>(sceneParams);
 
 	TriggerParams trigParams;
 	trigParams.Size = { 24, 24 };
@@ -103,19 +75,19 @@ Scene::Scene(SceneParams params) :
 	trigParams.TextureOverdubbing = "orange";
 	trigParams.TexturePunchedIn = "purple";
 	trigParams.DebounceMs = 120;
-	station->AddTrigger(trigParams);
-	_stations.push_back(station);
 
-	_audioDevice = std::make_unique<AudioDevice>();
+	for (auto stationStruct : jamStruct.Stations)
+	{
+		StationParams stationParams;
+		auto station = Station::FromFile(stationParams, stationStruct);
+		if (station.has_value())
+		{
+			station.value()->AddTrigger(trigParams);
+			scene->AddStation(station.value());
+		}
+	}
 
-	for (auto& stat : _stations)
-		stat->Init();
-}
-
-std::optional<std::unique_ptr<Scene>> Scene::FromJamFile(io::JamFile jam, std::vector<Trigger> rig)
-{
-	Scene scene(SceneParams(DrawableParams{ "" }, SizeableParams{ 1400, 1000 }, AudioSourceParams{}));
-	return std::optional<std::unique_ptr<Scene>>();
+	return scene;
 }
 
 void Scene::Draw(DrawContext& ctx)
@@ -378,4 +350,10 @@ void Scene::InitSize()
 glm::mat4 Scene::View()
 {
 	return glm::lookAt(glm::vec3(0.f, 0.f, 1.5f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
+}
+
+void Scene::AddStation(std::shared_ptr<Station> station)
+{
+	_stations.push_back(station);
+	station->Init();
 }

@@ -10,6 +10,7 @@
 #include "../gui/GuiSlider.h"
 #include "Tickable.h"
 #include "../io/JamFile.h"
+#include "../io/RigFile.h"
 #include "Drawable.h"
 #include "ActionReceiver.h"
 #include "AudioSource.h"
@@ -22,16 +23,13 @@ namespace engine
 {
 	class SceneParams :
 		public base::DrawableParams,
-		public base::SizeableParams,
-		public base::AudioSourceParams
+		public base::SizeableParams
 	{
 	public:
 		SceneParams(base::DrawableParams drawParams,
-			base::SizeableParams sizeParams,
-			base::AudioSourceParams AudioSourceParams) :
+			base::SizeableParams sizeParams) :
 			base::DrawableParams(drawParams),
-			base::SizeableParams(sizeParams),
-			base::AudioSourceParams(AudioSourceParams)
+			base::SizeableParams(sizeParams)
 		{}
 	};
 
@@ -107,8 +105,8 @@ namespace engine
 			return *this;
 		}*/
 
-		static std::optional<std::unique_ptr<Scene>> FromJamFile(io::JamFile jam, std::vector<Trigger> rig);
-
+		static std::optional<std::shared_ptr<Scene>> FromFile(SceneParams sceneParams, io::JamFile jam, io::RigFile rig);
+		
 		virtual void Draw(base::DrawContext& ctx) override;
 
 		virtual void SetSize(utils::Size2d size) override
@@ -130,14 +128,15 @@ namespace engine
 		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
 		virtual bool _ReleaseResources() override;
 
-	private:
 		static int AudioCallback(void* outBuffer, void* inBuffer, unsigned int numSamps, double streamTime, RtAudioStreamStatus status, void* userData);
 		void OnAudio(float* inBuffer, float* outBuffer, unsigned int numSamps);
 		bool OnUndo(std::shared_ptr<base::ActionUndo> undo);
 		void InitSize();
 		glm::mat4 View();
 
-	private:
+		void AddStation(std::shared_ptr<Station> station);
+
+	protected:
 		glm::mat4 _viewProj;
 		glm::mat4 _overlayViewProj;
 		std::shared_ptr<audio::ChannelMixer> _channelMixer;

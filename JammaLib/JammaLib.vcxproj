@@ -244,6 +244,7 @@
     <ClInclude Include="src\gui\GuiSlider.h" />
     <ClInclude Include="src\base\Moveable.h" />
     <ClInclude Include="src\base\Sizeable.h" />
+    <ClInclude Include="src\io\FileReadWriter.h" />
     <ClInclude Include="src\utils\CommonTypes.h" />
     <ClInclude Include="src\actions\CursorAction.h" />
     <ClInclude Include="src\actions\KeyAction.h" />
@@ -287,7 +288,7 @@
     <ClInclude Include="src\vst\Vst.h" />
     <ClInclude Include="src\engine\Trigger.h" />
     <ClInclude Include="src\engine\UndoHistory.h" />
-    <ClInclude Include="src\audio\WavReadWriter.h" />
+    <ClInclude Include="src\io\WavReadWriter.h" />
     <ClInclude Include="src\resources\TextureResource.h" />
     <ClInclude Include="src\base\Touchable.h" />
     <ClInclude Include="src\actions\WindowAction.h" />
@@ -342,7 +343,7 @@
     <ClCompile Include="src\vst\Vst.cpp" />
     <ClCompile Include="src\engine\Trigger.cpp" />
     <ClCompile Include="src\engine\UndoHistory.cpp" />
-    <ClCompile Include="src\audio\WavReadWriter.cpp" />
+    <ClCompile Include="src\io\WavReadWriter.cpp" />
     <ClCompile Include="src\resources\TextureResource.cpp" />
     <ClCompile Include="src\actions\WindowAction.cpp" />
     <ClCompile Include="src\resources\WavResource.cpp" />
