@@ -113,7 +113,7 @@ namespace engine
 		unsigned int InputChannel();
 		void SetInputChannel(unsigned int channel);
 
-		bool Load(const io::FileReadWriter& readWriter);
+		bool Load(const io::WavReadWriter& readWriter);
 		void Record();
 		void Play(unsigned long index, unsigned long length);
 		void Ditch();

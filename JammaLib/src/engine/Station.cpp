@@ -189,14 +189,10 @@ void Station::AddTake(std::shared_ptr<LoopTake> take)
 	_children.push_back(take);
 }
 
-std::shared_ptr<Trigger> Station::AddTrigger(TriggerParams trigParams)
+void Station::AddTrigger(std::shared_ptr<Trigger> trigger)
 {
-	auto trigger = std::make_shared<Trigger>(trigParams);
-
 	_triggers.push_back(trigger);
 	_children.push_back(trigger);
-
-	return trigger;
 }
 
 void Station::Reset()

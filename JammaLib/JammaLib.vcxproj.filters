@@ -323,6 +323,15 @@
     <ClInclude Include="src\io\FileReadWriter.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="src\utils\PathUtils.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\io\InitFile.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\io\TextReadWriter.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lib\glew\glew.c">
@@ -471,6 +480,15 @@
     </ClCompile>
     <ClCompile Include="src\io\WavReadWriter.cpp">
       <Filter>src\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utils\PathUtils.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\InitFile.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\TextReadWriter.cpp">
+      <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

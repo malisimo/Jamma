@@ -6,6 +6,7 @@
 #include <optional>
 #include <memory>
 #include "FileReadWriter.h"
+#include "../utils/StringUtils.h"
 
 namespace io
 {
@@ -27,13 +28,13 @@ namespace io
 	};
 
 	class WavReadWriter :
-		public FileReadWriter
+		public FileReadWriter<std::vector<float>>
 	{
 	protected:
 		std::optional<std::tuple<std::vector<float>, unsigned int, unsigned int>>
-			_Read(const std::string& fileName, unsigned int maxSamps) const;
+			_Read(const std::wstring& fileName, unsigned int maxVals) const;
 
-		bool _Write(std::string fileName,
+		bool _Write(std::wstring fileName,
 			std::vector<float> buffer,
 			unsigned int numSamps,
 			unsigned int sampleRate) const;

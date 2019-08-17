@@ -45,30 +45,7 @@ std::optional<std::shared_ptr<Scene>> Scene::FromFile(SceneParams sceneParams, i
 	TriggerParams trigParams;
 	trigParams.Size = { 24, 24 };
 	trigParams.Position = { 6, 6 };
-	trigParams.Activate = {
-		DualBinding(
-			TriggerBinding{
-				TriggerSource::TRIGGER_KEY,
-				49,
-				1
-			},
-			TriggerBinding{
-				TriggerSource::TRIGGER_KEY,
-				49,
-				0
-			}) };
-	trigParams.Ditch = {
-		DualBinding(
-			TriggerBinding{
-				TriggerSource::TRIGGER_KEY,
-				50,
-				1
-			},
-			TriggerBinding{
-				TriggerSource::TRIGGER_KEY,
-				50,
-				0
-			}) };
+	
 	trigParams.Texture = "green";
 	trigParams.TextureRecording = "red";
 	trigParams.TextureDitchDown = "blue";
@@ -82,7 +59,11 @@ std::optional<std::shared_ptr<Scene>> Scene::FromFile(SceneParams sceneParams, i
 		auto station = Station::FromFile(stationParams, stationStruct);
 		if (station.has_value())
 		{
-			station.value()->AddTrigger(trigParams);
+			auto trigger = Trigger::FromFile(trigParams, rigStruct.Triggers[0]);
+
+			if (trigger.has_value())
+				station.value()->AddTrigger(trigger.value());
+
 			scene->AddStation(station.value());
 		}
 	}

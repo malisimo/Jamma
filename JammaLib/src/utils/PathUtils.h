@@ -9,12 +9,14 @@
 
 #include <string>
 #include <windows.h>
+#include <shlobj.h>
 
 namespace utils
 {
-	LPCWSTR CharsToUnicodeString(const char* str);
-	std::wstring CharsToWideString(const char* str);
+	enum PathType
+	{
+		PATH_ROAMING
+	};
 
-	std::string EncodeUtf8(const std::wstring& wStr);
-	std::wstring DecodeUtf8(const std::string& str);
+	std::wstring GetPath(PathType pathType);
 }

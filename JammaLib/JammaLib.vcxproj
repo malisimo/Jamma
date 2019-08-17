@@ -98,7 +98,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;GLEW_STATIC;__WINDOWS_DS__;__WINDOWS_ASIO__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;NOMINMAX;_LIB;GLEW_STATIC;__WINDOWS_DS__;__WINDOWS_ASIO__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)src\base;$(ProjectDir)src\utils;$(ProjectDir)lib\opengl;$(ProjectDir)lib;$(ProjectDir)lib\rtaudio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <PrecompiledHeaderFile>include\stdafx.h</PrecompiledHeaderFile>
@@ -114,7 +114,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>dsound.lib</AdditionalDependencies>
+      <AdditionalDependencies>dsound.lib;comsuppw.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(WindowsSdkDir)Lib\10.0.16299.0\um\x86</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
@@ -127,7 +127,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;GLEW_STATIC;__WINDOWS_DS__;__WINDOWS_ASIO__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;NOMINMAX;_LIB;GLEW_STATIC;__WINDOWS_DS__;__WINDOWS_ASIO__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)src\base;$(ProjectDir)src\utils;$(ProjectDir)lib\opengl;$(ProjectDir)lib;$(ProjectDir)lib\rtaudio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>include\stdafx.h</PrecompiledHeaderFile>
@@ -142,7 +142,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>dsound.lib</AdditionalDependencies>
+      <AdditionalDependencies>dsound.lib;comsuppw.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(WindowsSdkDir)Lib\10.0.16299.0\um\x86</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
@@ -155,7 +155,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_LIB;GLEW_STATIC;__WINDOWS_DS__;__WINDOWS_ASIO__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;NOMINMAX;_LIB;GLEW_STATIC;__WINDOWS_DS__;__WINDOWS_ASIO__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)src\base;$(ProjectDir)src\utils;$(ProjectDir)lib\opengl;$(ProjectDir)lib;$(ProjectDir)lib\rtaudio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>include\stdafx.h</PrecompiledHeaderFile>
@@ -170,7 +170,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>dsound.lib</AdditionalDependencies>
+      <AdditionalDependencies>dsound.lib;comsuppw.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(WindowsSdkDir)Lib\10.0.16299.0\um\x64</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
@@ -186,7 +186,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_LIB;GLEW_STATIC;__WINDOWS_DS__;__WINDOWS_ASIO__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;NOMINMAX;_LIB;GLEW_STATIC;__WINDOWS_DS__;__WINDOWS_ASIO__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)src\base;$(ProjectDir)src\utils;$(ProjectDir)lib\opengl;$(ProjectDir)lib;$(ProjectDir)lib\rtaudio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>include\stdafx.h</PrecompiledHeaderFile>
@@ -202,7 +202,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>dsound.lib</AdditionalDependencies>
+      <AdditionalDependencies>dsound.lib;comsuppw.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(WindowsSdkDir)Lib\10.0.16299.0\um\x64</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
@@ -222,6 +222,7 @@
     <ClInclude Include="src\base\AudioSink.h" />
     <ClInclude Include="src\base\ActionUndo.h" />
     <ClInclude Include="src\base\Sharable.h" />
+    <ClInclude Include="src\io\InitFile.h" />
     <ClInclude Include="src\io\RigFile.h" />
     <ClInclude Include="src\io\Json.h" />
     <ClInclude Include="src\engine\LoopTake.h" />
@@ -245,6 +246,8 @@
     <ClInclude Include="src\base\Moveable.h" />
     <ClInclude Include="src\base\Sizeable.h" />
     <ClInclude Include="src\io\FileReadWriter.h" />
+    <ClInclude Include="src\io\TextReadWriter.h" />
+    <ClInclude Include="src\utils\PathUtils.h" />
     <ClInclude Include="src\utils\CommonTypes.h" />
     <ClInclude Include="src\actions\CursorAction.h" />
     <ClInclude Include="src\actions\KeyAction.h" />
@@ -305,6 +308,7 @@
     <ClCompile Include="src\audio\ChannelMixer.cpp" />
     <ClCompile Include="src\actions\DoubleAction.cpp" />
     <ClCompile Include="src\actions\TriggerAction.cpp" />
+    <ClCompile Include="src\io\InitFile.cpp" />
     <ClCompile Include="src\io\RigFile.cpp" />
     <ClCompile Include="src\io\Json.cpp" />
     <ClCompile Include="src\engine\LoopTake.cpp" />
@@ -322,6 +326,8 @@
     <ClCompile Include="src\actions\TouchMoveAction.cpp" />
     <ClCompile Include="src\gui\GuiGrid.cpp" />
     <ClCompile Include="src\base\GuiElement.cpp" />
+    <ClCompile Include="src\io\TextReadWriter.cpp" />
+    <ClCompile Include="src\utils\PathUtils.cpp" />
     <ClCompile Include="src\utils\ImageUtils.cpp" />
     <ClCompile Include="src\gui\GuiLabel.cpp" />
     <ClCompile Include="src\resources\ShaderResource.cpp" />

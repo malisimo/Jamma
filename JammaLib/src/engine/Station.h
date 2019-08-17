@@ -57,7 +57,7 @@ namespace engine
 		
 		std::shared_ptr<LoopTake> AddTake();
 		void AddTake(std::shared_ptr<LoopTake> take);
-		std::shared_ptr<Trigger> AddTrigger(TriggerParams trigParams);
+		void AddTrigger(std::shared_ptr<Trigger> trigger);
 		void Reset();
 
 	protected:

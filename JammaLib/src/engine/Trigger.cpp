@@ -35,6 +35,43 @@ Trigger::~Trigger()
 {
 }
 
+
+std::optional<std::shared_ptr<Trigger>> Trigger::FromFile(TriggerParams trigParams, io::RigFile::Trigger trigStruct)
+{
+	auto trigger = std::make_shared<Trigger>(trigParams);
+
+	for (auto trigPair : trigStruct.TriggerPairs)
+	{
+		auto activate = DualBinding(
+			TriggerBinding{
+				TriggerSource::TRIGGER_KEY,
+				trigPair.ActivateDown,
+				1
+			},
+			TriggerBinding{
+				TriggerSource::TRIGGER_KEY,
+				trigPair.ActivateUp,
+				0
+			});
+
+		auto ditch = DualBinding(
+			TriggerBinding{
+				TriggerSource::TRIGGER_KEY,
+				trigPair.DitchDown,
+				1
+			},
+			TriggerBinding{
+				TriggerSource::TRIGGER_KEY,
+				trigPair.DitchUp,
+				0
+			});
+
+		trigger->AddBinding(activate, ditch);
+	}
+
+	return trigger;
+}
+
 ActionResult Trigger::OnAction(KeyAction action)
 {
 	ActionResult res;
@@ -132,6 +169,12 @@ void Trigger::Draw(base::DrawContext& ctx)
 		child->Draw(ctx);
 
 	glCtx.PopMvp();
+}
+
+void Trigger::AddBinding(DualBinding activate, DualBinding ditch)
+{
+	_activateBindings.push_back(activate);
+	_ditchBindings.push_back(ditch);
 }
 
 TriggerState Trigger::GetState() const

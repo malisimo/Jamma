@@ -27,5 +27,5 @@ const std::vector<float>& WavResource::Buffer()
 
 std::optional<std::tuple<std::vector<float>, unsigned int, unsigned int>> WavResource::Load(const std::string & wavFile)
 {
-	return WavReadWriter().Read(wavFile, 80000000u);
+	return WavReadWriter().Read(utils::DecodeUtf8(wavFile), 80000000u);
 }

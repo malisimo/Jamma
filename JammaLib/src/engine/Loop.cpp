@@ -278,9 +278,9 @@ void Loop::SetInputChannel(unsigned int channel)
 	_mixer->SetInputChannel(channel);
 }
 
-bool Loop::Load(const io::FileReadWriter& readWriter)
+bool Loop::Load(const io::WavReadWriter& readWriter)
 {
-	auto loadOpt = readWriter.Read(_loopParams.Wav, _MaxBufferSize);
+	auto loadOpt = readWriter.Read(utils::DecodeUtf8(_loopParams.Wav), _MaxBufferSize);
 
 	if (!loadOpt.has_value())
 		return false;

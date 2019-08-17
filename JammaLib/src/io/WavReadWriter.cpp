@@ -3,18 +3,19 @@
 using namespace io;
 
 std::optional<std::tuple<std::vector<float>, unsigned int, unsigned int>>
-	WavReadWriter::_Read(const std::string& fileName, unsigned int maxSamps) const
+	WavReadWriter::_Read(const std::wstring& fileName, unsigned int maxVals) const
 {
 	struct SoundHeader info;
 	struct SoundHeader* pinfo = &info;
 
 	// The variable maxSamps represents the maximum
 	// number of 32 bit floats the array can contain.
-	if (maxSamps < 1)
+	if (maxVals < 1)
 		return std::nullopt;
 
-	auto cname = new char[fileName.size() + 1];
-	strcpy_s(cname, fileName.size() + 1, fileName.c_str());
+	auto fileNameStr = utils::EncodeUtf8(fileName);
+	auto cname = new char[fileNameStr.size() + 1];
+	strcpy_s(cname, fileNameStr.size() + 1, fileNameStr.c_str());
 
 	auto fid = OpenSoundIn(cname, pinfo);
 
@@ -23,11 +24,11 @@ std::optional<std::tuple<std::vector<float>, unsigned int, unsigned int>>
 	if (fid == NULL)
 		return {};
 
-	size_t numSampsLoaded = maxSamps;
+	size_t numSampsLoaded = maxVals;
 
 	// Only load the reported number of samples
 	// (but prevent loading more than the array can hold)
-	if (info.dlength < (long)(maxSamps * 2))
+	if (info.dlength < (long)(maxVals * 2))
 		numSampsLoaded = info.dlength / 2; // Two 16 bit integers per sample (32 bit float)
 
 	if (numSampsLoaded < 1)
@@ -58,9 +59,9 @@ std::optional<std::tuple<std::vector<float>, unsigned int, unsigned int>>
 	return std::make_tuple(std::move(buffer), (unsigned int)numSampsLoaded, info.srate);
 }
 
-bool WavReadWriter::_Write(std::string fileName,
-	std::vector<float> buffer,
-	unsigned int numSamps,
+bool WavReadWriter::_Write(std::wstring fileName,
+	std::vector<float> data,
+	unsigned int numVals,
 	unsigned int sampleRate) const
 {
 	char* cname;
@@ -69,17 +70,18 @@ bool WavReadWriter::_Write(std::string fileName,
 	struct SoundHeader* pinfo = &info;
 	FILE* fid;
 
-	cname = new char[fileName.size() + 1];
-	strcpy_s(cname, fileName.size() + 1, fileName.c_str());
+	auto fileNameStr = utils::EncodeUtf8(fileName);
+	cname = new char[fileNameStr.size() + 1];
+	strcpy_s(cname, fileNameStr.size() + 1, fileNameStr.c_str());
 
-	if (numSamps < 1)
+	if (numVals < 1)
 	{
 		delete cname;
 		return false;
 	}
 
 	info.srate = sampleRate;
-	info.dlength = numSamps * 2;
+	info.dlength = numVals * 2;
 	info.bits_per_samp = 16;
 
 	FillHeader(info);
@@ -91,14 +93,14 @@ bool WavReadWriter::_Write(std::string fileName,
 	if (fid == NULL)
 		return false;
 
-	bufferOut = new char[numSamps * 2]; // Two bytes per wav file sample (16 bit integer)
+	bufferOut = new char[numVals * 2]; // Two bytes per wav file sample (16 bit integer)
 
-	for (unsigned int i = 0; i < numSamps; i++)
+	for (unsigned int i = 0; i < numVals; i++)
 	{
-		FloatToChar(buffer[i], bufferOut + (i * 2));
+		FloatToChar(data[i], bufferOut + (i * 2));
 	}
 
-	fwrite(bufferOut, 1, numSamps * 2, fid);
+	fwrite(bufferOut, 1, numVals * 2, fid);
 
 	fclose(fid);
 	delete bufferOut;

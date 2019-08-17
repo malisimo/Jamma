@@ -9,6 +9,7 @@
 #include "../actions/KeyAction.h"
 #include "../actions/TriggerAction.h"
 #include "../actions/ActionResult.h"
+#include "../io/RigFile.h"
 
 namespace engine
 {
@@ -189,10 +190,13 @@ namespace engine
 		~Trigger();
 
 	public:
+		static std::optional<std::shared_ptr<Trigger>> FromFile(TriggerParams trigParams, io::RigFile::Trigger trigStruct);
+
 		virtual actions::ActionResult OnAction(actions::KeyAction action) override;
 		virtual void OnTick(Time curTime, unsigned int samps) override;
 		virtual void Draw(base::DrawContext& ctx) override;
 
+		void AddBinding(DualBinding activate, DualBinding ditch);
 		TriggerState GetState() const;
 		void Reset();
 
