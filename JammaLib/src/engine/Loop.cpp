@@ -23,34 +23,46 @@ Loop::Loop(LoopParams loopParams,
 	_length(0),
 	_state(STATE_PLAYING),
 	_loopParams(loopParams),
-	_wav(std::weak_ptr<WavResource>()),
 	_mixer(nullptr)
 {
 	_mixer = std::make_unique<AudioMixer>(mixerParams);
 	_children.push_back(_mixer);
 }
 
-std::optional<std::shared_ptr<Loop>> Loop::FromFile(LoopParams loopParams, io::JamFile::Loop loopStruct)
+std::optional<std::shared_ptr<Loop>> Loop::FromFile(LoopParams loopParams, io::JamFile::Loop loopStruct, std::wstring dir)
 {
 	audio::BehaviourParams behaviour;
 	audio::WireMixBehaviourParams wire;
 	audio::PanMixBehaviourParams pan;
 
+	std::vector<unsigned long> chans;
+	std::vector<double> levels;
+
 	switch (loopStruct.Mix.Mix)
 	{
 	case io::JamFile::LoopMix::MIX_WIRE:
-		wire.Channels = { 0, 1 };
+		if (loopStruct.Mix.Params.index() == 1)
+			chans = std::get<std::vector<unsigned long>>(loopStruct.Mix.Params);
+
+		for (auto chan : chans)
+			wire.Channels.push_back(chan);
+
 		behaviour = wire;
 		break;
 	case io::JamFile::LoopMix::MIX_PAN:
-		pan.ChannelLevels = { 0.8f, 0.2f };
+		if (loopStruct.Mix.Params.index() == 1)
+			levels = std::get<std::vector<double>>(loopStruct.Mix.Params);
+
+		for (auto level : levels)
+			pan.ChannelLevels.push_back((float)level);
+
 		behaviour = pan;
 		break;
 	}
 
 	auto mixerParams = GetMixerParams(loopParams.Size, behaviour);
 
-	loopParams.Wav = loopStruct.Name;
+	loopParams.Wav = utils::EncodeUtf8(dir) + "/" + loopStruct.Name;
 
 	auto loop = std::make_shared<Loop>(loopParams, mixerParams);
 
@@ -86,8 +98,9 @@ audio::AudioMixerParams Loop::GetMixerParams(utils::Size2d loopSize, audio::Beha
 	return mixerParams;
 }
 
-bool Loop::_InitResources(ResourceLib& resourceLib)
+/*bool Loop::_InitResources(ResourceLib& resourceLib)
 {
+	// Loading from resource (prerecorded samples)
 	auto resOpt = resourceLib.GetResource(_loopParams.Wav);
 
 	if (!resOpt.has_value())
@@ -121,33 +134,16 @@ bool Loop::_InitResources(ResourceLib& resourceLib)
 	}
 
 	return GuiElement::_InitResources(resourceLib);
-}
-
-bool Loop::_ReleaseResources()
-{
-	auto wav = _wav.lock();
-
-	if (wav)
-		wav->Release();
-
-	return GuiElement::_ReleaseResources();
-}
+}*/
 
 void Loop::OnPlay(const std::shared_ptr<MultiAudioSink> dest,
 	unsigned int numSamps)
 {
 	// Mixer will stereo spread the mono wav
 	// and adjust level
-	auto wav = _wav.lock();
-
-	if (!wav)
-		return;
-
 	if (0 == _length)
 		return;
 	
-	//auto wavLength = wav->Length();
-	//auto wavBuf = wav->Buffer();
 	auto index = _index;
 	auto bufSize = _length + _MaxFadeSamps;
 	while (index >= bufSize)
@@ -243,16 +239,9 @@ void Loop::OnPlayRaw(const std::shared_ptr<base::MultiAudioSink> dest,
 {
 	// Mixer will stereo spread the mono wav
 	// and adjust level
-	auto wav = _wav.lock();
-
-	if (!wav)
-		return;
-
 	if (0 == _length)
 		return;
 
-	//auto wavLength = wav->Length();
-	//auto wavBuf = wav->Buffer();
 	auto index = _index + delaySamps;
 	auto bufSize = _length + _MaxFadeSamps;
 	while (index >= bufSize)
@@ -311,6 +300,15 @@ void Loop::Record()
 void Loop::Play(unsigned long index, unsigned long length)
 {
 	auto bufSize = (unsigned int)_buffer.size();
+
+	if (0 == bufSize)
+	{
+		_playPos = 0;
+		_length = 0;
+		_state = STATE_INACTIVE;
+		return;
+	}
+
 	_playPos = (index + _MaxFadeSamps) >= bufSize ? (bufSize-1) : index + _MaxFadeSamps;
 	_length = (length + _MaxFadeSamps) <= bufSize ? length : bufSize - _MaxFadeSamps;
 	

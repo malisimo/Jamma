@@ -74,13 +74,11 @@ namespace engine
 			_playPos(other._playPos),
 			_recPos(other._recPos),
 			_loopParams{other._loopParams},
-			_mixer(std::move(other._mixer)),
-			_wav(std::move(other._wav))
+			_mixer(std::move(other._mixer))
 		{
 			other._index = 0;
 			other._loopParams = LoopParams();
 			other._mixer = std::make_unique<audio::AudioMixer>(audio::AudioMixerParams());
-			other._wav = std::weak_ptr<resources::WavResource>();
 		}
 
 		Loop& operator=(Loop&& other)
@@ -92,14 +90,13 @@ namespace engine
 				std::swap(_index, other._index);
 				std::swap(_loopParams, other._loopParams);
 				_mixer.swap(other._mixer);
-				_wav.swap(other._wav);
 			}
 
 			return *this;
 		}
 
 	public:
-		static std::optional<std::shared_ptr<Loop>> FromFile(LoopParams loopParams, io::JamFile::Loop loopStruct);
+		static std::optional<std::shared_ptr<Loop>> FromFile(LoopParams loopParams, io::JamFile::Loop loopStruct, std::wstring dir);
 		static audio::AudioMixerParams GetMixerParams(utils::Size2d loopSize, audio::BehaviourParams behaviour);
 
 		virtual MultiAudioDirection MultiAudibleDirection() const override { return MULTIAUDIO_BOTH; }
@@ -120,10 +117,6 @@ namespace engine
 		void Overdub();
 		void PunchIn();
 		void PunchOut();
-		
-	protected:
-		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
-		virtual bool _ReleaseResources() override;
 
 	protected:
 		static const unsigned int _MaxFadeSamps = 30000;
@@ -140,7 +133,6 @@ namespace engine
 		LoopVisualState _state;
 		LoopParams _loopParams;
 		std::shared_ptr<audio::AudioMixer> _mixer;
-		std::weak_ptr<resources::WavResource> _wav;
 		std::vector<float> _buffer;
 	};
 }

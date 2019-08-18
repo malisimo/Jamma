@@ -20,8 +20,14 @@ std::wstring utils::GetPath(PathType pathType)
 			&path);
 
 		if (SUCCEEDED(hr))
-			std::wstring(wszPath);
+			return std::wstring(path);
 	}
 
 	return std::wstring();
+}
+
+std::wstring utils::GetParentDirectory(std::wstring dir)
+{
+	std::filesystem::path p(dir);
+	return p.parent_path();
 }

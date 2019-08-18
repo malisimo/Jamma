@@ -6,6 +6,7 @@
 #include <optional>
 #include <memory>
 #include <filesystem>
+#include "../utils/PathUtils.h"
 
 namespace io
 {
@@ -13,10 +14,9 @@ namespace io
 	class FileReadWriter
 	{
 	public:
-		void CreateDirectory(const std::wstring& fileName)
+		static void CreateDirectory(const std::wstring& fileName)
 		{
-			std::filesystem::path p(fileName);
-			std::filesystem::path dir = p.parent_path();
+			auto dir = utils::GetParentDirectory(fileName);
 			std::filesystem::create_directories(dir);
 		}
 

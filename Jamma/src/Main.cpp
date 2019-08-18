@@ -21,7 +21,7 @@ using namespace graphics;
 using namespace utils;
 using namespace io;
 
-#define MAX_JSON_CHARS 1E6
+#define MAX_JSON_CHARS 1000000u
 
 void SetupConsole()
 {
@@ -36,13 +36,13 @@ void SetupConsole()
 
 std::optional<io::InitFile> LoadIni()
 {
-	std::wstring initPath = GetPath(PATH_ROAMING) + L"/defaults.json";
+	std::wstring initPath = GetPath(PATH_ROAMING) + L"/Jamma/defaults.json";
 	io::TextReadWriter txtFile;
 	auto res = txtFile.Read(initPath, MAX_JSON_CHARS);
 
-	std::string iniTxt = "{\"rig\":\"\",\"jam\":\"empty.jam\",\"jamload\":1,\"rigload\":0,\"win\":[-0,0,1400,1000]}";
+	std::string iniTxt = "{\"rig\":\"\",\"jam\":\"default.jam\",\"jamload\":1,\"rigload\":0,\"win\":[-0,0,1400,1000]}";
 	if (!res.has_value())
-		txtFile.Write(initPath, iniTxt, iniTxt.size(), 0);
+		txtFile.Write(initPath, iniTxt, (unsigned int)iniTxt.size(), 0);
 	else
 	{
 		auto [ini, numChars, unused] = res.value();
@@ -51,6 +51,54 @@ std::optional<io::InitFile> LoadIni()
 
 	std::stringstream ss(iniTxt);
 	return InitFile::FromStream(std::move(ss));
+}
+
+std::optional<io::JamFile> LoadJam(io::InitFile& ini)
+{
+	io::TextReadWriter txtFile;
+
+	std::string jamJson = "{\"name\":\"default\",\"stations\":[{\"name\":\"Mic1\",\"stationtype\":0,\"takes\":[{\"name\":\"Take1\",\"loops\":[{\"name\":\"Loop1.wav\",\"length\":400000,\"mix\":{\"type\":\"pan\",\"chans\":[0.5,0.5]}}]}]}";
+	auto res = txtFile.Read(ini.Jam, MAX_JSON_CHARS);
+	if (!res.has_value())
+	{
+		ini.Jam = GetPath(PATH_ROAMING) + L"/Jamma/default.jam";
+		txtFile.Write(ini.Jam,
+			jamJson,
+			(unsigned int)jamJson.size(),
+			0);
+	}
+	else
+	{
+		auto [str, numChars, unused] = res.value();
+		jamJson = str;
+	}
+
+	std::stringstream ss(jamJson);
+	return JamFile::FromStream(std::move(ss));
+}
+
+std::optional<io::RigFile> LoadRig(io::InitFile& ini)
+{
+	io::TextReadWriter txtFile;
+
+	std::string rigJson = "{\"name\":\"default\",\"audio\":{\"name\":\"default\",\"bufsize\":512,\"numchannelsin\":2,\"numchannelsout\":2},\"triggers\":[{\"name\":\"Trig1\",\"stationtype\":0,\"pairs\":[{\"activatedown\":49,\"activateup\":49,\"ditchdown\":50,\"ditchup\":50}]}";
+	auto res = txtFile.Read(ini.Rig, MAX_JSON_CHARS);
+	if (!res.has_value())
+	{
+		ini.Rig = GetPath(PATH_ROAMING) + L"/Jamma/default.rig";
+		txtFile.Write(ini.Rig,
+			rigJson,
+			(unsigned int)rigJson.size(),
+			0);
+	}
+	else
+	{
+		auto [str, numChars, unused] = res.value();
+		rigJson = str;
+	}
+
+	std::stringstream ss(rigJson);
+	return RigFile::FromStream(std::move(ss));
 }
 
 int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
@@ -65,35 +113,16 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
 
 	if (defaults.has_value())
 	{
-		io::TextReadWriter txtFile;
+		auto jamOpt = LoadJam(defaults.value());
+		if (jamOpt.has_value())
+			jam = jamOpt.value();
 
-		auto res = txtFile.Read(defaults.value().Jam, MAX_JSON_CHARS);
-		if (res.has_value())
-		{
-			auto [str, numChars, unused] = res.value();
-
-			std::stringstream ss(str);
-			auto opt = JamFile::FromStream(std::move(ss));
-		
-			if (opt.has_value())
-				jam = opt.value();
-		}
-
-		res = txtFile.Read(defaults.value().Rig, MAX_JSON_CHARS);
-		if (res.has_value())
-		{
-			auto [str, numChars, unused] = res.value();
-
-			std::stringstream ss(str);
-			auto opt = RigFile::FromStream(std::move(ss));
-
-			if (opt.has_value())
-				rig = opt.value();
-		}
+		auto rigOpt = LoadRig(defaults.value());
+		if (rigOpt.has_value())
+			rig = rigOpt.value();
 	}
 
-	auto scene = Scene::FromFile(sceneParams, jam, rig);
-
+	auto scene = Scene::FromFile(sceneParams, jam, rig, utils::GetParentDirectory(defaults.value().Jam));
 	if (!scene.has_value())
 	{
 		std::cout << "Failed to create Scene... quitting" << std::endl;
@@ -131,4 +160,3 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
 
 	return (int)msg.wParam;
 }
-

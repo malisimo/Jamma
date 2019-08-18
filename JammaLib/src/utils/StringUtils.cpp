@@ -30,7 +30,7 @@ std::wstring utils::CharsToWideString(const char* str)
 	return std::wstring(wideStr);
 }
 
-std::string EncodeUtf8(const std::wstring& wStr)
+std::string utils::EncodeUtf8(const std::wstring& wStr)
 {
 	if (wStr.empty())
 		return std::string();
@@ -51,7 +51,7 @@ std::string EncodeUtf8(const std::wstring& wStr)
 	return str;
 }
 
-std::wstring DecodeUtf8(const std::string& str)
+std::wstring utils::DecodeUtf8(const std::string& str)
 {
 	if (str.empty()) return std::wstring();
 	int numChars = MultiByteToWideChar(CP_UTF8,

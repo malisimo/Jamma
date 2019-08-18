@@ -10,6 +10,7 @@
 #include <string>
 #include <windows.h>
 #include <shlobj.h>
+#include <filesystem>
 
 namespace utils
 {
@@ -19,4 +20,5 @@ namespace utils
 	};
 
 	std::wstring GetPath(PathType pathType);
+	std::wstring GetParentDirectory(std::wstring dir);
 }

@@ -29,7 +29,7 @@ LoopTake::~LoopTake()
 {
 }
 
-std::optional<std::shared_ptr<LoopTake>> LoopTake::FromFile(LoopTakeParams takeParams, io::JamFile::LoopTake takeStruct)
+std::optional<std::shared_ptr<LoopTake>> LoopTake::FromFile(LoopTakeParams takeParams, io::JamFile::LoopTake takeStruct, std::wstring dir)
 {
 	auto take = std::make_shared<LoopTake>(takeParams);
 
@@ -44,7 +44,7 @@ std::optional<std::shared_ptr<LoopTake>> LoopTake::FromFile(LoopTakeParams takeP
 	for (auto loopStruct : takeStruct.Loops)
 	{
 		loopParams.Position = { (int)gap.Width, (int)(loopCount * loopHeight + gap.Height) };
-		auto loop = Loop::FromFile(loopParams, loopStruct);
+		auto loop = Loop::FromFile(loopParams, loopStruct, dir);
 		
 		if (loop.has_value())
 			take->AddLoop(loop.value());

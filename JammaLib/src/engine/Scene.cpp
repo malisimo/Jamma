@@ -38,14 +38,13 @@ Scene::Scene(SceneParams params) :
 	_audioDevice = std::make_unique<AudioDevice>();
 }
 
-std::optional<std::shared_ptr<Scene>> Scene::FromFile(SceneParams sceneParams, io::JamFile jamStruct, io::RigFile rigStruct)
+std::optional<std::shared_ptr<Scene>> Scene::FromFile(SceneParams sceneParams, io::JamFile jamStruct, io::RigFile rigStruct, std::wstring dir)
 {
 	auto scene = std::make_shared<Scene>(sceneParams);
 
 	TriggerParams trigParams;
 	trigParams.Size = { 24, 24 };
-	trigParams.Position = { 6, 6 };
-	
+	trigParams.Position = { 6, 6 };	
 	trigParams.Texture = "green";
 	trigParams.TextureRecording = "red";
 	trigParams.TextureDitchDown = "blue";
@@ -56,7 +55,10 @@ std::optional<std::shared_ptr<Scene>> Scene::FromFile(SceneParams sceneParams, i
 	for (auto stationStruct : jamStruct.Stations)
 	{
 		StationParams stationParams;
-		auto station = Station::FromFile(stationParams, stationStruct);
+		stationParams.Position = { 20, 20 };
+		stationParams.Size = { 140, 80 };
+
+		auto station = Station::FromFile(stationParams, stationStruct, dir);
 		if (station.has_value())
 		{
 			auto trigger = Trigger::FromFile(trigParams, rigStruct.Triggers[0]);

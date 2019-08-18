@@ -31,15 +31,15 @@ Station::~Station()
 {
 }
 
-std::optional<std::shared_ptr<Station>> Station::FromFile(StationParams stationParams, io::JamFile::Station stationStruct)
+std::optional<std::shared_ptr<Station>> Station::FromFile(StationParams stationParams, io::JamFile::Station stationStruct, std::wstring dir)
 {
 	auto station = std::make_shared<Station>(stationParams);
 
 	auto numTakes = (unsigned int)stationStruct.LoopTakes.size();
 	Size2d gap = { 4, 4 };
 	auto takeHeight = numTakes > 0 ?
-		stationParams.Size.Height - ((2 + numTakes - 1) * gap.Height) / numTakes :
-		stationParams.Size.Height - (2 * gap.Height);
+		std::max(1u, stationParams.Size.Height - ((2 + numTakes - 1) * gap.Height) / numTakes) :
+		std::max(1u, stationParams.Size.Height - (2 * gap.Height));
 	Size2d takeSize = { stationParams.Size.Width - (2 * gap.Width), takeHeight };
 	LoopTakeParams takeParams;
 	takeParams.Size = { 80, 80 };
@@ -48,7 +48,7 @@ std::optional<std::shared_ptr<Station>> Station::FromFile(StationParams stationP
 	for (auto takeStruct : stationStruct.LoopTakes)
 	{
 		takeParams.Position = { (int)gap.Width, (int)(takeCount * takeHeight + gap.Height) };
-		auto take = LoopTake::FromFile(takeParams, takeStruct);
+		auto take = LoopTake::FromFile(takeParams, takeStruct, dir);
 		
 		if (take.has_value())
 			station->AddTake(take.value());

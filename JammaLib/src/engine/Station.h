@@ -43,7 +43,7 @@ namespace engine
 		Station& operator=(const Station&) = delete;
 
 	public:
-		static std::optional<std::shared_ptr<Station>> FromFile(StationParams stationParams, io::JamFile::Station stationStruct);
+		static std::optional<std::shared_ptr<Station>> FromFile(StationParams stationParams, io::JamFile::Station stationStruct, std::wstring dir);
 
 		virtual MultiAudioDirection MultiAudibleDirection() const override { return MULTIAUDIO_BOTH; }
 		virtual void OnPlay(const std::shared_ptr<base::MultiAudioSink> dest, unsigned int numSamps) override;
