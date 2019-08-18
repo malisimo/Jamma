@@ -53,6 +53,10 @@ void Image::Draw(DrawContext& ctx)
 	glUseProgram(0);
 }
 
+void Image::Draw3d(DrawContext& ctx)
+{
+}
+
 bool Image::_InitResources(ResourceLib& resourceLib)
 {
 	auto validated = true;

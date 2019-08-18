@@ -52,7 +52,7 @@ namespace gui
 	public:
 		GuiSliderParams() :
 			base::GuiElementParams(DrawableParams{ "" },
-				MoveableParams{ 0,0 },
+				MoveableParams(utils::Position2d{ 0, 0 }, utils::Position3d{ 0, 0, 0 }, 1.0),
 				SizeableParams{ 1,1 },
 				"",
 				"",

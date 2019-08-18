@@ -9,6 +9,9 @@ using audio::AudioMixer;
 using audio::AudioMixerParams;
 using audio::PanMixBehaviour;
 using gui::GuiSliderParams;
+using gui::GuiModel;
+using gui::GuiModelParams;
+using graphics::GlDrawContext;
 
 const utils::Size2d Loop::_Gap = { 2, 4 };
 const utils::Size2d Loop::_DragGap = { 4, 4 };
@@ -23,10 +26,19 @@ Loop::Loop(LoopParams loopParams,
 	_length(0),
 	_state(STATE_PLAYING),
 	_loopParams(loopParams),
-	_mixer(nullptr)
+	_mixer(nullptr),
+	_model(nullptr)
 {
 	_mixer = std::make_unique<AudioMixer>(mixerParams);
+
+	GuiModelParams modelParams;
+	modelParams.ModelScale = 0.001f;
+	modelParams.ModelTexture = "purple";
+	modelParams.ModelShader = "texture";
+	_model = std::make_shared<GuiModel>(modelParams);
+
 	_children.push_back(_mixer);
+	_children.push_back(_model);
 }
 
 std::optional<std::shared_ptr<Loop>> Loop::FromFile(LoopParams loopParams, io::JamFile::Loop loopStruct, std::wstring dir)

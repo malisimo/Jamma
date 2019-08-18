@@ -331,6 +331,7 @@ void Window::Render()
 	glClearColor(0.129f, 0.586f, 0.949f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	_scene.Draw3d(_drawContext);
 	_scene.Draw(_drawContext);
 }
 

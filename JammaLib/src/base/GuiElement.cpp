@@ -71,6 +71,19 @@ void GuiElement::Draw(DrawContext& ctx)
 	glCtx.PopMvp();
 }
 
+void GuiElement::Draw3d(DrawContext& ctx)
+{
+	auto& glCtx = dynamic_cast<GlDrawContext&>(ctx);
+	glCtx.PushMvp(glm::translate(glm::mat4(1.0), glm::vec3(_moveParams.ModelPosition.X, _moveParams.ModelPosition.Y, _moveParams.ModelPosition.Z)));
+	glCtx.PushMvp(glm::scale(glm::mat4(1.0), glm::vec3(_moveParams.ModelScale, _moveParams.ModelScale, _moveParams.ModelScale)));
+
+	for (auto& child : _children)
+		child->Draw3d(ctx);
+
+	glCtx.PopMvp();
+	glCtx.PopMvp();
+}
+
 ActionResult GuiElement::OnAction(KeyAction action)
 {
 	for (auto& child : _children)

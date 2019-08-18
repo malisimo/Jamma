@@ -6,9 +6,12 @@
 #include "ActionReceiver.h"
 #include "ResourceUser.h"
 #include "GuiElement.h"
+#include "GlUtils.h"
+#include "../gui/GuiModel.h"
 #include "../io/FileReadWriter.h"
 #include "../io/JamFile.h"
 #include "../audio/AudioMixer.h"
+#include "../graphics/GlDrawContext.h"
 #include "../resources/WavResource.h"
 
 namespace engine
@@ -19,7 +22,7 @@ namespace engine
 	public:
 		LoopParams() :
 			base::GuiElementParams(DrawableParams{ "" },
-				MoveableParams{ 0,0 },
+				MoveableParams(utils::Position2d{ 0, 0 }, utils::Position3d{ 0, 0, 0 }, 1.0),
 				SizeableParams{ 1,1 },
 				"",
 				"",
@@ -74,7 +77,8 @@ namespace engine
 			_playPos(other._playPos),
 			_recPos(other._recPos),
 			_loopParams{other._loopParams},
-			_mixer(std::move(other._mixer))
+			_mixer(std::move(other._mixer)),
+			_model(std::move(other._model))
 		{
 			other._index = 0;
 			other._loopParams = LoopParams();
@@ -90,6 +94,7 @@ namespace engine
 				std::swap(_index, other._index);
 				std::swap(_loopParams, other._loopParams);
 				_mixer.swap(other._mixer);
+				_model.swap(other._model);
 			}
 
 			return *this;
@@ -134,5 +139,6 @@ namespace engine
 		LoopParams _loopParams;
 		std::shared_ptr<audio::AudioMixer> _mixer;
 		std::vector<float> _buffer;
+		std::shared_ptr<gui::GuiModel> _model;
 	};
 }

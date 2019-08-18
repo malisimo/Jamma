@@ -26,6 +26,7 @@ namespace base
 
 	public:
 		virtual void Draw(DrawContext& ctx) = 0;
+		virtual void Draw3d(DrawContext& ctx) = 0;
 
 	protected:
 		DrawableParams _drawParams;

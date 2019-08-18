@@ -69,12 +69,17 @@ namespace graphics
 	public:
 		virtual void SetSize(utils::Size2d size) override;
 		virtual void Draw(base::DrawContext& ctx) override;
+		virtual void Draw3d(base::DrawContext& ctx) override;
 
 	protected:
 		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
 		virtual bool _ReleaseResources() override;
 
-	private:
+		bool InitTexture(resources::ResourceLib& resourceLib);
+		bool InitShader(resources::ResourceLib& resourceLib);
+		bool InitVertexArray();
+
+	protected:
 		const int VertexCount = 6;
 
 		GLuint _vertexArray;
@@ -82,10 +87,5 @@ namespace graphics
 		std::string _shaderName;
 		std::weak_ptr<resources::TextureResource> _texture;
 		std::weak_ptr<resources::ShaderResource> _shader;
-
-	private:
-		bool InitTexture(resources::ResourceLib& resourceLib);
-		bool InitShader(resources::ResourceLib& resourceLib);
-		bool InitVertexArray();
 	};
 }

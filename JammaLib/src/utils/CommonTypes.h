@@ -56,6 +56,65 @@ namespace utils
 			};
 		}
 	};
+	struct Position3d
+	{
+		int X;
+		int Y;
+		int Z;
+
+		Position3d operator+(const Position3d& a) const
+		{
+			return { X + a.X, Y + a.Y, Z + a.Z };
+		}
+
+		Position3d operator-(const Position3d& a) const
+		{
+			return { X - a.X, Y - a.Y, Z - a.Z };
+		}
+
+		Position3d operator*(const Position3d& a) const
+		{
+			return { X * a.X, Y * a.Y, Z * a.Z };
+		}
+
+		Position3d& operator+=(const Position3d& a)
+		{
+			X += a.X;
+			Y += a.Y;
+			Z += a.Z;
+			return *this;
+		}
+
+		Position3d& operator-=(const Position3d& a)
+		{
+			X -= a.X;
+			Y -= a.Y;
+			Z -= a.Z;
+			return *this;
+		}
+
+		Position3d& operator*=(const Position3d& a)
+		{
+			X *= a.X;
+			Y *= a.Y;
+			Z *= a.Z;
+			return *this;
+		}
+
+		bool operator==(const Position3d& a) const
+		{
+			return (a.X == X && a.Y == Y && a.Z == Z);
+		}
+
+		static Position3d Clamp(Position3d v, Position3d vMin, Position3d vMax)
+		{
+			return Position3d{
+				v.X < vMin.X ? vMin.X : v.X > vMax.X ? vMax.X : v.X,
+				v.Y < vMin.Y ? vMin.Y : v.Y > vMax.Y ? vMax.Y : v.Y,
+				v.Z < vMin.Z ? vMin.Z : v.Z > vMax.Z ? vMax.Z : v.Z
+			};
+		}
+	};
 
 	struct Size2d
 	{

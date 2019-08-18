@@ -20,7 +20,7 @@ GuiSlider::GuiSlider(GuiSliderParams params) :
 	_calcDragPosFun(),
 	_dragElement(GuiElementParams(
 		DrawableParams{ params.DragTexture },
-		MoveableParams{ params.Position },
+		MoveableParams(params.Position, params.ModelPosition, params.ModelScale),
 		SizeableParams{ params.DragControlSize, params.DragControlSize },
 		params.DragOverTexture,
 		params.DragDownTexture,

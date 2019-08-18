@@ -24,10 +24,9 @@ Scene::Scene(SceneParams params) :
 	_touchDownElement(std::weak_ptr<GuiElement>()),
 	_audioCallbackCount(0)
 {
-
 	GuiLabelParams labelParams(GuiElementParams(
 		DrawableParams{ "" },
-		MoveableParams{ 10,10 },
+		MoveableParams(utils::Position2d{ 10, 10 }, utils::Position3d{ 10, 10, 0 }, 1.0),
 		SizeableParams{ 200,80 },
 		"",
 		"",
@@ -75,14 +74,8 @@ std::optional<std::shared_ptr<Scene>> Scene::FromFile(SceneParams sceneParams, i
 
 void Scene::Draw(DrawContext& ctx)
 {
-	// Draw scene
-	auto &glCtx = dynamic_cast<GlDrawContext&>(ctx);
-	glCtx.ClearMvp();
-	glCtx.PushMvp(_viewProj);
-
-	glCtx.PopMvp();
-
 	// Draw overlays
+	auto &glCtx = dynamic_cast<GlDrawContext&>(ctx);
 	glCtx.ClearMvp();
 	glCtx.PushMvp(_overlayViewProj);
 
@@ -90,6 +83,19 @@ void Scene::Draw(DrawContext& ctx)
 
 	for (auto& station : _stations)
 		station->Draw(ctx);
+
+	glCtx.PopMvp();
+}
+
+void Scene::Draw3d(DrawContext& ctx)
+{
+	// Draw scene
+	auto& glCtx = dynamic_cast<GlDrawContext&>(ctx);
+	glCtx.ClearMvp();
+	glCtx.PushMvp(_viewProj);
+
+	for (auto& station : _stations)
+		station->Draw3d(ctx);
 
 	glCtx.PopMvp();
 }

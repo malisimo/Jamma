@@ -71,7 +71,7 @@ namespace engine
 				gui::GuiLabelParams(
 					base::GuiElementParams(
 						base::DrawableParams{ "" },
-						base::MoveableParams{ 0,0 },
+						base::MoveableParams(utils::Position2d{ 0, 0 }, utils::Position3d{ 0, 0, 0 }, 1.0),
 						base::SizeableParams{ 1,1 },
 						"",
 						"",
@@ -108,6 +108,7 @@ namespace engine
 		static std::optional<std::shared_ptr<Scene>> FromFile(SceneParams sceneParams, io::JamFile jam, io::RigFile rig, std::wstring dir);
 		
 		virtual void Draw(base::DrawContext& ctx) override;
+		virtual void Draw3d(base::DrawContext& ctx) override;
 
 		virtual void SetSize(utils::Size2d size) override
 		{
