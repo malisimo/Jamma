@@ -47,7 +47,9 @@ void GuiElement::SetSize(Size2d size)
 void GuiElement::Draw(DrawContext& ctx)
 {
 	auto &glCtx = dynamic_cast<GlDrawContext&>(ctx);
-	glCtx.PushMvp(glm::translate(glm::mat4(1.0), glm::vec3(_moveParams.Position.X, _moveParams.Position.Y, 0.f)));
+
+	auto pos = Position();
+	glCtx.PushMvp(glm::translate(glm::mat4(1.0), glm::vec3(pos.X, pos.Y, 0.f)));
 
 	switch (_state)
 	{
@@ -74,8 +76,11 @@ void GuiElement::Draw(DrawContext& ctx)
 void GuiElement::Draw3d(DrawContext& ctx)
 {
 	auto& glCtx = dynamic_cast<GlDrawContext&>(ctx);
-	glCtx.PushMvp(glm::translate(glm::mat4(1.0), glm::vec3(_moveParams.ModelPosition.X, _moveParams.ModelPosition.Y, _moveParams.ModelPosition.Z)));
-	glCtx.PushMvp(glm::scale(glm::mat4(1.0), glm::vec3(_moveParams.ModelScale, _moveParams.ModelScale, _moveParams.ModelScale)));
+
+	auto pos = ModelPosition();
+	auto scale = ModelScale();
+	glCtx.PushMvp(glm::translate(glm::mat4(1.0), glm::vec3(pos.X, pos.Y, pos.Z)));
+	glCtx.PushMvp(glm::scale(glm::mat4(1.0), glm::vec3(scale, scale, scale)));
 
 	for (auto& child : _children)
 		child->Draw3d(ctx);
@@ -134,39 +139,39 @@ void GuiElement::SetParent(std::shared_ptr<GuiElement> parent)
 TouchAction GuiElement::GlobalToLocal(actions::TouchAction action)
 {
 	auto actionParent = nullptr == _parent ? action : _parent->GlobalToLocal(action);
-	actionParent.Position -= _moveParams.Position;
+	actionParent.Position -= Position();
 	return actionParent;
 }
 
 TouchAction GuiElement::ParentToLocal(actions::TouchAction action)
 {
-	action.Position -= _moveParams.Position;
+	action.Position -= Position();
 	return action;
 }
 
 TouchMoveAction GuiElement::GlobalToLocal(TouchMoveAction action)
 {
 	auto actionParent = nullptr == _parent ? action : _parent->GlobalToLocal(action);
-	actionParent.Position -= _moveParams.Position;
+	actionParent.Position -= Position();
 	return actionParent;
 }
 
 TouchMoveAction GuiElement::ParentToLocal(TouchMoveAction action)
 {
-	action.Position -= _moveParams.Position;
+	action.Position -= Position();
 	return action;
 }
 
 utils::Position2d GuiElement::GlobalToLocal(utils::Position2d pos)
 {
 	auto posParent = nullptr == _parent ? pos : _parent->GlobalToLocal(pos);
-	posParent -= _moveParams.Position;
+	posParent -= Position();
 	return posParent;
 }
 
 utils::Position2d GuiElement::ParentToLocal(utils::Position2d pos)
 {
-	pos -= _moveParams.Position;
+	pos -= Position();
 	return pos;
 }
 

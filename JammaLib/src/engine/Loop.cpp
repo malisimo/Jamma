@@ -13,10 +13,6 @@ using gui::GuiModel;
 using gui::GuiModelParams;
 using graphics::GlDrawContext;
 
-const utils::Size2d Loop::_Gap = { 2, 4 };
-const utils::Size2d Loop::_DragGap = { 4, 4 };
-const utils::Size2d Loop::_DragSize = { 32, 32 };
-
 Loop::Loop(LoopParams loopParams,
 	audio::AudioMixerParams mixerParams) :
 	GuiElement(loopParams),
@@ -32,7 +28,7 @@ Loop::Loop(LoopParams loopParams,
 	_mixer = std::make_unique<AudioMixer>(mixerParams);
 
 	GuiModelParams modelParams;
-	modelParams.ModelScale = 0.001f;
+	modelParams.ModelScale = 0.1f;
 	modelParams.ModelTexture = "purple";
 	modelParams.ModelShader = "texture";
 	_model = std::make_shared<GuiModel>(modelParams);
@@ -84,27 +80,26 @@ std::optional<std::shared_ptr<Loop>> Loop::FromFile(LoopParams loopParams, io::J
 	return loop;
 }
 
+utils::Position2d Loop::Position() const
+{
+	auto pos = ModelPosition();
+	return { pos.X, pos.Y };
+}
+
+void Loop::SetSize(utils::Size2d size)
+{
+	auto mixerParams = GetMixerParams(size, audio::WireMixBehaviourParams());
+
+	_mixer->SetSize(mixerParams.Size);
+
+	GuiElement::SetSize(size);
+}
+
 audio::AudioMixerParams Loop::GetMixerParams(utils::Size2d loopSize, audio::BehaviourParams behaviour)
 {
-	GuiSliderParams sliderParams;
-	sliderParams.Min = 0.0;
-	sliderParams.Max = 6.0;
-	sliderParams.InitValue = 1.0;
-	sliderParams.Orientation = GuiSliderParams::SLIDER_VERTICAL;
-	sliderParams.Position = { (int)_Gap.Width, (int)_Gap.Height };
-	sliderParams.Size = { loopSize.Width - (2u * _Gap.Width), loopSize.Height - (2 * _Gap.Height) };
-	sliderParams.MinSize = { std::max(40u,loopSize.Width), std::max(40u, loopSize.Height) };
-	sliderParams.DragLength = loopSize.Height - _DragSize.Height - (2 * (_Gap.Height + _DragGap.Height));
-	sliderParams.DragControlOffset = { (int)_DragGap.Width, (int)_DragGap.Height };
-	sliderParams.DragControlSize = _DragSize;
-	sliderParams.Texture = "fader_back";
-	sliderParams.DragTexture = "fader";
-	sliderParams.DragOverTexture = "fader_over";
-
 	AudioMixerParams mixerParams;
 	mixerParams.Size = { 160, 320 };
 	mixerParams.Position = { 6, 6 };
-	mixerParams.SliderParams = sliderParams;
 	mixerParams.Behaviour = behaviour;
 
 	return mixerParams;

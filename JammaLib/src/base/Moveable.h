@@ -62,7 +62,7 @@ namespace base
 			return _moveParams.ModelScale;
 		};
 
-	protected:
+	private:
 		MoveableParams _moveParams;
 	};
 }

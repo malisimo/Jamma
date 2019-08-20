@@ -98,8 +98,8 @@ namespace gui
 		SliderOrientation Orientation;
 		double Min;
 		double Max;
-		int DragLength;
-		int Steps;
+		unsigned int DragLength;
+		unsigned int Steps;
 		double InitValue;
 		std::string DragTexture;
 		std::string DragOverTexture;

@@ -70,6 +70,7 @@ namespace engine
 	public:
 		static std::optional<std::shared_ptr<LoopTake>> FromFile(LoopTakeParams takeParams, io::JamFile::LoopTake takeStruct, std::wstring dir);
 
+		virtual utils::Position2d Position() const override;
 		virtual MultiAudioDirection MultiAudibleDirection() const override { return MULTIAUDIO_BOTH; }
 		virtual void OnPlay(const std::shared_ptr<base::MultiAudioSink> dest, unsigned int numSamps) override;
 		virtual void EndMultiPlay(unsigned int numSamps) override;
@@ -91,6 +92,9 @@ namespace engine
 
 	protected:
 		static unsigned int CalcLoopHeight(unsigned int takeHeight, unsigned int numLoops);
+
+		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
+		void ArrangeLoops();
 
 	protected:
 		static const utils::Size2d _Gap;

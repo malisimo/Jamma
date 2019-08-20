@@ -45,6 +45,7 @@ namespace engine
 	public:
 		static std::optional<std::shared_ptr<Station>> FromFile(StationParams stationParams, io::JamFile::Station stationStruct, std::wstring dir);
 
+		virtual	utils::Position2d Position() const override;
 		virtual MultiAudioDirection MultiAudibleDirection() const override { return MULTIAUDIO_BOTH; }
 		virtual void OnPlay(const std::shared_ptr<base::MultiAudioSink> dest, unsigned int numSamps) override;
 		virtual void EndMultiPlay(unsigned int numSamps) override;
@@ -62,7 +63,9 @@ namespace engine
 
 	protected:
 		static unsigned int CalcTakeHeight(unsigned int stationHeight, unsigned int numTakes);
-		
+
+		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
+		void ArrangeTakes();
 		std::optional<std::shared_ptr<LoopTake>> TryGetTake(unsigned long id);
 
 	protected:

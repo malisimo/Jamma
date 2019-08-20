@@ -17,8 +17,10 @@ GuiModel::GuiModel(GuiModelParams params) :
 void GuiModel::Draw3d(DrawContext& ctx)
 {
 	auto& glCtx = dynamic_cast<GlDrawContext&>(ctx);
-	glCtx.PushMvp(glm::translate(glm::mat4(1.0), glm::vec3(_moveParams.ModelPosition.X, _moveParams.ModelPosition.Y, _moveParams.ModelPosition.Z)));
-	glCtx.PushMvp(glm::scale(glm::mat4(1.0), glm::vec3(_moveParams.ModelScale, _moveParams.ModelScale, _moveParams.ModelScale)));
+	auto pos = ModelPosition();
+	auto scale = ModelScale();
+	glCtx.PushMvp(glm::translate(glm::mat4(1.0), glm::vec3(pos.X, pos.Y, pos.Z)));
+	glCtx.PushMvp(glm::scale(glm::mat4(1.0), glm::vec3(scale, scale, scale)));
 
 	auto texture = _modelTexture.lock();
 	auto shader = _modelShader.lock();

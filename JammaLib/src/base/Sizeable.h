@@ -51,8 +51,7 @@ namespace base
 		{
 			_resizing = resizing;
 		}
-
-
+	
 	protected:
 		SizeableParams _sizeParams;
 		bool _resizing;

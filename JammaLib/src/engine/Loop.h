@@ -104,6 +104,8 @@ namespace engine
 		static std::optional<std::shared_ptr<Loop>> FromFile(LoopParams loopParams, io::JamFile::Loop loopStruct, std::wstring dir);
 		static audio::AudioMixerParams GetMixerParams(utils::Size2d loopSize, audio::BehaviourParams behaviour);
 
+		virtual utils::Position2d Position() const override;
+		virtual void SetSize(utils::Size2d size) override;
 		virtual MultiAudioDirection MultiAudibleDirection() const override { return MULTIAUDIO_BOTH; }
 		virtual void OnPlay(const std::shared_ptr<base::MultiAudioSink> dest, unsigned int numSamps) override;
 		virtual void EndMultiPlay(unsigned int numSamps) override;
@@ -127,9 +129,6 @@ namespace engine
 		static const unsigned int _MaxFadeSamps = 30000;
 		static const unsigned int _InitBufferSize = 1000000;
 		static const unsigned int _MaxBufferSize = 40000000;
-		static const utils::Size2d _Gap;
-		static const utils::Size2d _DragGap;
-		static const utils::Size2d _DragSize;
 
 		unsigned long _playPos;
 		unsigned long _recPos;

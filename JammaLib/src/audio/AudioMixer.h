@@ -126,6 +126,7 @@ namespace audio
 	public:
 		virtual actions::ActionResult OnAction(actions::DoubleAction val) override;
 		virtual void InitReceivers() override;
+		virtual void SetSize(utils::Size2d size) override;
 
 		void OnPlay(const std::shared_ptr<base::MultiAudioSink> dest,
 			float samp,
@@ -136,6 +137,13 @@ namespace audio
 		void SetInputChannel(unsigned int channel);
 
 	protected:
+		gui::GuiSliderParams GetSliderParams(utils::Size2d size);
+
+	protected:
+		static const utils::Size2d _Gap;
+		static const utils::Size2d _DragGap;
+		static const utils::Size2d _DragSize;
+
 		unsigned int _inputChannel;
 		std::unique_ptr<MixBehaviour> _behaviour;
 		std::shared_ptr<gui::GuiSlider> _slider;

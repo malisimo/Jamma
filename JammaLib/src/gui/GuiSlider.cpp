@@ -47,9 +47,12 @@ GuiSlider::GuiSlider(GuiSliderParams params) :
 		double initValue) 
 	{
 		auto valRange = params.Max - params.Min;
-		auto dragFrac = GuiSliderParams::SLIDER_VERTICAL == params.Orientation ?
-			std::clamp(dragPos.Y - params.DragControlOffset.Y, 0, params.DragLength) / (double)params.DragLength :
-			std::clamp(dragPos.X - params.DragControlOffset.X, 0, params.DragLength) / (double)params.DragLength;
+		double dragFrac = 0.0;
+
+		if (params.DragLength > 0)
+			dragFrac = GuiSliderParams::SLIDER_VERTICAL == params.Orientation ?
+				std::clamp(dragPos.Y - params.DragControlOffset.Y, 0, (int)params.DragLength) / (double)params.DragLength :
+				std::clamp(dragPos.X - params.DragControlOffset.X, 0, (int)params.DragLength) / (double)params.DragLength;
 
 		if (params.Steps > 0)
 		{
@@ -136,7 +139,8 @@ void GuiSlider::Draw(DrawContext & ctx)
 	GuiElement::Draw(ctx);
 
 	auto &glCtx = dynamic_cast<GlDrawContext&>(ctx);
-	glCtx.PushMvp(glm::translate(glm::mat4(1.0), glm::vec3(_moveParams.Position.X, _moveParams.Position.Y, 0.f)));
+	auto pos = Position();
+	glCtx.PushMvp(glm::translate(glm::mat4(1.0), glm::vec3(pos.X, pos.Y, 0.f)));
 	_dragElement.Draw(ctx);
 	glCtx.PopMvp();
 }

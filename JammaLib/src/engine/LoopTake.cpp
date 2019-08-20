@@ -33,26 +33,24 @@ std::optional<std::shared_ptr<LoopTake>> LoopTake::FromFile(LoopTakeParams takeP
 {
 	auto take = std::make_shared<LoopTake>(takeParams);
 
-	auto loopHeight = 20u;
-	Size2d gap = { 2, 2 };
 	LoopParams loopParams;
 	loopParams.Wav = "hh";
-	loopParams.Size = { 80, 80 };
-	loopParams.Position = { 10, 22 };
 
-	auto loopCount = 0u;
 	for (auto loopStruct : takeStruct.Loops)
 	{
-		loopParams.Position = { (int)gap.Width, (int)(loopCount * loopHeight + gap.Height) };
 		auto loop = Loop::FromFile(loopParams, loopStruct, dir);
 		
 		if (loop.has_value())
 			take->AddLoop(loop.value());
-
-		loopCount++;
 	}
 
 	return take;
+}
+
+utils::Position2d LoopTake::Position() const
+{
+	auto pos = ModelPosition();
+	return { pos.X, pos.Y };
 }
 
 void LoopTake::OnPlay(const std::shared_ptr<MultiAudioSink> dest,
@@ -118,27 +116,15 @@ std::shared_ptr<Loop> LoopTake::AddLoop(unsigned int chan)
 	auto newNumLoops = (unsigned int)_loops.size() + 1;
 
 	auto loopHeight = CalcLoopHeight(_sizeParams.Size.Height, newNumLoops);
-	utils::Size2d loopSize = { _sizeParams.Size.Width - (2 * _Gap.Width), _sizeParams.Size.Height - (2 * _Gap.Height) };
-
-	auto loopCount = 0;
-	for (auto& loop : _loops)
-	{
-		loop->SetSize(loopSize);
-		loop->SetPosition({ (int)_Gap.Width, (int)(_Gap.Height + (loopCount * loopHeight)) });
-
-		loopCount++;
-	}
 
 	audio::WireMixBehaviourParams wire;
 	wire.Channels = { chan };
 	auto mixerParams = Loop::GetMixerParams({ 110, loopHeight }, wire);
 
 	LoopParams loopParams;
-	loopParams.Size = loopSize;
-	loopParams.Position = { (int)_Gap.Width, (int)(_Gap.Height + (newNumLoops-1) * loopHeight) };
+	loopParams.Wav = "hh";
 
 	auto loop = std::make_shared<Loop>(loopParams, mixerParams);
-
 	AddLoop(loop);
 
 	return loop;
@@ -191,10 +177,36 @@ void LoopTake::Ditch()
 	_loops.clear();
 }
 
-unsigned int engine::LoopTake::CalcLoopHeight(unsigned int takeHeight, unsigned int numLoops)
+unsigned int LoopTake::CalcLoopHeight(unsigned int takeHeight, unsigned int numLoops)
 {
 	if (0 == numLoops)
 		return 0;
 
 	return (takeHeight - ((2 + (numLoops - 1)) * _Gap.Width)) / numLoops;
+}
+
+bool LoopTake::_InitResources(ResourceLib& resourceLib)
+{
+	GuiElement::_InitResources(resourceLib);
+	
+	ArrangeLoops();
+
+	return false;
+}
+
+void LoopTake::ArrangeLoops()
+{
+	auto numLoops = (unsigned int)_loops.size();
+
+	auto loopHeight = CalcLoopHeight(_sizeParams.Size.Height, numLoops);
+	utils::Size2d loopSize = { _sizeParams.Size.Width - (2 * _Gap.Width), _sizeParams.Size.Height - (2 * _Gap.Height) };
+
+	auto loopCount = 0;
+	for (auto& loop : _loops)
+	{
+		loop->SetSize(loopSize);
+		loop->SetModelPosition({ (int)_Gap.Width, (int)(_Gap.Height + (loopCount * loopHeight)), 0 });
+
+		loopCount++;
+	}
 }

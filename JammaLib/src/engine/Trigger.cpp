@@ -147,7 +147,8 @@ void Trigger::Draw(base::DrawContext& ctx)
 	}
 
 	auto& glCtx = dynamic_cast<GlDrawContext&>(ctx);
-	glCtx.PushMvp(glm::translate(glm::mat4(1.0), glm::vec3(_moveParams.Position.X, _moveParams.Position.Y, 0.f)));
+	auto pos = Position();
+	glCtx.PushMvp(glm::translate(glm::mat4(1.0), glm::vec3(pos.X, pos.Y, 0.f)));
 
 	switch (_state)
 	{

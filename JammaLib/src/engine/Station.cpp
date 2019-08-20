@@ -47,7 +47,7 @@ std::optional<std::shared_ptr<Station>> Station::FromFile(StationParams stationP
 	auto takeCount = 0u;
 	for (auto takeStruct : stationStruct.LoopTakes)
 	{
-		takeParams.Position = { (int)gap.Width, (int)(takeCount * takeHeight + gap.Height) };
+		takeParams.ModelPosition = { (int)gap.Width, (int)(takeCount * takeHeight + gap.Height), 0 };
 		auto take = LoopTake::FromFile(takeParams, takeStruct, dir);
 		
 		if (take.has_value())
@@ -57,6 +57,12 @@ std::optional<std::shared_ptr<Station>> Station::FromFile(StationParams stationP
 	}
 		
 	return station;
+}
+
+utils::Position2d Station::Position() const
+{
+	auto pos = ModelPosition();
+	return { pos.X, pos.Y };
 }
 
 void Station::OnPlay(const std::shared_ptr<base::MultiAudioSink> dest, unsigned int numSamps)
@@ -158,26 +164,9 @@ void Station::OnTick(Time curTime, unsigned int samps)
 
 std::shared_ptr<LoopTake> Station::AddTake()
 {
-	auto newNumTakes = (unsigned int)_loopTakes.size() + 1;
-
-	auto takeHeight = CalcTakeHeight(_sizeParams.Size.Height, newNumTakes);
-	utils::Size2d takeSize = { _sizeParams.Size.Width - (2 * _Gap.Width), _sizeParams.Size.Height - (2 * _Gap.Height) };
-
-	auto takeCount = 0;
-	for (auto& take : _loopTakes)
-	{
-		take->SetSize(takeSize);
-		take->SetPosition({ (int)_Gap.Width, (int)(_Gap.Height + (takeCount * takeHeight)) });
-
-		takeCount++;
-	}
-
 	LoopTakeParams takeParams;
-	takeParams.Size = takeSize;
-	takeParams.Position = { (int)_Gap.Width, (int)(_Gap.Height + (newNumTakes - 1) * takeHeight) };
 
 	auto take = std::make_shared<LoopTake>(takeParams);
-
 	AddTake(take);
 
 	return take;
@@ -214,7 +203,6 @@ void Station::Reset()
 	_triggers.clear();
 }
 
-
 unsigned int Station::CalcTakeHeight(unsigned int stationHeight, unsigned int numTakes)
 {
 	if (0 == numTakes)
@@ -223,6 +211,31 @@ unsigned int Station::CalcTakeHeight(unsigned int stationHeight, unsigned int nu
 	return (stationHeight - ((2 + (numTakes - 1)) * _Gap.Width)) / numTakes;
 }
 
+bool Station::_InitResources(ResourceLib& resourceLib)
+{
+	GuiElement::_InitResources(resourceLib);
+
+	ArrangeTakes();
+
+	return false;
+}
+
+void Station::ArrangeTakes()
+{
+	auto numTakes = (unsigned int)_loopTakes.size();
+
+	auto takeHeight = CalcTakeHeight(_sizeParams.Size.Height, numTakes);
+	utils::Size2d takeSize = { _sizeParams.Size.Width - (2 * _Gap.Width), _sizeParams.Size.Height - (2 * _Gap.Height) };
+
+	auto takeCount = 0;
+	for (auto& take : _loopTakes)
+	{
+		take->SetSize(takeSize);
+		take->SetPosition({ (int)_Gap.Width, (int)(_Gap.Height + (takeCount * takeHeight)) });
+
+		takeCount++;
+	}
+}
 
 std::optional<std::shared_ptr<LoopTake>> Station::TryGetTake(unsigned long id)
 {
