@@ -16,7 +16,7 @@ AudioMixer::AudioMixer(AudioMixerParams params) :
 	GuiElement(params),
 	_inputChannel(params.InputChannel),
 	_behaviour(std::unique_ptr<MixBehaviour>()),
-	_slider(std::make_shared<GuiSlider>(params.SliderParams)),
+	_slider(std::make_shared<GuiSlider>(GetSliderParams(params.Size))),
 	_fade(std::make_unique<InterpolatedValueExp>())
 {
 	_behaviour = std::visit(MixerBehaviourFactory{}, params.Behaviour);
@@ -39,7 +39,6 @@ void AudioMixer::InitReceivers()
 void AudioMixer::SetSize(utils::Size2d size)
 {
 	auto sliderParams = GetSliderParams(size);
-
 	_slider->SetSize(sliderParams.Size);
 
 	GuiElement::SetSize(size);
@@ -109,9 +108,9 @@ gui::GuiSliderParams AudioMixer::GetSliderParams(utils::Size2d mixerSize)
 	sliderParams.Position = { (int)_Gap.Width, (int)_Gap.Height };
 	sliderParams.Size = { mixerSize.Width - (2u * _Gap.Width), mixerSize.Height - (2 * _Gap.Height) };
 	sliderParams.MinSize = { std::max(40u,mixerSize.Width), std::max(40u, mixerSize.Height) };
-	sliderParams.DragLength = mixerSize.Height - _DragSize.Height - (2 * (_Gap.Height + _DragGap.Height));
 	sliderParams.DragControlOffset = { (int)_DragGap.Width, (int)_DragGap.Height };
 	sliderParams.DragControlSize = _DragSize;
+	sliderParams.DragGap = _DragGap;
 	sliderParams.Texture = "fader_back";
 	sliderParams.DragTexture = "fader";
 	sliderParams.DragOverTexture = "fader_over";

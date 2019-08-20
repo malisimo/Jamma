@@ -84,8 +84,7 @@ namespace audio
 				"",
 				"",
 				{}),
-			Behaviour(MixBehaviourParams()),
-			SliderParams(gui::GuiSliderParams())
+			Behaviour(MixBehaviourParams())
 		{
 		}
 
@@ -93,15 +92,13 @@ namespace audio
 			BehaviourParams behaviour,
 			gui::GuiSliderParams sliderParams) :
 			base::GuiElementParams(params),
-			Behaviour(behaviour),
-			SliderParams(sliderParams)
+			Behaviour(behaviour)
 		{
 		}
 
 	public:
 		BehaviourParams Behaviour;
 		unsigned int InputChannel;
-		gui::GuiSliderParams SliderParams;
 	};
 	
 	struct MixerBehaviourFactory

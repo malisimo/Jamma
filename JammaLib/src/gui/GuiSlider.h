@@ -10,42 +10,6 @@
 
 namespace gui
 {
-	class GuiSliderParams;
-
-	class GuiSlider :
-		public base::GuiElement
-	{
-	public:
-		GuiSlider(GuiSliderParams guiParams);
-
-	public:
-		double Value() const;
-		void SetValue(double value);
-		void SetValue(double value, bool bypassUpdate);
-
-		virtual bool HitTest(utils::Position2d pos) override;
-		virtual void Draw(base::DrawContext& ctx) override;
-		virtual actions::ActionResult OnAction(actions::TouchAction action) override;
-		virtual actions::ActionResult OnAction(actions::TouchMoveAction action) override;
-		virtual bool Undo(std::shared_ptr<base::ActionUndo> undo) override;
-		virtual bool Redo(std::shared_ptr<base::ActionUndo> undo) override;
-
-	protected:
-		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
-		virtual bool _ReleaseResources() override;
-
-		void OnValueChange(bool bypassUpdate);
-		std::function<double(utils::Position2d,utils::Position2d,double)> _calcValueOffsetFun;
-		std::function<utils::Position2d(double)> _calcDragPosFun;
-
-	private:
-		bool _isDragging;
-		utils::Position2d _initClickPos;
-		utils::Position2d _initDragPos;
-		base::GuiElement _dragElement;
-		double _valueOffset;
-		double _initValue;
-	};
 
 	class GuiSliderParams : public base::GuiElementParams
 	{
@@ -61,14 +25,14 @@ namespace gui
 			Orientation(SLIDER_VERTICAL),
 			Min(0.0),
 			Max(1.0),
-			DragLength(1),
 			Steps(0),
 			DragTexture(""),
 			DragOverTexture(""),
 			DragDownTexture(""),
 			DragOutTexture(""),
 			DragControlOffset({ 0,0 }),
-			DragControlSize({ 1,1 })
+			DragControlSize({ 1,1 }),
+			DragGap({ 0,0 })
 		{
 		}
 
@@ -77,14 +41,14 @@ namespace gui
 			Orientation(SLIDER_VERTICAL),
 			Min(0.0),
 			Max(1.0),
-			DragLength(1),
 			Steps(0),
 			DragTexture(""),
 			DragOverTexture(""),
 			DragDownTexture(""),
 			DragOutTexture(""),
 			DragControlOffset({ 0,0 }),
-			DragControlSize({ 1,1 })
+			DragControlSize({ 1,1 }),
+			DragGap({ 0,0 })
 		{
 		}
 
@@ -98,7 +62,6 @@ namespace gui
 		SliderOrientation Orientation;
 		double Min;
 		double Max;
-		unsigned int DragLength;
 		unsigned int Steps;
 		double InitValue;
 		std::string DragTexture;
@@ -107,5 +70,47 @@ namespace gui
 		std::string DragOutTexture;
 		utils::Position2d DragControlOffset;
 		utils::Size2d DragControlSize;
+		utils::Size2d DragGap;
+	};
+
+	class GuiSlider :
+		public base::GuiElement
+	{
+	public:
+		GuiSlider(GuiSliderParams guiParams);
+
+	public:
+		double Value() const;
+		void SetValue(double value);
+		void SetValue(double value, bool bypassUpdate);
+		void SetDragParams(utils::Position2d dragOffset,
+			utils::Size2d dragSize,
+			utils::Size2d dragGap);
+
+		virtual	void SetSize(utils::Size2d size) override;
+		virtual bool HitTest(utils::Position2d pos) override;
+		virtual void Draw(base::DrawContext& ctx) override;
+		virtual actions::ActionResult OnAction(actions::TouchAction action) override;
+		virtual actions::ActionResult OnAction(actions::TouchMoveAction action) override;
+		virtual bool Undo(std::shared_ptr<base::ActionUndo> undo) override;
+		virtual bool Redo(std::shared_ptr<base::ActionUndo> undo) override;
+
+	protected:
+		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
+		virtual bool _ReleaseResources() override;
+
+		static double CalcValueOffset(GuiSliderParams params, utils::Position2d dragPos, utils::Position2d initDragPos, double initValue);
+		static utils::Position2d CalcDragPos(GuiSliderParams params, double value);
+		static unsigned int CalcDragLength(GuiSliderParams params);
+		void OnValueChange(bool bypassUpdate);
+
+	private:
+		GuiSliderParams _sliderParams;
+		bool _isDragging;
+		utils::Position2d _initClickPos;
+		utils::Position2d _initDragPos;
+		base::GuiElement _dragElement;
+		double _valueOffset;
+		double _initValue;
 	};
 }

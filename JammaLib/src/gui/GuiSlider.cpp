@@ -11,13 +11,12 @@ using resources::ResourceLib;
 
 GuiSlider::GuiSlider(GuiSliderParams params) :
 	GuiElement(params),
+	_sliderParams(params),
 	_isDragging(false),
 	_initClickPos({ 0,0 }),
 	_initDragPos({ 0,0 }),
 	_initValue(params.InitValue),
 	_valueOffset(0.0),
-	_calcValueOffsetFun(),
-	_calcDragPosFun(),
 	_dragElement(GuiElementParams(
 		DrawableParams{ params.DragTexture },
 		MoveableParams(params.Position, params.ModelPosition, params.ModelScale),
@@ -27,72 +26,13 @@ GuiSlider::GuiSlider(GuiSliderParams params) :
 		params.DragOutTexture,
 		{} ))
 {
-	auto calcDragPosFun = [params](double value) {
-		auto valRange = params.Max - params.Min;
-		auto valFrac = (value - params.Min) / valRange;
-
-		return GuiSliderParams::SLIDER_VERTICAL == params.Orientation ?
-			Position2d {
-				params.DragControlOffset.X, 
-				((int)round(valFrac * params.DragLength)) + params.DragControlOffset.Y
-			} :
-			Position2d {
-				((int)round(valFrac * params.DragLength)) + params.DragControlOffset.X,
-				params.DragControlOffset.Y
-			};
-	};
-
-	_calcValueOffsetFun = [params, calcDragPosFun](Position2d dragPos,
-		Position2d initDragPos,
-		double initValue) 
-	{
-		auto valRange = params.Max - params.Min;
-		double dragFrac = 0.0;
-
-		if (params.DragLength > 0)
-			dragFrac = GuiSliderParams::SLIDER_VERTICAL == params.Orientation ?
-				std::clamp(dragPos.Y - params.DragControlOffset.Y, 0, (int)params.DragLength) / (double)params.DragLength :
-				std::clamp(dragPos.X - params.DragControlOffset.X, 0, (int)params.DragLength) / (double)params.DragLength;
-
-		if (params.Steps > 0)
-		{
-			auto dStep = valRange / (double)params.Steps;
-			auto stepNum = (int)round(dragFrac * params.Steps);
-			auto newValue = params.Min + (stepNum * dStep);
-			return newValue - initValue;
-		}
-
-		auto initDrag = GuiSliderParams::SLIDER_VERTICAL == params.Orientation ?
-			initDragPos.Y :
-			initDragPos.X;
-
-		auto newDragPos = GuiSliderParams::SLIDER_VERTICAL == params.Orientation ?
-			Position2d {
-				params.DragControlOffset.X,
-				((int)round(dragFrac * params.DragLength)) + params.DragControlOffset.Y 
-			} :
-			Position2d {
-				((int)round(dragFrac * params.DragLength)) + params.DragControlOffset.X,
-				params.DragControlOffset.Y
-			};
-
-		auto dDragPos = newDragPos - initDragPos;
-		auto dDrag = GuiSliderParams::SLIDER_VERTICAL == params.Orientation ?
-			dDragPos.Y :
-			dDragPos.X;
-		auto dDragFrac = ((double)dDrag) / ((double)params.DragLength);
-
-		return valRange * dDragFrac;
-	};
-
-	_calcDragPosFun = calcDragPosFun;
 	SetValue(params.InitValue);
 	_initDragPos = _dragElement.Position();
 }
 
 double GuiSlider::Value() const
 {
-	return _initValue + _valueOffset;// _calcValueOffsetFun(_dragElement.Position(), _initDragPos, _initValue);
+	return _initValue + _valueOffset;
 }
 
 void GuiSlider::SetValue(double value)
@@ -109,6 +49,29 @@ void GuiSlider::SetValue(double value, bool bypassUpdates)
 	_valueOffset = 0.0;
 
 	OnValueChange(bypassUpdates);
+}
+
+void GuiSlider::SetDragParams(utils::Position2d dragOffset,
+	utils::Size2d dragSize,
+	utils::Size2d dragGap)
+{
+	_sliderParams.DragControlOffset = dragOffset;
+	_sliderParams.DragControlSize = dragSize;
+	_sliderParams.DragGap = dragGap;
+
+	OnValueChange(true);
+}
+
+void GuiSlider::SetSize(Size2d size)
+{
+	GuiElement::SetSize(size);
+
+	OnValueChange(true);
+
+	_texture.SetSize(_sizeParams.Size);
+	_overTexture.SetSize(_sizeParams.Size);
+	_downTexture.SetSize(_sizeParams.Size);
+	_outTexture.SetSize(_sizeParams.Size);
 }
 
 bool GuiSlider::HitTest(Position2d localPos)
@@ -214,7 +177,7 @@ ActionResult GuiSlider::OnAction(TouchMoveAction action)
 	auto dPos = action.Position - _initClickPos;
 	auto dragPos = _initDragPos + dPos;
 
-	_valueOffset = _calcValueOffsetFun(dragPos, _initDragPos, _initValue);
+	_valueOffset = CalcValueOffset(_sliderParams, dragPos, _initDragPos, _initValue);
 	std::cout << "InitValue: " << _initValue << ", ValueOffset: " << _valueOffset << " = " << (_initValue + _valueOffset) << std::endl;
 
 	OnValueChange(false);
@@ -270,8 +233,78 @@ bool GuiSlider::_ReleaseResources()
 void GuiSlider::OnValueChange(bool bypassUpdates)
 {
 	auto value = _initValue + _valueOffset;
-	_dragElement.SetPosition(_calcDragPosFun(value));
+	_dragElement.SetPosition(CalcDragPos(_sliderParams, value));
 
 	if (_receiver && !bypassUpdates)
 		_receiver->OnAction(DoubleAction(value));
+}
+
+double GuiSlider::CalcValueOffset(GuiSliderParams params,
+	Position2d dragPos,
+	Position2d initDragPos,
+	double initValue)
+{
+	auto valRange = params.Max - params.Min;
+	double dragFrac = 0.0;
+
+	auto dragLength = CalcDragLength(params);
+
+	if (dragLength > 0)
+		dragFrac = GuiSliderParams::SLIDER_VERTICAL == params.Orientation ?
+		std::clamp(dragPos.Y - params.DragControlOffset.Y, 0, (int)dragLength) / (double)dragLength :
+		std::clamp(dragPos.X - params.DragControlOffset.X, 0, (int)dragLength) / (double)dragLength;
+
+	if (params.Steps > 0)
+	{
+		auto dStep = valRange / (double)params.Steps;
+		auto stepNum = (int)round(dragFrac * params.Steps);
+		auto newValue = params.Min + (stepNum * dStep);
+		return newValue - initValue;
+	}
+
+	auto initDrag = GuiSliderParams::SLIDER_VERTICAL == params.Orientation ?
+		initDragPos.Y :
+		initDragPos.X;
+
+	auto newDragPos = GuiSliderParams::SLIDER_VERTICAL == params.Orientation ?
+		Position2d{
+			params.DragControlOffset.X,
+			((int)round(dragFrac * CalcDragLength(params))) + params.DragControlOffset.Y
+	} :
+		Position2d{
+			((int)round(dragFrac * CalcDragLength(params))) + params.DragControlOffset.X,
+			params.DragControlOffset.Y
+	};
+
+	auto dDragPos = newDragPos - initDragPos;
+	auto dDrag = GuiSliderParams::SLIDER_VERTICAL == params.Orientation ?
+		dDragPos.Y :
+		dDragPos.X;
+	auto dDragFrac = ((double)dDrag) / ((double)CalcDragLength(params));
+
+	return valRange * dDragFrac;
+}
+
+utils::Position2d GuiSlider::CalcDragPos(GuiSliderParams params,
+	double value)
+{
+	auto valRange = params.Max - params.Min;
+	auto valFrac = (value - params.Min) / valRange;
+
+	return GuiSliderParams::SLIDER_VERTICAL == params.Orientation ?
+		Position2d{
+			params.DragControlOffset.X,
+			((int)round(valFrac * CalcDragLength(params))) + params.DragControlOffset.Y
+	} :
+		Position2d{
+			((int)round(valFrac * CalcDragLength(params))) + params.DragControlOffset.X,
+			params.DragControlOffset.Y
+	};
+}
+
+unsigned int GuiSlider::CalcDragLength(GuiSliderParams params)
+{
+	return GuiSliderParams::SLIDER_VERTICAL == params.Orientation ?
+		params.Size.Height - params.DragControlSize.Height - (2 * params.DragGap.Height) :
+		params.Size.Width - params.DragControlSize.Width - (2 * params.DragGap.Width);
 }
