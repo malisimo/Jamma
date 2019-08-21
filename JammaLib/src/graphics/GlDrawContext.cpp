@@ -1,8 +1,10 @@
 #include "GlDrawContext.h"
 
 using namespace graphics;
+using namespace utils;
 
-GlDrawContext::GlDrawContext()
+GlDrawContext::GlDrawContext() :
+	DrawContext()
 {
 }
 
@@ -42,4 +44,25 @@ void GlDrawContext::PopMvp() noexcept
 void GlDrawContext::ClearMvp() noexcept
 {
 	_mvp.clear();
+}
+
+Position2d GlDrawContext::ProjectScreen(utils::Position3d pos)
+{
+	auto p = glm::vec3(pos.X, pos.Y, pos.Z);
+	auto collapsed = glm::mat4(1.0);
+	for (auto m : _mvp)
+	{
+		collapsed *= m;
+	}
+
+	auto screenPosHom = glm::vec4{ p.x, p.y, p.z, 1.0 } * collapsed;
+	auto screenPosNorm = glm::vec3{ screenPosHom.x / screenPosHom.w,
+		screenPosHom.x / screenPosHom.w,
+		screenPosHom.x / screenPosHom.w };
+
+	auto screenPosPix = Position2d{
+		(int)((screenPosNorm.x + 1.0) * 0.5 * _size.Width),
+		(int)((screenPosNorm.y + 1.0) * 0.5 * _size.Height) };
+
+	return screenPosPix;
 }

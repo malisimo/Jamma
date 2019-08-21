@@ -28,7 +28,8 @@ Loop::Loop(LoopParams loopParams,
 	_mixer = std::make_unique<AudioMixer>(mixerParams);
 
 	GuiModelParams modelParams;
-	modelParams.ModelScale = 0.1f;
+	modelParams.Size = { 12, 14 };
+	modelParams.ModelScale = 1.0f;
 	modelParams.ModelTexture = "purple";
 	modelParams.ModelShader = "texture";
 	_model = std::make_shared<GuiModel>(modelParams);
@@ -71,7 +72,6 @@ std::optional<std::shared_ptr<Loop>> Loop::FromFile(LoopParams loopParams, io::J
 	auto mixerParams = GetMixerParams(loopParams.Size, behaviour);
 
 	loopParams.Wav = utils::EncodeUtf8(dir) + "/" + loopStruct.Name;
-
 	auto loop = std::make_shared<Loop>(loopParams, mixerParams);
 
 	loop->Load(io::WavReadWriter());
@@ -104,44 +104,6 @@ audio::AudioMixerParams Loop::GetMixerParams(utils::Size2d loopSize, audio::Beha
 
 	return mixerParams;
 }
-
-/*bool Loop::_InitResources(ResourceLib& resourceLib)
-{
-	// Loading from resource (prerecorded samples)
-	auto resOpt = resourceLib.GetResource(_loopParams.Wav);
-
-	if (!resOpt.has_value())
-		return false;
-
-	auto resource = resOpt.value().lock(); 
-	
-	if (!resource)
-		return false;
-
-	if (WAV != resource->GetType())
-		return false;
-
-	_length = 0;
-	_wav = std::dynamic_pointer_cast<WavResource>(resource);
-	_buffer.clear();
-
-	auto wav = _wav.lock();
-	if (wav)
-	{
-		auto wavBuffer = wav->Buffer();
-		auto length = (unsigned long)wavBuffer.size();
-		_buffer = std::vector<float>(length);
-
-		for (auto i = 0u; i < length; i++)
-		{
-			_buffer[i] = wavBuffer[i];
-		}
-
-		_length = length - _MaxFadeSamps;
-	}
-
-	return GuiElement::_InitResources(resourceLib);
-}*/
 
 void Loop::OnPlay(const std::shared_ptr<MultiAudioSink> dest,
 	unsigned int numSamps)

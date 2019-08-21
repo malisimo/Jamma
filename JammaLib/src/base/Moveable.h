@@ -29,7 +29,9 @@ namespace base
 	class Moveable
 	{
 	public:
-		Moveable(MoveableParams params) : _moveParams(params) {};
+		Moveable(MoveableParams params) :
+			_moveParams(params),
+			_modelScreenPos({ 0, 0 }) {};
 
 	public:
 		virtual void SetPosition(utils::Position2d pos)
@@ -61,6 +63,9 @@ namespace base
 		{
 			return _moveParams.ModelScale;
 		};
+
+	protected:
+		utils::Position2d _modelScreenPos;
 
 	private:
 		MoveableParams _moveParams;

@@ -24,6 +24,7 @@ namespace audio
 	public:
 		void SetDevice(std::unique_ptr<RtAudio> device);
 		void Start();
+		void Stop();
 		RtAudio::DeviceInfo GetInputStreamInfo();
 		RtAudio::DeviceInfo GetOutputStreamInfo();
 

@@ -23,11 +23,7 @@ AudioDevice::~AudioDevice()
 	if (!_stream)
 		return;
 
-	if (_stream->isStreamRunning())
-		_stream->stopStream();
-
-	if (_stream->isStreamOpen())
-		_stream->closeStream();
+	Stop();
 }
 
 void AudioDevice::SetDevice(std::unique_ptr<RtAudio> device)
@@ -39,6 +35,15 @@ void AudioDevice::Start()
 {
 	if (_stream)
 		_stream->startStream();
+}
+
+void AudioDevice::Stop()
+{
+	if (_stream->isStreamRunning())
+		_stream->stopStream();
+
+	if (_stream->isStreamOpen())
+		_stream->closeStream();
 }
 
 RtAudio::DeviceInfo AudioDevice::GetInputStreamInfo()

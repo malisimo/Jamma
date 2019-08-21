@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <algorithm>
+#include <mutex>
 #include "../resources/ResourceLib.h"
 #include "../audio/AudioDevice.h"
 #include "../audio/ChannelMixer.h"
@@ -124,6 +125,7 @@ namespace engine
 		virtual void OnTick(Time curTime, unsigned int samps) override;
 
 		void InitAudio();
+		void CloseAudio();
 		
 	protected:
 		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
@@ -138,6 +140,8 @@ namespace engine
 		void AddStation(std::shared_ptr<Station> station);
 
 	protected:
+		static std::mutex _Mutex;
+
 		glm::mat4 _viewProj;
 		glm::mat4 _overlayViewProj;
 		std::shared_ptr<audio::ChannelMixer> _channelMixer;

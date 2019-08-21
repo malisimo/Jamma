@@ -19,6 +19,8 @@ void GuiModel::Draw3d(DrawContext& ctx)
 	auto& glCtx = dynamic_cast<GlDrawContext&>(ctx);
 	auto pos = ModelPosition();
 	auto scale = ModelScale();
+
+	_modelScreenPos = glCtx.ProjectScreen(pos);
 	glCtx.PushMvp(glm::translate(glm::mat4(1.0), glm::vec3(pos.X, pos.Y, pos.Z)));
 	glCtx.PushMvp(glm::scale(glm::mat4(1.0), glm::vec3(scale, scale, scale)));
 

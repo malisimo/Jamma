@@ -11,6 +11,8 @@ using namespace graphics;
 using namespace resources;
 using namespace utils;
 
+std::mutex Scene::_Mutex = std::mutex();
+
 Scene::Scene(SceneParams params) :
 	Drawable(params),
 	Sizeable(params),
@@ -51,12 +53,13 @@ std::optional<std::shared_ptr<Scene>> Scene::FromFile(SceneParams sceneParams, i
 	trigParams.TexturePunchedIn = "purple";
 	trigParams.DebounceMs = 120;
 
+	StationParams stationParams;
+	stationParams.Position = { 20, 20 };
+	stationParams.ModelPosition = { -50, -20 };
+	stationParams.Size = { 140, 80 };
+
 	for (auto stationStruct : jamStruct.Stations)
 	{
-		StationParams stationParams;
-		stationParams.Position = { 20, 20 };
-		stationParams.Size = { 140, 80 };
-
 		auto station = Station::FromFile(stationParams, stationStruct, dir);
 		if (station.has_value())
 		{
@@ -67,6 +70,9 @@ std::optional<std::shared_ptr<Scene>> Scene::FromFile(SceneParams sceneParams, i
 
 			scene->AddStation(station.value());
 		}
+
+		stationParams.Position += { 0, 90 };
+		stationParams.ModelPosition += { 0, 90 };
 	}
 
 	return scene;
@@ -223,6 +229,9 @@ void Scene::OnTick(Time curTime, unsigned int samps)
 
 void Scene::InitAudio()
 {
+	std::unique_lock<std::mutex> lck(_Mutex, std::defer_lock);
+	lck.lock();
+
 	auto dev = AudioDevice::Open(Scene::AudioCallback,
 		[](RtAudioError::Type type, const std::string& err) { std::cout << "[" << type << " RtAudio Error] " << err << std::endl; },
 		this);
@@ -243,6 +252,18 @@ void Scene::InitAudio()
 		_audioCallbackCount = 0;
 		_audioDevice->Start();
 	}
+
+	lck.unlock();
+}
+
+void Scene::CloseAudio()
+{
+	std::unique_lock<std::mutex> lck(_Mutex, std::defer_lock);
+	lck.lock();
+
+	_audioDevice->Stop();
+
+	lck.unlock();
 }
 
 int Scene::AudioCallback(void* outBuffer,
@@ -252,8 +273,13 @@ int Scene::AudioCallback(void* outBuffer,
 	RtAudioStreamStatus status,
 	void* userData)
 {
+	std::unique_lock<std::mutex> lck(_Mutex, std::defer_lock);
+	lck.lock();
+
 	Scene* scene = (Scene*)userData;
 	scene->OnAudio((float*)inBuffer, (float*)outBuffer, numSamps);
+
+	lck.unlock();
 
 	return 0;
 }
@@ -326,7 +352,7 @@ void Scene::InitSize()
 	auto ar = _sizeParams.Size.Height > 0 ?
 		(float)_sizeParams.Size.Width / (float)_sizeParams.Size.Height :
 		1.0f;
-	auto projection = glm::perspective(glm::radians(45.0f), ar, 0.1f, 100.0f);
+	auto projection = glm::perspective(glm::radians(60.0f), ar, 0.5f, 300.0f);
 	_viewProj = projection * View();
 
 	auto hScale = _sizeParams.Size.Width > 0 ? 2.0f / (float)_sizeParams.Size.Width : 1.0f;
@@ -338,7 +364,7 @@ void Scene::InitSize()
 
 glm::mat4 Scene::View()
 {
-	return glm::lookAt(glm::vec3(0.f, 0.f, 1.5f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
+	return glm::lookAt(glm::vec3(0.f, 0.f, 100.0f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
 }
 
 void Scene::AddStation(std::shared_ptr<Station> station)

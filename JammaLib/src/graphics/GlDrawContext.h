@@ -6,7 +6,10 @@
 #include <any>
 #include <glm/glm.hpp>
 #include <vector>
+#include "../utils/CommonTypes.h"
 #include "DrawContext.h"
+#include "glm/glm.hpp"
+#include "glm/ext.hpp"
 
 namespace graphics
 {
@@ -29,6 +32,7 @@ namespace graphics
 		void PushMvp(const glm::mat4 mat) noexcept;
 		void PopMvp() noexcept;
 		void ClearMvp() noexcept;
+		utils::Position2d ProjectScreen(utils::Position3d pos);
 
 	private:
 		const std::string _MvpUniformName = "MVP";

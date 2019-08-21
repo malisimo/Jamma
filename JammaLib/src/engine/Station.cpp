@@ -61,8 +61,7 @@ std::optional<std::shared_ptr<Station>> Station::FromFile(StationParams stationP
 
 utils::Position2d Station::Position() const
 {
-	auto pos = ModelPosition();
-	return { pos.X, pos.Y };
+	return _modelScreenPos;
 }
 
 void Station::OnPlay(const std::shared_ptr<base::MultiAudioSink> dest, unsigned int numSamps)

@@ -72,6 +72,12 @@ std::optional<std::shared_ptr<Trigger>> Trigger::FromFile(TriggerParams trigPara
 	return trigger;
 }
 
+utils::Position2d Trigger::Position() const
+{
+	auto pos = ModelPosition();
+	return { pos.X, pos.Y };
+}
+
 ActionResult Trigger::OnAction(KeyAction action)
 {
 	ActionResult res;
@@ -188,13 +194,10 @@ void Trigger::Reset()
 	_state = TRIGSTATE_DEFAULT;
 	
 	for (auto& b : _activateBindings)
-	{
 		b.Reset();
-	}
+
 	for (auto& b : _ditchBindings)
-	{
 		b.Reset();
-	}
 
 	_state = TriggerState::TRIGSTATE_DEFAULT;
 	_targetId = 0;
