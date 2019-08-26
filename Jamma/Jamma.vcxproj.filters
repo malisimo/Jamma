@@ -88,11 +88,14 @@
     <Content Include="resources\shaders\texture.vert">
       <Filter>resources\shaders</Filter>
     </Content>
+    <Content Include="resources\shaders\texture_shaded.frag">
+      <Filter>resources\shaders</Filter>
+    </Content>
+    <Content Include="resources\shaders\texture_shaded.vert">
+      <Filter>resources\shaders</Filter>
+    </Content>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="resources\ResourceList.txt">
-      <Filter>resources</Filter>
-    </Text>
     <Text Include="resources\fonts\font_large.txt">
       <Filter>resources\fonts</Filter>
     </Text>
@@ -105,8 +108,11 @@
     <Text Include="resources\fonts\font_tiny.txt">
       <Filter>resources\fonts</Filter>
     </Text>
+    <Text Include="resources\ResourceList.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Media Include="resources\wav\hh.wav" />
+    <Media Include="resources\wav\hh.wav">
+      <Filter>resources\textures</Filter>
+    </Media>
   </ItemGroup>
 </Project>

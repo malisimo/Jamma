@@ -7,6 +7,7 @@
 #include "ResourceUser.h"
 #include "GuiElement.h"
 #include "GlUtils.h"
+#include "../utils/ArrayUtils.h"
 #include "../gui/GuiModel.h"
 #include "../io/FileReadWriter.h"
 #include "../io/JamFile.h"
@@ -16,6 +17,8 @@
 
 namespace engine
 {
+	constexpr auto TWOPI = 6.283185307179586476925286766559;
+
 	class LoopParams :
 		public base::GuiElementParams
 	{
@@ -107,12 +110,16 @@ namespace engine
 		virtual utils::Position2d Position() const override;
 		virtual void SetSize(utils::Size2d size) override;
 		virtual MultiAudioDirection MultiAudibleDirection() const override { return MULTIAUDIO_BOTH; }
+		virtual void Draw3d(base::DrawContext& ctx) override;
 		virtual void OnPlay(const std::shared_ptr<base::MultiAudioSink> dest, unsigned int numSamps) override;
 		virtual void EndMultiPlay(unsigned int numSamps) override;
 		inline virtual int OnWrite(float samp, int indexOffset) override;
 		inline virtual int OnOverwrite(float samp, int indexOffset) override;
 		virtual void EndWrite(unsigned int numSamps, bool updateIndex) override;
-		void OnPlayRaw(const std::shared_ptr<base::MultiAudioSink> dest, unsigned int channel, unsigned int delaySamps, unsigned int numSamps);
+		void OnPlayRaw(const std::shared_ptr<base::MultiAudioSink> dest,
+			unsigned int channel,
+			unsigned int delaySamps,
+			unsigned int numSamps);
 
 		unsigned int InputChannel();
 		void SetInputChannel(unsigned int channel);
@@ -126,9 +133,18 @@ namespace engine
 		void PunchOut();
 
 	protected:
+		virtual void UpdateLoopModel();
+		virtual std::tuple<std::vector<float>, std::vector<float>, float, float>
+			CalcGrainGeometry(unsigned int grain,
+			unsigned int numGrains,
+			float lastYMin,
+			float lastYMax);
+
+	protected:
 		static const unsigned int _MaxFadeSamps = 30000;
 		static const unsigned int _InitBufferSize = 1000000;
 		static const unsigned int _MaxBufferSize = 40000000;
+		static const unsigned int _GrainSamps = 1100;
 
 		unsigned long _playPos;
 		unsigned long _recPos;

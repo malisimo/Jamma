@@ -10,7 +10,8 @@ using graphics::GlDrawContext;
 
 GuiModel::GuiModel(GuiModelParams params) :
 	GuiElement(params),
-	_modelParams(params)
+	_modelParams(params),
+	_numTris(0)
 {
 }
 
@@ -36,9 +37,7 @@ void GuiModel::Draw3d(DrawContext& ctx)
 	glBindVertexArray(_vertexArray);
 
 	glBindTexture(GL_TEXTURE_2D, texture->GetId());
-
-	//glDrawArraysInstanced(GL_TRIANGLES, 0, VertexCount, 1);
-	glDrawArrays(GL_TRIANGLES, 0, VertexCount);
+	glDrawArrays(GL_TRIANGLES, 0, _numTris * 3);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindVertexArray(0);
@@ -50,6 +49,13 @@ void GuiModel::Draw3d(DrawContext& ctx)
 	glCtx.PopMvp();
 }
 
+void GuiModel::SetGeometry(std::vector<float> verts, std::vector<float> uvs)
+{
+	_modelParams.Verts = verts;
+	_modelParams.Uvs = uvs;
+	// TODO: Cause InitResources() to get called
+}
+
 bool GuiModel::_InitResources(ResourceLib& resourceLib)
 {
 	auto validated = true;
@@ -59,7 +65,7 @@ bool GuiModel::_InitResources(ResourceLib& resourceLib)
 	if (validated)
 		validated = InitShader(resourceLib);
 	if (validated)
-		validated = InitVertexArray();
+		validated = InitVertexArray(_modelParams.Verts, _modelParams.Uvs);
 
 	return validated && GlUtils::CheckError("GuiModel::Init()");
 }
@@ -116,40 +122,49 @@ bool GuiModel::InitShader(ResourceLib & resourceLib)
 	return true;
 }
 
-bool GuiModel::InitVertexArray()
+bool GuiModel::InitVertexArray(std::vector<float> verts, std::vector<float> uvs)
 {
+	_numTris = (unsigned int)verts.size() / 9;
+
+	auto numFaces = _numTris / 2;
+
 	glGenVertexArrays(1, &_vertexArray);
 	glBindVertexArray(_vertexArray);
 
-	glGenBuffers(2, _vertexBuffer);
-
-	GLfloat verts[] = {
-		0.0f, 0.0f, 0.0f,
-		(float)_sizeParams.Size.Width * 0.5f, (float)_sizeParams.Size.Height * 0.5f, 0.0f,
-		0.0f,  (float)_sizeParams.Size.Height, 0.0f,
-		(float)_sizeParams.Size.Width,  (float)_sizeParams.Size.Height, 0.0f,
-		(float)_sizeParams.Size.Width * 0.5f, (float)_sizeParams.Size.Height * 0.5f, 1.0f,
-		(float)_sizeParams.Size.Width, 0.0f, 0.0f,
-	};
+	glGenBuffers(3, _vertexBuffer);
 
 	glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer[0]);
-	glBufferData(GL_ARRAY_BUFFER, 18 * sizeof(GLfloat), verts, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(GLfloat), verts.data(), GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
-
-	static const GLfloat uvs[] = {
-		0.0f, 0.0f,
-		0.5f, 0.5f,
-		0.0f, 1.0f,
-		1.0f, 1.0f,
-		0.5f, 0.5f,
-		1.0f, 0.0f,
-	};
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer[1]);
-	glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(GLfloat), uvs, GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(GLfloat), uvs.data(), GL_STATIC_DRAW);
 	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+	std::vector<GLfloat> norms;
+	for (auto tri = 0u; tri < _numTris; tri++)
+	{
+		auto v1 = glm::vec3(verts[(tri * 3 + 0) * 3], verts[(tri * 3 + 0) * 3 + 1], verts[(tri * 3 + 0) * 3 + 2]);
+		auto v2 = glm::vec3(verts[(tri * 3 + 1) * 3], verts[(tri * 3 + 1) * 3 + 1], verts[(tri * 3 + 1) * 3 + 2]);
+		auto v3 = glm::vec3(verts[(tri * 3 + 2) * 3], verts[(tri * 3 + 2) * 3 + 1], verts[(tri * 3 + 2) * 3 + 2]);
+
+		auto v12 = glm::normalize(v2 - v1);
+		auto v13 = glm::normalize(v3 - v1);
+		auto norm = glm::vec3(1.0f, 0.0f, 0.0f);
+		if ((glm::length(v12) < 1.1f) && (glm::length(v13) < 1.1f))
+			norm = glm::normalize(glm::cross(v12, v13));
+
+		norms.push_back(norm.x); norms.push_back(norm.y); norms.push_back(norm.z);
+		norms.push_back(norm.x); norms.push_back(norm.y); norms.push_back(norm.z);
+		norms.push_back(norm.x); norms.push_back(norm.y); norms.push_back(norm.z);
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer[2]);
+	glBufferData(GL_ARRAY_BUFFER, norms.size() * sizeof(GLfloat), norms.data(), GL_STATIC_DRAW);
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);

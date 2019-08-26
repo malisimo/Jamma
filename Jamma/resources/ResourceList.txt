@@ -1,5 +1,6 @@
 1 grid
 2 texture MVP
+2 texture_shaded MVP
 1 fader_back
 1 fader
 1 fader_over

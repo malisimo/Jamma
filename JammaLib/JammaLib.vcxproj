@@ -222,6 +222,7 @@
     <ClInclude Include="src\base\AudioSink.h" />
     <ClInclude Include="src\base\ActionUndo.h" />
     <ClInclude Include="src\base\Sharable.h" />
+    <ClInclude Include="src\utils\ArrayUtils.h" />
     <ClInclude Include="src\io\InitFile.h" />
     <ClInclude Include="src\io\RigFile.h" />
     <ClInclude Include="src\io\Json.h" />

@@ -17,20 +17,26 @@ namespace gui
 				"",
 				{}),
 			ModelTexture(""),
-			ModelShader("")
+			ModelShader(""),
+			Verts({}),
+			Uvs({})
 		{
 		}
 
 		GuiModelParams(base::GuiElementParams params) :
 			base::GuiElementParams(params),
 			ModelTexture(""),
-			ModelShader("")
+			ModelShader(""),
+			Verts({}),
+			Uvs({})
 		{
 		}
 
 	public:
 		std::string ModelTexture;
 		std::string ModelShader;
+		std::vector<float> Verts;
+		std::vector<float> Uvs;
 	};
 
 	class GuiModel :
@@ -40,7 +46,9 @@ namespace gui
 		GuiModel(GuiModelParams params);
 
 	public:
-		void Draw3d(base::DrawContext& ctx) override;
+		virtual void Draw3d(base::DrawContext& ctx) override;
+
+		void SetGeometry(std::vector<float> coords, std::vector<float> uvs);
 
 	protected:
 		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
@@ -48,14 +56,13 @@ namespace gui
 
 		bool InitTexture(resources::ResourceLib& resourceLib);
 		bool InitShader(resources::ResourceLib& resourceLib);
-		bool InitVertexArray();
+		bool InitVertexArray(std::vector<float> verts, std::vector<float> uvs);
 
 	protected:
-		const int VertexCount = 6;
-
 		GuiModelParams _modelParams;
 		GLuint _vertexArray;
-		GLuint _vertexBuffer[2];
+		GLuint _vertexBuffer[3];
+		unsigned int _numTris;
 		std::weak_ptr<resources::TextureResource> _modelTexture;
 		std::weak_ptr<resources::ShaderResource> _modelShader;
 	};

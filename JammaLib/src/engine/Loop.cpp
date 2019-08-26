@@ -29,9 +29,9 @@ Loop::Loop(LoopParams loopParams,
 
 	GuiModelParams modelParams;
 	modelParams.Size = { 12, 14 };
-	modelParams.ModelScale = 1.0f;
-	modelParams.ModelTexture = "purple";
-	modelParams.ModelShader = "texture";
+	modelParams.ModelScale = .1f;
+	modelParams.ModelTexture = "grid";
+	modelParams.ModelShader = "texture_shaded";
 	_model = std::make_shared<GuiModel>(modelParams);
 
 	_children.push_back(_mixer);
@@ -80,6 +80,16 @@ std::optional<std::shared_ptr<Loop>> Loop::FromFile(LoopParams loopParams, io::J
 	return loop;
 }
 
+audio::AudioMixerParams Loop::GetMixerParams(utils::Size2d loopSize, audio::BehaviourParams behaviour)
+{
+	AudioMixerParams mixerParams;
+	mixerParams.Size = { 160, 320 };
+	mixerParams.Position = { 6, 6 };
+	mixerParams.Behaviour = behaviour;
+
+	return mixerParams;
+}
+
 utils::Position2d Loop::Position() const
 {
 	auto pos = ModelPosition();
@@ -95,14 +105,26 @@ void Loop::SetSize(utils::Size2d size)
 	GuiElement::SetSize(size);
 }
 
-audio::AudioMixerParams Loop::GetMixerParams(utils::Size2d loopSize, audio::BehaviourParams behaviour)
+void Loop::Draw3d(DrawContext& ctx)
 {
-	AudioMixerParams mixerParams;
-	mixerParams.Size = { 160, 320 };
-	mixerParams.Position = { 6, 6 };
-	mixerParams.Behaviour = behaviour;
+	auto& glCtx = dynamic_cast<GlDrawContext&>(ctx);
 
-	return mixerParams;
+	auto pos = ModelPosition();
+	auto scale = ModelScale();
+
+	auto frac = _length == 0 ? 0.0 : std::max(0.0, std::min(1.0, ((double)(_index % _length)) / ((double)_length)));
+
+	_modelScreenPos = glCtx.ProjectScreen(pos);
+	glCtx.PushMvp(glm::translate(glm::mat4(1.0), glm::vec3(pos.X, pos.Y, pos.Z)));
+	glCtx.PushMvp(glm::scale(glm::mat4(1.0), glm::vec3(scale, scale, scale)));
+	glCtx.PushMvp(glm::rotate(glm::mat4(1.0), (float)(TWOPI * frac), glm::vec3(0.0f, 1.0f, 0.0f)));
+
+	for (auto& child : _children)
+		child->Draw3d(ctx);
+
+	glCtx.PopMvp();
+	glCtx.PopMvp();
+	glCtx.PopMvp();
 }
 
 void Loop::OnPlay(const std::shared_ptr<MultiAudioSink> dest,
@@ -177,6 +199,8 @@ void Loop::EndWrite(unsigned int numSamps, bool updateIndex)
 	auto bufSize = _length + _MaxFadeSamps;
 	while (_index > bufSize)
 		_index -= _length;
+
+	UpdateLoopModel();
 }
 
 void Loop::EndMultiPlay(unsigned int numSamps)
@@ -258,6 +282,8 @@ bool Loop::Load(const io::WavReadWriter& readWriter)
 
 	_length = length - _MaxFadeSamps;
 
+	UpdateLoopModel();
+
 	return true;
 }
 
@@ -307,4 +333,136 @@ void Loop::PunchIn()
 void Loop::PunchOut()
 {
 	_state = STATE_OVERDUBBING;
+}
+
+void Loop::UpdateLoopModel()
+{	
+	std::vector<float> verts;
+	std::vector<float> uvs;
+
+	auto numSamps = (unsigned int)_buffer.size();
+	auto lastYMin = -10.0f;
+	auto lastYMax = 10.0f;
+	auto numGrains = (unsigned int)ceil((double)numSamps / (double)_GrainSamps);
+
+	for (auto grain = 1u; grain < numGrains; grain++)
+	{
+		auto [grainVerts, grainUvs,	nextYMin, nextYMax] =
+			CalcGrainGeometry(grain,
+			numGrains,
+			lastYMin,
+			lastYMax);
+
+		for (auto vert : grainVerts)
+			verts.push_back(vert);
+
+		for (auto uv : grainUvs)
+			uvs.push_back(uv);
+
+		lastYMin = nextYMin;
+		lastYMax = nextYMax;
+	}
+
+	_model->SetGeometry(verts, uvs);
+}
+
+std::tuple<std::vector<float>, std::vector<float>, float, float>
+	Loop::CalcGrainGeometry(unsigned int grain,
+	unsigned int numGrains,
+	float lastYMin,
+	float lastYMax)
+{
+	const float minHeight = 4.0;
+	const float radialThickness = 40.0;
+	const float radius = 500.0;
+	const float heightScale = 50.0f;
+
+	auto yToUv = [minHeight, heightScale](float y) {
+		auto scale = 1.0f / ((minHeight * 2) + (heightScale * 2));
+		auto offset = 0.5f;
+		return scale * y + offset;
+	};
+
+	auto angle1 = ((float)TWOPI) * ((float)(grain - 1) / (float)numGrains);
+	auto angle2 = ((float)TWOPI) * ((float)grain / (float)numGrains);
+	auto i1 = (grain - 1) * _GrainSamps;
+	auto i2 = grain * _GrainSamps;
+	auto gMin = utils::ArraySubMin(_buffer, i1, i2);
+	auto gMax = utils::ArraySubMax(_buffer, i1, i2);
+
+	auto xInner1 = sin(angle1) * (radius - radialThickness);
+	auto xInner2 = sin(angle2) * (radius - radialThickness);
+	auto xOuter1 = sin(angle1) * radius;
+	auto xOuter2 = sin(angle2) * radius;
+	auto yMin = (heightScale * gMin) - minHeight;
+	auto yMax = (heightScale * gMax) + minHeight;
+	auto zInner1 = cos(angle1) * (radius - radialThickness);
+	auto zInner2 = cos(angle2) * (radius - radialThickness);
+	auto zOuter1 = cos(angle1) * radius;
+	auto zOuter2 = cos(angle2) * radius;
+
+	std::vector<float> verts;
+	std::vector<float> uvs;
+
+	// Front
+	verts.push_back(xInner1); verts.push_back(lastYMin); verts.push_back(zInner1);
+	verts.push_back(xInner2); verts.push_back(yMax); verts.push_back(zInner2);
+	verts.push_back(xInner1); verts.push_back(lastYMax); verts.push_back(zInner1);
+	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMin));
+	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMax));
+	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMax));
+
+	verts.push_back(xInner1); verts.push_back(lastYMin); verts.push_back(zInner1);
+	verts.push_back(xInner2); verts.push_back(yMin); verts.push_back(zInner2);
+	verts.push_back(xInner2); verts.push_back(yMax); verts.push_back(zInner2);
+	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMin));
+	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMin));
+	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMax));
+
+	// Top
+	verts.push_back(xInner1); verts.push_back(lastYMax); verts.push_back(zInner1);
+	verts.push_back(xInner2); verts.push_back(yMax); verts.push_back(zOuter2);
+	verts.push_back(xInner1); verts.push_back(lastYMax); verts.push_back(zOuter1);
+	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMax));
+	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMax));
+	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMax));
+
+	verts.push_back(xInner1); verts.push_back(lastYMax); verts.push_back(zInner1);
+	verts.push_back(xInner2); verts.push_back(yMax); verts.push_back(zInner2);
+	verts.push_back(xOuter2); verts.push_back(yMax); verts.push_back(zOuter2);
+	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMax));
+	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMax));
+	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMax));
+
+	// Back
+	verts.push_back(xOuter1); verts.push_back(lastYMax); verts.push_back(zOuter1);
+	verts.push_back(xOuter1); verts.push_back(lastYMin); verts.push_back(zOuter1);
+	verts.push_back(xOuter2); verts.push_back(yMin); verts.push_back(zOuter2);
+	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMax));
+	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMin));
+	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMin));
+
+	verts.push_back(xOuter1); verts.push_back(lastYMax); verts.push_back(zOuter1);
+	verts.push_back(xOuter2); verts.push_back(yMin); verts.push_back(zOuter2);
+	verts.push_back(xOuter2); verts.push_back(yMax); verts.push_back(zOuter2);
+	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMax));
+	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMin));
+	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMax));
+
+	// Bottom
+	verts.push_back(xOuter1); verts.push_back(lastYMin); verts.push_back(zOuter1);
+	verts.push_back(xInner2); verts.push_back(yMin); verts.push_back(zInner2);
+	verts.push_back(xInner1); verts.push_back(lastYMin); verts.push_back(zInner1);
+	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMin));
+	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMin));
+	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMin));
+
+	verts.push_back(xOuter1); verts.push_back(lastYMin); verts.push_back(zOuter1);
+	verts.push_back(xOuter2); verts.push_back(yMin); verts.push_back(zOuter2);
+	verts.push_back(xInner2); verts.push_back(yMin); verts.push_back(zInner2);
+	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMin));
+	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMin));
+	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMin));
+
+	return std::make_tuple(verts, uvs, yMin, yMax);
 }

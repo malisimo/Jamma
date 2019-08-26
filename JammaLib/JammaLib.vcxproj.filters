@@ -332,6 +332,9 @@
     <ClInclude Include="src\io\TextReadWriter.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="src\utils\ArrayUtils.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lib\glew\glew.c">
