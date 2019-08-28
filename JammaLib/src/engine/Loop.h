@@ -31,7 +31,12 @@ namespace engine
 				"",
 				"",
 				{}),
-			Wav("")
+			Wav(""),
+			PlayTexture(""),
+			RecordTexture(""),
+			OverdubTexture(""),
+			PunchTexture(""),
+			TakeIndex(0)
 		{
 		}
 
@@ -48,6 +53,7 @@ namespace engine
 		std::string RecordTexture;
 		std::string OverdubTexture;
 		std::string PunchTexture;
+		unsigned int TakeIndex;
 	};
 
 	class Loop :
@@ -133,12 +139,14 @@ namespace engine
 		void PunchOut();
 
 	protected:
-		virtual void UpdateLoopModel();
-		virtual std::tuple<std::vector<float>, std::vector<float>, float, float>
+		void UpdateLoopModel();
+		double CalcDrawRadius();
+		std::tuple<std::vector<float>, std::vector<float>, float, float>
 			CalcGrainGeometry(unsigned int grain,
 			unsigned int numGrains,
 			float lastYMin,
-			float lastYMax);
+			float lastYMax,
+			float radius);
 
 	protected:
 		static const unsigned int _MaxFadeSamps = 30000;

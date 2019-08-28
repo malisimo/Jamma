@@ -93,7 +93,7 @@ audio::AudioMixerParams Loop::GetMixerParams(utils::Size2d loopSize, audio::Beha
 utils::Position2d Loop::Position() const
 {
 	auto pos = ModelPosition();
-	return { pos.X, pos.Y };
+	return { (int)round(pos.X), (int)round(pos.Y) };
 }
 
 void Loop::SetSize(utils::Size2d size)
@@ -344,6 +344,7 @@ void Loop::UpdateLoopModel()
 	auto lastYMin = -10.0f;
 	auto lastYMax = 10.0f;
 	auto numGrains = (unsigned int)ceil((double)numSamps / (double)_GrainSamps);
+	auto radius = (float)CalcDrawRadius();
 
 	for (auto grain = 1u; grain < numGrains; grain++)
 	{
@@ -351,7 +352,8 @@ void Loop::UpdateLoopModel()
 			CalcGrainGeometry(grain,
 			numGrains,
 			lastYMin,
-			lastYMax);
+			lastYMax,
+			radius);
 
 		for (auto vert : grainVerts)
 			verts.push_back(vert);
@@ -366,15 +368,24 @@ void Loop::UpdateLoopModel()
 	_model->SetGeometry(verts, uvs);
 }
 
+double Loop::CalcDrawRadius()
+{
+	auto minRadius = 200.0;
+	auto maxRadius = 800.0;
+	auto radius = 120.0 * log(_length) - 1000;
+
+	return std::clamp(radius, 200.0, 800.0);
+}
+
 std::tuple<std::vector<float>, std::vector<float>, float, float>
 	Loop::CalcGrainGeometry(unsigned int grain,
 	unsigned int numGrains,
 	float lastYMin,
-	float lastYMax)
+	float lastYMax,
+	float radius)
 {
 	const float minHeight = 4.0;
-	const float radialThickness = 40.0;
-	const float radius = 500.0;
+	const float radialThickness = radius / 20.0f;
 	const float heightScale = 50.0f;
 
 	auto yToUv = [minHeight, heightScale](float y) {
@@ -392,74 +403,74 @@ std::tuple<std::vector<float>, std::vector<float>, float, float>
 
 	auto xInner1 = sin(angle1) * (radius - radialThickness);
 	auto xInner2 = sin(angle2) * (radius - radialThickness);
-	auto xOuter1 = sin(angle1) * radius;
-	auto xOuter2 = sin(angle2) * radius;
+	auto xOuter1 = sin(angle1) * (radius + radialThickness);
+	auto xOuter2 = sin(angle2) * (radius + radialThickness);
 	auto yMin = (heightScale * gMin) - minHeight;
 	auto yMax = (heightScale * gMax) + minHeight;
 	auto zInner1 = cos(angle1) * (radius - radialThickness);
 	auto zInner2 = cos(angle2) * (radius - radialThickness);
-	auto zOuter1 = cos(angle1) * radius;
-	auto zOuter2 = cos(angle2) * radius;
+	auto zOuter1 = cos(angle1) * (radius + radialThickness);
+	auto zOuter2 = cos(angle2) * (radius + radialThickness);
 
 	std::vector<float> verts;
 	std::vector<float> uvs;
 
 	// Front
-	verts.push_back(xInner1); verts.push_back(lastYMin); verts.push_back(zInner1);
-	verts.push_back(xInner2); verts.push_back(yMax); verts.push_back(zInner2);
-	verts.push_back(xInner1); verts.push_back(lastYMax); verts.push_back(zInner1);
+	verts.push_back(xOuter1); verts.push_back(lastYMin); verts.push_back(zOuter1);
+	verts.push_back(xOuter2); verts.push_back(yMax); verts.push_back(zOuter2);
+	verts.push_back(xOuter1); verts.push_back(lastYMax); verts.push_back(zOuter1);
 	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMin));
 	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMax));
 	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMax));
 
-	verts.push_back(xInner1); verts.push_back(lastYMin); verts.push_back(zInner1);
-	verts.push_back(xInner2); verts.push_back(yMin); verts.push_back(zInner2);
-	verts.push_back(xInner2); verts.push_back(yMax); verts.push_back(zInner2);
+	verts.push_back(xOuter1); verts.push_back(lastYMin); verts.push_back(zOuter1);
+	verts.push_back(xOuter2); verts.push_back(yMin); verts.push_back(zOuter2);
+	verts.push_back(xOuter2); verts.push_back(yMax); verts.push_back(zOuter2);
 	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMin));
 	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMin));
 	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMax));
 
 	// Top
+	verts.push_back(xOuter1); verts.push_back(lastYMax); verts.push_back(zOuter1);
+	verts.push_back(xInner2); verts.push_back(yMax); verts.push_back(zInner2);
 	verts.push_back(xInner1); verts.push_back(lastYMax); verts.push_back(zInner1);
-	verts.push_back(xInner2); verts.push_back(yMax); verts.push_back(zOuter2);
-	verts.push_back(xInner1); verts.push_back(lastYMax); verts.push_back(zOuter1);
 	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMax));
 	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMax));
 	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMax));
 
-	verts.push_back(xInner1); verts.push_back(lastYMax); verts.push_back(zInner1);
-	verts.push_back(xInner2); verts.push_back(yMax); verts.push_back(zInner2);
+	verts.push_back(xOuter1); verts.push_back(lastYMax); verts.push_back(zOuter1);
 	verts.push_back(xOuter2); verts.push_back(yMax); verts.push_back(zOuter2);
+	verts.push_back(xInner2); verts.push_back(yMax); verts.push_back(zInner2);
 	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMax));
 	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMax));
 	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMax));
 
 	// Back
-	verts.push_back(xOuter1); verts.push_back(lastYMax); verts.push_back(zOuter1);
-	verts.push_back(xOuter1); verts.push_back(lastYMin); verts.push_back(zOuter1);
-	verts.push_back(xOuter2); verts.push_back(yMin); verts.push_back(zOuter2);
-	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMax));
+	verts.push_back(xInner1); verts.push_back(lastYMin); verts.push_back(zInner1);
+	verts.push_back(xInner1); verts.push_back(lastYMax); verts.push_back(zInner1);
+	verts.push_back(xInner2); verts.push_back(yMax); verts.push_back(zInner2);
 	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMin));
-	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMin));
-
-	verts.push_back(xOuter1); verts.push_back(lastYMax); verts.push_back(zOuter1);
-	verts.push_back(xOuter2); verts.push_back(yMin); verts.push_back(zOuter2);
-	verts.push_back(xOuter2); verts.push_back(yMax); verts.push_back(zOuter2);
 	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMax));
-	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMin));
 	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMax));
+
+	verts.push_back(xInner1); verts.push_back(lastYMin); verts.push_back(zInner1);
+	verts.push_back(xInner2); verts.push_back(yMax); verts.push_back(zInner2);
+	verts.push_back(xInner2); verts.push_back(yMin); verts.push_back(zInner2);
+	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMin));
+	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMax));
+	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMin));
 
 	// Bottom
 	verts.push_back(xOuter1); verts.push_back(lastYMin); verts.push_back(zOuter1);
-	verts.push_back(xInner2); verts.push_back(yMin); verts.push_back(zInner2);
 	verts.push_back(xInner1); verts.push_back(lastYMin); verts.push_back(zInner1);
+	verts.push_back(xInner2); verts.push_back(yMin); verts.push_back(zInner2);
+	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMin));
 	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMin));
 	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMin));
-	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMin));
 
 	verts.push_back(xOuter1); verts.push_back(lastYMin); verts.push_back(zOuter1);
-	verts.push_back(xOuter2); verts.push_back(yMin); verts.push_back(zOuter2);
 	verts.push_back(xInner2); verts.push_back(yMin); verts.push_back(zInner2);
+	verts.push_back(xOuter2); verts.push_back(yMin); verts.push_back(zOuter2);
 	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMin));
 	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMin));
 	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMin));

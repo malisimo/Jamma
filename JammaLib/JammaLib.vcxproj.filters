@@ -335,6 +335,9 @@
     <ClInclude Include="src\utils\ArrayUtils.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="src\graphics\Camera.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lib\glew\glew.c">
@@ -491,6 +494,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\io\TextReadWriter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\Camera.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

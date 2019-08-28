@@ -75,7 +75,7 @@ std::optional<std::shared_ptr<Trigger>> Trigger::FromFile(TriggerParams trigPara
 utils::Position2d Trigger::Position() const
 {
 	auto pos = ModelPosition();
-	return { pos.X, pos.Y };
+	return { (int)round(pos.X), (int)round(pos.Y) };
 }
 
 ActionResult Trigger::OnAction(KeyAction action)

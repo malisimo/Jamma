@@ -50,7 +50,7 @@ std::optional<std::shared_ptr<LoopTake>> LoopTake::FromFile(LoopTakeParams takeP
 utils::Position2d LoopTake::Position() const
 {
 	auto pos = ModelPosition();
-	return { pos.X, pos.Y };
+	return { (int)round(pos.X), (int)round(pos.Y) };
 }
 
 void LoopTake::OnPlay(const std::shared_ptr<MultiAudioSink> dest,
@@ -205,7 +205,7 @@ void LoopTake::ArrangeLoops()
 	for (auto& loop : _loops)
 	{
 		loop->SetSize(loopSize);
-		loop->SetModelPosition({ (int)_Gap.Width, (int)(_Gap.Height + (loopCount * loopHeight)), 0 });
+		loop->SetModelPosition({ (float)_Gap.Width, (float)(_Gap.Height + (loopCount * loopHeight)), 0.0 });
 
 		loopCount++;
 	}

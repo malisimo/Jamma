@@ -222,6 +222,7 @@
     <ClInclude Include="src\base\AudioSink.h" />
     <ClInclude Include="src\base\ActionUndo.h" />
     <ClInclude Include="src\base\Sharable.h" />
+    <ClInclude Include="src\graphics\Camera.h" />
     <ClInclude Include="src\utils\ArrayUtils.h" />
     <ClInclude Include="src\io\InitFile.h" />
     <ClInclude Include="src\io\RigFile.h" />
@@ -309,6 +310,7 @@
     <ClCompile Include="src\audio\ChannelMixer.cpp" />
     <ClCompile Include="src\actions\DoubleAction.cpp" />
     <ClCompile Include="src\actions\TriggerAction.cpp" />
+    <ClCompile Include="src\graphics\Camera.cpp" />
     <ClCompile Include="src\io\InitFile.cpp" />
     <ClCompile Include="src\io\RigFile.cpp" />
     <ClCompile Include="src\io\Json.cpp" />

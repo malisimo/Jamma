@@ -58,9 +58,9 @@ namespace utils
 	};
 	struct Position3d
 	{
-		int X;
-		int Y;
-		int Z;
+		float X;
+		float Y;
+		float Z;
 
 		Position3d operator+(const Position3d& a) const
 		{

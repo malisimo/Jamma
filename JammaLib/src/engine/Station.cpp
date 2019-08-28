@@ -47,7 +47,7 @@ std::optional<std::shared_ptr<Station>> Station::FromFile(StationParams stationP
 	auto takeCount = 0u;
 	for (auto takeStruct : stationStruct.LoopTakes)
 	{
-		takeParams.ModelPosition = { (int)gap.Width, (int)(takeCount * takeHeight + gap.Height), 0 };
+		takeParams.ModelPosition = { (float)gap.Width, (float)(takeCount * takeHeight + gap.Height), 0.0 };
 		auto take = LoopTake::FromFile(takeParams, takeStruct, dir);
 		
 		if (take.has_value())

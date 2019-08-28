@@ -6,6 +6,7 @@
 #include "../audio/AudioDevice.h"
 #include "../audio/ChannelMixer.h"
 #include "../graphics/Image.h"
+#include "../graphics/Camera.h"
 #include "../graphics/GlDrawContext.h"
 #include "../gui/GuiLabel.h"
 #include "../gui/GuiSlider.h"
@@ -142,6 +143,9 @@ namespace engine
 	protected:
 		static std::mutex _Mutex;
 
+		bool _isSceneTouching;
+		utils::Position2d _initTouchDownPosition;
+		utils::Position3d _initTouchCamPosition;
 		glm::mat4 _viewProj;
 		glm::mat4 _overlayViewProj;
 		std::shared_ptr<audio::ChannelMixer> _channelMixer;
@@ -152,5 +156,6 @@ namespace engine
 		std::weak_ptr<base::GuiElement> _touchDownElement;
 		std::shared_ptr<Loop> _masterLoop;
 		unsigned int _audioCallbackCount;
+		graphics::Camera _camera;
 	};
 }

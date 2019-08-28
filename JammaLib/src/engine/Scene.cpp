@@ -16,6 +16,7 @@ std::mutex Scene::_Mutex = std::mutex();
 Scene::Scene(SceneParams params) :
 	Drawable(params),
 	Sizeable(params),
+	_isSceneTouching(false),
 	_viewProj(glm::mat4()),
 	_overlayViewProj(glm::mat4()),
 	_channelMixer(std::make_shared<ChannelMixer>(ChannelMixerParams{})),
@@ -24,7 +25,13 @@ Scene::Scene(SceneParams params) :
 	_masterLoop(std::shared_ptr<Loop>()),
 	_stations(),
 	_touchDownElement(std::weak_ptr<GuiElement>()),
-	_audioCallbackCount(0)
+	_audioCallbackCount(0),
+	_camera(CameraParams(
+		MoveableParams(
+			Position2d{ 0,0 },
+			Position3d{ 0, 0, 100 },
+			1.0),
+		0))
 {
 	GuiLabelParams labelParams(GuiElementParams(
 		DrawableParams{ "" },
@@ -80,6 +87,8 @@ std::optional<std::shared_ptr<Scene>> Scene::FromFile(SceneParams sceneParams, i
 
 void Scene::Draw(DrawContext& ctx)
 {
+	glDisable(GL_DEPTH_TEST);
+
 	// Draw overlays
 	auto &glCtx = dynamic_cast<GlDrawContext&>(ctx);
 	glCtx.ClearMvp();
@@ -95,6 +104,8 @@ void Scene::Draw(DrawContext& ctx)
 
 void Scene::Draw3d(DrawContext& ctx)
 {
+	glEnable(GL_DEPTH_TEST);
+
 	// Draw scene
 	auto& glCtx = dynamic_cast<GlDrawContext&>(ctx);
 	glCtx.ClearMvp();
@@ -147,6 +158,8 @@ ActionResult Scene::OnAction(TouchAction action)
 					_undoHistory.Add(res.Undo);
 			}
 		}
+		else if (_isSceneTouching)
+			_isSceneTouching = false;
 
 		_touchDownElement.reset();
 
@@ -168,19 +181,34 @@ ActionResult Scene::OnAction(TouchAction action)
 			return res;
 		}
 	}
+	
+	_isSceneTouching = true;
+	_initTouchDownPosition = action.Position;
+	_initTouchCamPosition = _camera.ModelPosition();
 
-	return { false, ACTIONRESULT_DEFAULT };
+	ActionResult res;
+	res.IsEaten = true;
+	res.Id = 0;
+	res.ResultType = ACTIONRESULT_ID;
+	res.Undo = std::shared_ptr<ActionUndo>();
+	res.ActiveElement = std::weak_ptr<GuiElement>();
+	return res;
 }
 
 ActionResult Scene::OnAction(TouchMoveAction action)
 {
 	action.SetActionTime(Timer::GetTime());
-	//std::cout << "Touch Move action " << action.Touch << " [" << action.Position.X << "," << action.Position.Y << "] " << action.Index << std::endl;
 	
 	auto activeElement = _touchDownElement.lock();
 
 	if (activeElement)
 		return activeElement->OnAction(activeElement->GlobalToLocal(action));
+	else if (_isSceneTouching)
+	{
+		auto dPos = action.Position - _initTouchDownPosition;
+		_camera.SetModelPosition(_initTouchCamPosition - Position3d{ (float)dPos.X, (float)dPos.Y, 0.0 });
+		SetSize(_sizeParams.Size);
+	}
 
 	return { false, ACTIONRESULT_DEFAULT };
 }
@@ -364,7 +392,8 @@ void Scene::InitSize()
 
 glm::mat4 Scene::View()
 {
-	return glm::lookAt(glm::vec3(0.f, 0.f, 100.0f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
+	auto camPos = _camera.ModelPosition();
+	return glm::lookAt(glm::vec3(camPos.X, camPos.Y, camPos.Z), glm::vec3(camPos.X, camPos.Y, 0.f), glm::vec3(0.f, 1.f, 0.f));
 }
 
 void Scene::AddStation(std::shared_ptr<Station> station)
