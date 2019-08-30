@@ -1,5 +1,6 @@
 #include "ShaderResource.h"
 #include "glm/gtc/type_ptr.hpp"
+#include "../utils/GlUtils.h"
 
 using namespace resources;
 using namespace graphics;
@@ -70,11 +71,14 @@ void ShaderResource::SetUniforms(GlDrawContext& ctx)
 			else if (val.type() == typeid(float))
 				glUniform1f(uniform.second, std::any_cast<float&>(val));
 			else if (val.type() == typeid(glm::mat4))
-				glUniformMatrix4fv(uniform.second, 1, GL_FALSE, glm::value_ptr(std::any_cast<glm::mat4&>(val)));
+			{
+				auto mat = std::any_cast<glm::mat4>(val);
+				glUniformMatrix4fv(uniform.second, 1, GL_FALSE, glm::value_ptr(mat));
+			}
 		}
 	}
 
-	//GlUtils::CheckError("ShaderResource::SetUniforms");
+	utils::GlUtils::CheckError("ShaderResource::SetUniforms");
 }
 
 void ShaderResource::InitUniforms(std::vector<std::string> uniforms)

@@ -19,6 +19,7 @@ Scene::Scene(SceneParams params) :
 	_isSceneTouching(false),
 	_projection(glm::mat4()),
 	_view(glm::mat4()),
+	_overlayProjection(glm::mat4()),
 	_overlayView(glm::mat4()),
 	_channelMixer(std::make_shared<ChannelMixer>(ChannelMixerParams{})),
 	_label(std::unique_ptr<GuiLabel>()),
@@ -93,7 +94,7 @@ void Scene::Draw(DrawContext& ctx)
 	// Draw overlays
 	auto &glCtx = dynamic_cast<GlDrawContext&>(ctx);
 	glCtx.ClearModelView();
-	glCtx.SetProjection(_projection);
+	glCtx.SetProjection(_overlayProjection);
 	glCtx.PushModelView(_overlayView);
 
 	_label->Draw(ctx);
@@ -388,7 +389,7 @@ void Scene::InitSize()
 
 	auto hScale = _sizeParams.Size.Width > 0 ? 2.0f / (float)_sizeParams.Size.Width : 1.0f;
 	auto vScale = _sizeParams.Size.Height > 0 ? 2.0f / (float)_sizeParams.Size.Height : 1.0f;
-	_projection = glm::mat4(1.0);
+	_overlayProjection = glm::mat4(1.0);
 	_overlayView = glm::translate(glm::mat4(1.0), glm::vec3(-1.0f, -1.0f, -1.0f));
 	_overlayView = glm::scale(glm::mat4(1.0), glm::vec3(hScale, vScale, 1.0f));
 }

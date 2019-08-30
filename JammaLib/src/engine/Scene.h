@@ -148,6 +148,7 @@ namespace engine
 		utils::Position3d _initTouchCamPosition;
 		glm::mat4 _projection;
 		glm::mat4 _view;
+		glm::mat4 _overlayProjection;
 		glm::mat4 _overlayView;
 		std::shared_ptr<audio::ChannelMixer> _channelMixer;
 		std::unique_ptr<audio::AudioDevice> _audioDevice;
