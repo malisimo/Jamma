@@ -38,6 +38,9 @@
     <Filter Include="resources\fonts">
       <UniqueIdentifier>{0216c653-6a7a-43e2-902c-7fc2f167cd2a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="resources\wav">
+      <UniqueIdentifier>{0275723f-083e-4444-b9af-9ff2850088cd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Content Include="resources\textures\grid.tga">
@@ -96,23 +99,27 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="resources\fonts\font_large.txt">
+    <Content Include="resources\fonts\font_large.txt">
       <Filter>resources\fonts</Filter>
-    </Text>
-    <Text Include="resources\fonts\font_medium.txt">
+    </Content>
+    <Content Include="resources\fonts\font_medium.txt">
       <Filter>resources\fonts</Filter>
-    </Text>
-    <Text Include="resources\fonts\font_small.txt">
+    </Content>
+    <Content Include="resources\fonts\font_small.txt">
       <Filter>resources\fonts</Filter>
-    </Text>
-    <Text Include="resources\fonts\font_tiny.txt">
+    </Content>
+    <Content Include="resources\fonts\font_tiny.txt">
       <Filter>resources\fonts</Filter>
-    </Text>
-    <Text Include="resources\ResourceList.txt" />
+    </Content>
   </ItemGroup>
   <ItemGroup>
-    <Media Include="resources\wav\hh.wav">
-      <Filter>resources\textures</Filter>
-    </Media>
+    <Content Include="resources\wav\hh.wav">
+      <Filter>resources\wav</Filter>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="resources\ResourceList.txt">
+      <Filter>resources</Filter>
+    </Content>
   </ItemGroup>
 </Project>
