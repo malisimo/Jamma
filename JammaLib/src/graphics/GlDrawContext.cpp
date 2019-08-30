@@ -55,10 +55,10 @@ Position2d GlDrawContext::ProjectScreen(utils::Position3d pos)
 		collapsed *= m;
 	}
 
-	auto screenPosHom = glm::vec4{ p.x, p.y, p.z, 1.0 } * collapsed;
+	auto screenPosHom = collapsed * glm::vec4{ pos.X, pos.Y, pos.Z, 1.0 };
 	auto screenPosNorm = glm::vec3{ screenPosHom.x / screenPosHom.w,
-		screenPosHom.x / screenPosHom.w,
-		screenPosHom.x / screenPosHom.w };
+		screenPosHom.y / screenPosHom.w,
+		screenPosHom.z / screenPosHom.w };
 
 	auto screenPosPix = Position2d{
 		(int)((screenPosNorm.x + 1.0) * 0.5 * _size.Width),
