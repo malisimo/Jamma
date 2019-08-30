@@ -22,8 +22,8 @@ void GuiModel::Draw3d(DrawContext& ctx)
 	auto scale = ModelScale();
 
 	_modelScreenPos = glCtx.ProjectScreen(pos);
-	glCtx.PushMvp(glm::translate(glm::mat4(1.0), glm::vec3(pos.X, pos.Y, pos.Z)));
-	glCtx.PushMvp(glm::scale(glm::mat4(1.0), glm::vec3(scale, scale, scale)));
+	glCtx.PushModelView(glm::translate(glm::mat4(1.0), glm::vec3(pos.X, pos.Y, pos.Z)));
+	glCtx.PushModelView(glm::scale(glm::mat4(1.0), glm::vec3(scale, scale, scale)));
 
 	auto texture = _modelTexture.lock();
 	auto shader = _modelShader.lock();
@@ -46,7 +46,7 @@ void GuiModel::Draw3d(DrawContext& ctx)
 	for (auto& child : _children)
 		child->Draw3d(ctx);
 
-	glCtx.PopMvp();
+	glCtx.PopModelView();
 }
 
 void GuiModel::SetGeometry(std::vector<float> verts, std::vector<float> uvs)

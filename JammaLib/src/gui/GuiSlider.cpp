@@ -103,9 +103,9 @@ void GuiSlider::Draw(DrawContext & ctx)
 
 	auto &glCtx = dynamic_cast<GlDrawContext&>(ctx);
 	auto pos = Position();
-	glCtx.PushMvp(glm::translate(glm::mat4(1.0), glm::vec3(pos.X, pos.Y, 0.f)));
+	glCtx.PushModelView(glm::translate(glm::mat4(1.0), glm::vec3(pos.X, pos.Y, 0.f)));
 	_dragElement.Draw(ctx);
-	glCtx.PopMvp();
+	glCtx.PopModelView();
 }
 
 ActionResult GuiSlider::OnAction(TouchAction action)

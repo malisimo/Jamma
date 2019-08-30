@@ -4,7 +4,9 @@ using namespace graphics;
 using namespace utils;
 
 GlDrawContext::GlDrawContext() :
-	DrawContext()
+	DrawContext(),
+	_modelView({}),
+	_projection(glm::mat4(1.0))
 {
 }
 
@@ -15,7 +17,15 @@ GlDrawContext::~GlDrawContext()
 std::optional<std::any> GlDrawContext::GetUniform(std::string name)
 {
 	if (_MvpUniformName == name)
-		return (name, _mvp);
+	{
+		auto collapsed = _projection;
+		for (auto m : _modelView)
+		{
+			collapsed *= m;
+		}
+
+		return (name, collapsed);
+	}
 
 	auto it = _uniforms.find(name);
 
@@ -25,32 +35,37 @@ std::optional<std::any> GlDrawContext::GetUniform(std::string name)
 	return std::nullopt;
 }
 
+void GlDrawContext::SetProjection(const glm::mat4 mat) noexcept
+{
+	_projection = mat;
+}
+
 void GlDrawContext::SetUniform(const std::string& name, std::any val)
 {
 	_uniforms[name] = val;
 }
 
-void GlDrawContext::PushMvp(const glm::mat4 mat) noexcept
+void GlDrawContext::PushModelView(const glm::mat4 mat) noexcept
 {
-	_mvp.push_back(mat);
+	_modelView.push_back(mat);
 }
 
-void GlDrawContext::PopMvp() noexcept
+void GlDrawContext::PopModelView() noexcept
 {
-	if (!_mvp.empty())
-		_mvp.pop_back();
+	if (!_modelView.empty())
+		_modelView.pop_back();
 }
 
-void GlDrawContext::ClearMvp() noexcept
+void GlDrawContext::ClearModelView() noexcept
 {
-	_mvp.clear();
+	_modelView.clear();
 }
 
 Position2d GlDrawContext::ProjectScreen(utils::Position3d pos)
 {
 	auto p = glm::vec3(pos.X, pos.Y, pos.Z);
-	auto collapsed = glm::mat4(1.0);
-	for (auto m : _mvp)
+	auto collapsed = _projection;
+	for (auto m : _modelView)
 	{
 		collapsed *= m;
 	}

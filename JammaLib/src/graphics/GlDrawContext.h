@@ -29,15 +29,17 @@ namespace graphics
 		std::optional<std::any> GetUniform(std::string name);
 		void SetUniform(const std::string& name, std::any val);
 
-		void PushMvp(const glm::mat4 mat) noexcept;
-		void PopMvp() noexcept;
-		void ClearMvp() noexcept;
+		void SetProjection(const glm::mat4 mat) noexcept;
+		void PushModelView(const glm::mat4 mat) noexcept;
+		void PopModelView() noexcept;
+		void ClearModelView() noexcept;
 		utils::Position2d ProjectScreen(utils::Position3d pos);
 
 	private:
 		const std::string _MvpUniformName = "MVP";
 
 		std::map<std::string, std::any> _uniforms;
-		std::vector<glm::mat4> _mvp;
+		glm::mat4 _projection;
+		std::vector<glm::mat4> _modelView;
 	};
 }

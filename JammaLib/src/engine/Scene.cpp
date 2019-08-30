@@ -17,8 +17,9 @@ Scene::Scene(SceneParams params) :
 	Drawable(params),
 	Sizeable(params),
 	_isSceneTouching(false),
-	_viewProj(glm::mat4()),
-	_overlayViewProj(glm::mat4()),
+	_projection(glm::mat4()),
+	_view(glm::mat4()),
+	_overlayView(glm::mat4()),
 	_channelMixer(std::make_shared<ChannelMixer>(ChannelMixerParams{})),
 	_label(std::unique_ptr<GuiLabel>()),
 	_audioDevice(std::unique_ptr<AudioDevice>()),
@@ -91,15 +92,16 @@ void Scene::Draw(DrawContext& ctx)
 
 	// Draw overlays
 	auto &glCtx = dynamic_cast<GlDrawContext&>(ctx);
-	glCtx.ClearMvp();
-	glCtx.PushMvp(_overlayViewProj);
+	glCtx.ClearModelView();
+	glCtx.SetProjection(_projection);
+	glCtx.PushModelView(_overlayView);
 
 	_label->Draw(ctx);
 
 	for (auto& station : _stations)
 		station->Draw(ctx);
 
-	glCtx.PopMvp();
+	glCtx.PopModelView();
 }
 
 void Scene::Draw3d(DrawContext& ctx)
@@ -108,13 +110,14 @@ void Scene::Draw3d(DrawContext& ctx)
 
 	// Draw scene
 	auto& glCtx = dynamic_cast<GlDrawContext&>(ctx);
-	glCtx.ClearMvp();
-	glCtx.PushMvp(_viewProj);
+	glCtx.ClearModelView();
+	glCtx.SetProjection(_projection);
+	glCtx.PushModelView(_view);
 
 	for (auto& station : _stations)
 		station->Draw3d(ctx);
 
-	glCtx.PopMvp();
+	glCtx.PopModelView();
 }
 
 bool Scene::_InitResources(ResourceLib& resourceLib)
@@ -380,14 +383,14 @@ void Scene::InitSize()
 	auto ar = _sizeParams.Size.Height > 0 ?
 		(float)_sizeParams.Size.Width / (float)_sizeParams.Size.Height :
 		1.0f;
-	auto projection = glm::perspective(glm::radians(60.0f), ar, 0.5f, 300.0f);
-	_viewProj = projection * View();
+	_projection = glm::perspective(glm::radians(60.0f), ar, 0.5f, 300.0f);
+	_view = View();
 
 	auto hScale = _sizeParams.Size.Width > 0 ? 2.0f / (float)_sizeParams.Size.Width : 1.0f;
 	auto vScale = _sizeParams.Size.Height > 0 ? 2.0f / (float)_sizeParams.Size.Height : 1.0f;
-	_overlayViewProj = glm::mat4(1.0);
-	_overlayViewProj = glm::translate(_overlayViewProj, glm::vec3(-1.0f, -1.0f, -1.0f));
-	_overlayViewProj = glm::scale(_overlayViewProj, glm::vec3(hScale, vScale, 1.0f));
+	_projection = glm::mat4(1.0);
+	_overlayView = glm::translate(glm::mat4(1.0), glm::vec3(-1.0f, -1.0f, -1.0f));
+	_overlayView = glm::scale(glm::mat4(1.0), glm::vec3(hScale, vScale, 1.0f));
 }
 
 glm::mat4 Scene::View()

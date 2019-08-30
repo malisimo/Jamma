@@ -146,8 +146,9 @@ namespace engine
 		bool _isSceneTouching;
 		utils::Position2d _initTouchDownPosition;
 		utils::Position3d _initTouchCamPosition;
-		glm::mat4 _viewProj;
-		glm::mat4 _overlayViewProj;
+		glm::mat4 _projection;
+		glm::mat4 _view;
+		glm::mat4 _overlayView;
 		std::shared_ptr<audio::ChannelMixer> _channelMixer;
 		std::unique_ptr<audio::AudioDevice> _audioDevice;
 		std::unique_ptr<gui::GuiLabel> _label;

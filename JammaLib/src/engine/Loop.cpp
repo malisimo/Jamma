@@ -115,16 +115,16 @@ void Loop::Draw3d(DrawContext& ctx)
 	auto frac = _length == 0 ? 0.0 : std::max(0.0, std::min(1.0, ((double)(_index % _length)) / ((double)_length)));
 
 	_modelScreenPos = glCtx.ProjectScreen(pos);
-	glCtx.PushMvp(glm::translate(glm::mat4(1.0), glm::vec3(pos.X, pos.Y, pos.Z)));
-	glCtx.PushMvp(glm::scale(glm::mat4(1.0), glm::vec3(scale, scale, scale)));
-	glCtx.PushMvp(glm::rotate(glm::mat4(1.0), (float)(TWOPI * frac), glm::vec3(0.0f, 1.0f, 0.0f)));
+	glCtx.PushModelView(glm::translate(glm::mat4(1.0), glm::vec3(pos.X, pos.Y, pos.Z)));
+	glCtx.PushModelView(glm::scale(glm::mat4(1.0), glm::vec3(scale, scale, scale)));
+	glCtx.PushModelView(glm::rotate(glm::mat4(1.0), (float)(TWOPI * frac), glm::vec3(0.0f, 1.0f, 0.0f)));
 
 	for (auto& child : _children)
 		child->Draw3d(ctx);
 
-	glCtx.PopMvp();
-	glCtx.PopMvp();
-	glCtx.PopMvp();
+	glCtx.PopModelView();
+	glCtx.PopModelView();
+	glCtx.PopModelView();
 }
 
 void Loop::OnPlay(const std::shared_ptr<MultiAudioSink> dest,

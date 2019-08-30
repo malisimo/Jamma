@@ -22,14 +22,7 @@ void GuiLabel::Draw(DrawContext& ctx)
 	auto model = glm::mat4(1.0);
 	model = glm::translate(glm::mat4(1.0), glm::vec3(100.f, 200.f, 0.f));
 	auto glCtx = dynamic_cast<GlDrawContext&>(ctx);
-	auto mvpOpt = glCtx.GetUniform("MVP");
-
-	if (mvpOpt.has_value())
-	{
-		auto mvp = std::any_cast<std::vector<glm::mat4>>(mvpOpt.value());
-		mvp.push_back(model);
-		glCtx.SetUniform("MVP", mvp);
-	}
+	glCtx.PushModelView(model);
 
 	auto font = _font.lock();
 

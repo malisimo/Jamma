@@ -49,7 +49,7 @@ void GuiElement::Draw(DrawContext& ctx)
 	auto &glCtx = dynamic_cast<GlDrawContext&>(ctx);
 
 	auto pos = Position();
-	glCtx.PushMvp(glm::translate(glm::mat4(1.0), glm::vec3(pos.X, pos.Y, 0.f)));
+	glCtx.PushModelView(glm::translate(glm::mat4(1.0), glm::vec3(pos.X, pos.Y, 0.f)));
 
 	switch (_state)
 	{
@@ -70,7 +70,7 @@ void GuiElement::Draw(DrawContext& ctx)
 	for (auto& child : _children)
 		child->Draw(ctx);
 
-	glCtx.PopMvp();
+	glCtx.PopModelView();
 }
 
 void GuiElement::Draw3d(DrawContext& ctx)
@@ -81,14 +81,14 @@ void GuiElement::Draw3d(DrawContext& ctx)
 	auto scale = ModelScale();
 
 	_modelScreenPos = glCtx.ProjectScreen(pos);
-	glCtx.PushMvp(glm::translate(glm::mat4(1.0), glm::vec3(pos.X, pos.Y, pos.Z)));
-	glCtx.PushMvp(glm::scale(glm::mat4(1.0), glm::vec3(scale, scale, scale)));
+	glCtx.PushModelView(glm::translate(glm::mat4(1.0), glm::vec3(pos.X, pos.Y, pos.Z)));
+	glCtx.PushModelView(glm::scale(glm::mat4(1.0), glm::vec3(scale, scale, scale)));
 
 	for (auto& child : _children)
 		child->Draw3d(ctx);
 
-	glCtx.PopMvp();
-	glCtx.PopMvp();
+	glCtx.PopModelView();
+	glCtx.PopModelView();
 }
 
 ActionResult GuiElement::OnAction(KeyAction action)
