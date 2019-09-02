@@ -55,6 +55,7 @@ namespace io
 			std::string Name;
 			unsigned int StationType;
 			std::vector<TriggerPair> TriggerPairs;
+			std::vector<unsigned int> InputChannels;
 
 			static std::optional<Trigger> FromJson(Json::JsonPart json);
 		};

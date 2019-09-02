@@ -31,7 +31,9 @@ Station::~Station()
 {
 }
 
-std::optional<std::shared_ptr<Station>> Station::FromFile(StationParams stationParams, io::JamFile::Station stationStruct, std::wstring dir)
+std::optional<std::shared_ptr<Station>> Station::FromFile(StationParams stationParams,
+	io::JamFile::Station stationStruct,
+	std::wstring dir)
 {
 	auto station = std::make_shared<Station>(stationParams);
 
@@ -117,18 +119,23 @@ ActionResult Station::OnAction(TriggerAction action)
 	ActionResult res;
 	res.IsEaten = false;
 
-	LoopTakeParams takeParams;
 	auto loopCount = 0u;
 	auto loopTake = TryGetTake(action.TargetId);
 
 	switch (action.ActionType)
 	{
 	case TriggerAction::TRIGGER_REC_START:
-		if (loopTake.has_value())
-			loopTake.value()->Record(action.InputChannels);
+	{
+		auto newLoopTake = AddTake();
+
+		for (auto chan : action.InputChannels)
+			newLoopTake->AddLoop(chan);
+
+		newLoopTake->Record(action.InputChannels);
 
 		res.IsEaten = true;
 		break;
+	}
 	case TriggerAction::TRIGGER_REC_END:
 		if (_globalClock->IsMasterLengthSet())
 		{
@@ -179,6 +186,8 @@ void Station::AddTake(std::shared_ptr<LoopTake> take)
 
 void Station::AddTrigger(std::shared_ptr<Trigger> trigger)
 {
+	trigger->SetReceiver(ActionReceiver::shared_from_this());
+
 	_triggers.push_back(trigger);
 	_children.push_back(trigger);
 }

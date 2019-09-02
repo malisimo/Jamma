@@ -191,6 +191,7 @@ std::optional<RigFile::Trigger> RigFile::Trigger::FromJson(Json::JsonPart json)
 	std::string name;
 	unsigned int stationType = 0;
 	std::vector<TriggerPair> pairs;
+	std::vector<unsigned int> inputChannels;
 
 	auto iter = json.KeyValues.find("name");
 	if (iter != json.KeyValues.end())
@@ -226,6 +227,25 @@ std::optional<RigFile::Trigger> RigFile::Trigger::FromJson(Json::JsonPart json)
 		}
 	}
 
+	iter = json.KeyValues.find("input");
+	if (iter != json.KeyValues.end())
+	{
+		if (json.KeyValues["input"].index() == 5)
+		{
+			auto jsonArray = std::get<Json::JsonArray>(json.KeyValues["input"]);
+
+			if (jsonArray.Array.index() == 2)
+			{
+				auto inChans = std::get<std::vector<unsigned long>>(jsonArray.Array);
+				for (auto chan : inChans)
+				{
+					if (inputChannels.end() == std::find(inputChannels.begin(), inputChannels.end(), chan))
+						inputChannels.push_back((unsigned int)chan);
+				}
+			}
+		}
+	}
+
 	if (pairs.empty() || name.empty())
 		return std::nullopt;
 
@@ -233,5 +253,6 @@ std::optional<RigFile::Trigger> RigFile::Trigger::FromJson(Json::JsonPart json)
 	trigger.Name = name;
 	trigger.StationType = stationType;
 	trigger.TriggerPairs = pairs;
+	trigger.InputChannels = inputChannels;
 	return trigger;
 }

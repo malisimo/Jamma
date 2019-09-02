@@ -16,6 +16,7 @@ Trigger::Trigger(TriggerParams trigParams) :
 	GuiElement(trigParams),
 	_activateBindings(trigParams.Activate),
 	_ditchBindings(trigParams.Ditch),
+	_inputChannels(trigParams.InputChannels),
 	_state(TRIGSTATE_DEFAULT),
 	_debounceTimeMs(trigParams.DebounceMs),
 	_lastActivateTime(),
@@ -34,7 +35,6 @@ Trigger::Trigger(TriggerParams trigParams) :
 Trigger::~Trigger()
 {
 }
-
 
 std::optional<std::shared_ptr<Trigger>> Trigger::FromFile(TriggerParams trigParams, io::RigFile::Trigger trigStruct)
 {
@@ -68,6 +68,9 @@ std::optional<std::shared_ptr<Trigger>> Trigger::FromFile(TriggerParams trigPara
 
 		trigger->AddBinding(activate, ditch);
 	}
+
+	for (auto inChan : trigStruct.InputChannels)
+		trigger->AddInputChannel(inChan);
 
 	return trigger;
 }
@@ -182,6 +185,40 @@ void Trigger::AddBinding(DualBinding activate, DualBinding ditch)
 {
 	_activateBindings.push_back(activate);
 	_ditchBindings.push_back(ditch);
+}
+
+void Trigger::RemoveBinding(DualBinding activate, DualBinding ditch)
+{
+	auto foundBinding = std::find(_activateBindings.begin(), _activateBindings.end(), activate);
+	if (foundBinding != _activateBindings.end())
+		_activateBindings.erase(foundBinding);
+
+	foundBinding = std::find(_ditchBindings.begin(), _ditchBindings.end(), ditch);
+	if (foundBinding != _ditchBindings.end())
+		_ditchBindings.erase(foundBinding);
+}
+
+void Trigger::ClearBindings()
+{
+	_activateBindings.clear();
+	_ditchBindings.clear();
+}
+
+void Trigger::AddInputChannel(unsigned int chan)
+{
+	_inputChannels.push_back(chan);
+}
+
+void Trigger::RemoveInputChannel(unsigned int chan)
+{
+	auto inChan = std::find(_inputChannels.begin(), _inputChannels.end(), chan);
+	if (inChan != _inputChannels.end())
+		_inputChannels.erase(inChan);
+}
+
+void Trigger::ClearInputChannels()
+{
+	_inputChannels.clear();
 }
 
 TriggerState Trigger::GetState() const
@@ -409,6 +446,7 @@ void Trigger::StartRecording()
 	{
 		TriggerAction trigAction;
 		trigAction.ActionType = TriggerAction::TRIGGER_REC_START;
+		trigAction.InputChannels = _inputChannels;
 		auto res = _receiver->OnAction(trigAction);
 
 		if (res.IsEaten)

@@ -13,6 +13,12 @@
 
 namespace engine
 {
+	struct TriggerWire
+	{
+		unsigned int InputChannel;
+		unsigned int OutputChannel;
+	};
+
 	enum TriggerSource
 	{
 		TRIGGER_NOTSET,
@@ -51,6 +57,16 @@ namespace engine
 				return true;
 
 			return false;
+		}
+
+		bool operator==(const TriggerBinding& other) {
+			if (TriggerSource != other.TriggerSource)
+				return false;
+
+			if (Value != other.Value)
+				return false;
+
+			return State == other.State;
 		}
 
 	public:
@@ -142,6 +158,19 @@ namespace engine
 
 		void Reset() { _isDown = false;	}
 
+		bool operator==(const DualBinding& other) {
+			if (!(_triggerDown == other._triggerDown))
+				return false;
+
+			if (_triggerRelease.has_value() != other._triggerRelease.has_value())
+				return false;
+
+			if (!_triggerRelease.has_value())
+				return true;
+
+			return _triggerRelease.value() == other._triggerRelease.value();
+		}
+
 	private:
 		TriggerBinding _triggerDown;
 		std::optional<TriggerBinding> _triggerRelease;
@@ -165,6 +194,7 @@ namespace engine
 	public:
 		std::vector<DualBinding> Activate;
 		std::vector<DualBinding> Ditch;
+		std::vector<unsigned int> InputChannels;
 		std::string TextureRecording;
 		std::string TextureDitchDown;
 		std::string TextureOverdubbing;
@@ -180,7 +210,7 @@ namespace engine
 		TRIGSTATE_OVERDUBBING,
 		TRIGSTATE_PUNCHEDIN
 	};
-
+	
 	class Trigger :
 		public base::Tickable,
 		public base::GuiElement
@@ -198,6 +228,11 @@ namespace engine
 		virtual void Draw(base::DrawContext& ctx) override;
 
 		void AddBinding(DualBinding activate, DualBinding ditch);
+		void RemoveBinding(DualBinding activate, DualBinding ditch);
+		void ClearBindings();
+		void AddInputChannel(unsigned int chan);
+		void RemoveInputChannel(unsigned int chan);
+		void ClearInputChannels();
 		TriggerState GetState() const;
 		void Reset();
 
@@ -232,6 +267,7 @@ namespace engine
 		double _debounceTimeMs;
 		std::vector<DualBinding> _activateBindings;
 		std::vector<DualBinding> _ditchBindings;
+		std::vector<unsigned int> _inputChannels;
 		TriggerState _state;
 		unsigned long _targetId;
 		unsigned long _overdubTargetId;

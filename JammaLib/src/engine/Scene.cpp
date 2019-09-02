@@ -46,8 +46,12 @@ Scene::Scene(SceneParams params) :
 	_audioDevice = std::make_unique<AudioDevice>();
 }
 
-std::optional<std::shared_ptr<Scene>> Scene::FromFile(SceneParams sceneParams, io::JamFile jamStruct, io::RigFile rigStruct, std::wstring dir)
+std::optional<std::shared_ptr<Scene>> Scene::FromFile(SceneParams sceneParams,
+	io::JamFile jamStruct,
+	io::RigFile rigStruct,
+	std::wstring dir)
 {
+	auto globalClock = std::make_shared<Timer>();
 	auto scene = std::make_shared<Scene>(sceneParams);
 
 	TriggerParams trigParams;
@@ -64,6 +68,7 @@ std::optional<std::shared_ptr<Scene>> Scene::FromFile(SceneParams sceneParams, i
 	stationParams.Position = { 20, 20 };
 	stationParams.ModelPosition = { -50, -20 };
 	stationParams.Size = { 140, 80 };
+	stationParams.GlobalClock = globalClock;
 
 	for (auto stationStruct : jamStruct.Stations)
 	{

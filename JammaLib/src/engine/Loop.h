@@ -84,7 +84,6 @@ namespace engine
 		Loop(Loop&& other) :
 			GuiElement(other._guiParams),
 			_playPos(other._playPos),
-			_recPos(other._recPos),
 			_loopParams{other._loopParams},
 			_mixer(std::move(other._mixer)),
 			_model(std::move(other._model))
@@ -139,6 +138,7 @@ namespace engine
 		void PunchOut();
 
 	protected:
+		void Reset();
 		void UpdateLoopModel();
 		double CalcDrawRadius();
 		std::tuple<std::vector<float>, std::vector<float>, float, float>
@@ -155,7 +155,6 @@ namespace engine
 		static const unsigned int _GrainSamps = 1100;
 
 		unsigned long _playPos;
-		unsigned long _recPos;
 		double _pitch;
 		unsigned long _length;
 		LoopVisualState _state;

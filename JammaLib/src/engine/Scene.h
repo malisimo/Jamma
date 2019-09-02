@@ -107,7 +107,10 @@ namespace engine
 			return *this;
 		}*/
 
-		static std::optional<std::shared_ptr<Scene>> FromFile(SceneParams sceneParams, io::JamFile jam, io::RigFile rig, std::wstring dir);
+		static std::optional<std::shared_ptr<Scene>> FromFile(SceneParams sceneParams,
+			io::JamFile jam,
+			io::RigFile rig,
+			std::wstring dir);
 		
 		virtual void Draw(base::DrawContext& ctx) override;
 		virtual void Draw3d(base::DrawContext& ctx) override;

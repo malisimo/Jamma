@@ -16,8 +16,8 @@ using graphics::GlDrawContext;
 Loop::Loop(LoopParams loopParams,
 	audio::AudioMixerParams mixerParams) :
 	GuiElement(loopParams),
+	AudioSink(),
 	_playPos(0),
-	_recPos(0),
 	_pitch(1.0),
 	_length(0),
 	_state(STATE_PLAYING),
@@ -134,6 +134,9 @@ void Loop::OnPlay(const std::shared_ptr<MultiAudioSink> dest,
 	// and adjust level
 	if (0 == _length)
 		return;
+
+	if (STATE_PLAYING != _state)
+		return;
 	
 	auto index = _index;
 	auto bufSize = _length + _MaxFadeSamps;
@@ -157,9 +160,14 @@ int Loop::OnWrite(float samp, int indexOffset)
 
 int Loop::OnOverwrite(float samp, int indexOffset)
 {
+	if ((STATE_RECORDING != _state) &&
+		(STATE_OVERDUBBING != _state) &&
+		(STATE_PUNCHEDIN != _state))
+		return;
+
 	auto bufSize = (unsigned long)_buffer.size();
 
-	if (bufSize < (_recPos + indexOffset))
+	if (bufSize < (_index + indexOffset))
 	{
 		if (bufSize >= _MaxBufferSize)
 			return indexOffset;
@@ -171,11 +179,11 @@ int Loop::OnOverwrite(float samp, int indexOffset)
 
 			_buffer.resize(newBufSize);
 			// buffer must always be larger than _MaxFadeSamps!
-			_length = newBufSize - _MaxFadeSamps;
+			//_length = newBufSize - _MaxFadeSamps;
 		}
 	}
 
-	_buffer[_recPos + indexOffset] = samp;
+	_buffer[_index + indexOffset] = samp;
 
 	return indexOffset + 1;
 }
@@ -192,20 +200,13 @@ void Loop::EndWrite(unsigned int numSamps, bool updateIndex)
 		return;
 
 	_index += numSamps;
-
-	if (0 == _length)
-		return;
-
-	auto bufSize = _length + _MaxFadeSamps;
-	while (_index > bufSize)
-		_index -= _length;
+	_length = _index;
 
 	UpdateLoopModel();
 }
 
 void Loop::EndMultiPlay(unsigned int numSamps)
 {
-	// Only update if currently recording
 	if (STATE_PLAYING != _state)
 		return;
 
@@ -289,7 +290,9 @@ bool Loop::Load(const io::WavReadWriter& readWriter)
 
 void Loop::Record()
 {
+	Reset();
 	_state = STATE_RECORDING;
+	_buffer = std::vector<float>(_MaxFadeSamps);
 }
 
 void Loop::Play(unsigned long index, unsigned long length)
@@ -298,9 +301,7 @@ void Loop::Play(unsigned long index, unsigned long length)
 
 	if (0 == bufSize)
 	{
-		_playPos = 0;
-		_length = 0;
-		_state = STATE_INACTIVE;
+		Reset();
 		return;
 	}
 
@@ -312,11 +313,7 @@ void Loop::Play(unsigned long index, unsigned long length)
 
 void Loop::Ditch()
 {
-	_recPos = 0;
-	_playPos = 0;
-	_length = 0;
-	_state = STATE_INACTIVE;
-
+	Reset();
 	_buffer = std::vector<float>(_MaxFadeSamps);
 }
 
@@ -333,6 +330,14 @@ void Loop::PunchIn()
 void Loop::PunchOut()
 {
 	_state = STATE_OVERDUBBING;
+}
+
+void Loop::Reset()
+{
+	_index = 0;
+	_playPos = 0;
+	_length = 0;
+	_state = STATE_INACTIVE;
 }
 
 void Loop::UpdateLoopModel()
