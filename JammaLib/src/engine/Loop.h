@@ -36,14 +36,21 @@ namespace engine
 			RecordTexture(""),
 			OverdubTexture(""),
 			PunchTexture(""),
-			TakeIndex(0)
+			Id(0),
+			TakeId(0)
 		{
 		}
 
 		LoopParams(base::GuiElementParams params,
 			std::string wav) :
 			base::GuiElementParams(params),
-			Wav(wav)
+			Wav(wav),
+			PlayTexture(""),
+			RecordTexture(""),
+			OverdubTexture(""),
+			PunchTexture(""),
+			Id(0),
+			TakeId(0)
 		{
 		}
 
@@ -53,7 +60,8 @@ namespace engine
 		std::string RecordTexture;
 		std::string OverdubTexture;
 		std::string PunchTexture;
-		unsigned int TakeIndex;
+		unsigned long Id;
+		unsigned long TakeId;
 	};
 
 	class Loop :
@@ -126,8 +134,9 @@ namespace engine
 			unsigned int delaySamps,
 			unsigned int numSamps);
 
-		unsigned int InputChannel();
+		unsigned int InputChannel() const;
 		void SetInputChannel(unsigned int channel);
+		unsigned long Id() const;
 
 		bool Load(const io::WavReadWriter& readWriter);
 		void Record();

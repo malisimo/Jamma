@@ -66,6 +66,7 @@ void LoopTake::EndMultiPlay(unsigned int numSamps)
 		loop->EndMultiPlay(numSamps);
 }
 
+// TODO: Remove method
 void LoopTake::OnWrite(const std::shared_ptr<MultiAudioSource> src,
 	unsigned int numSamps)
 {
@@ -76,6 +77,17 @@ void LoopTake::OnWrite(const std::shared_ptr<MultiAudioSource> src,
 	}
 
 	_recordedSampCount += numSamps;
+}
+
+void LoopTake::OnWriteChannel(unsigned int channel,
+	const std::shared_ptr<base::AudioSource> src,
+	unsigned int numSamps)
+{
+	for (auto& loop : _loops)
+	{
+		if (loop->InputChannel() == channel)
+			src->OnPlay(loop, numSamps);
+	}
 }
 
 void LoopTake::EndMultiWrite(unsigned int numSamps, bool updateIndex)
@@ -120,10 +132,17 @@ std::shared_ptr<Loop> LoopTake::AddLoop(unsigned int chan)
 	audio::WireMixBehaviourParams wire;
 	wire.Channels = { chan };
 	auto mixerParams = Loop::GetMixerParams({ 110, loopHeight }, wire);
+	
+	unsigned long highestLoopIndex = 0;
+	for (auto& loop : _loops)
+	{
+		if (loop->Id() > highestLoopIndex)
+			highestLoopIndex = loop->Id();
+	}
 
 	LoopParams loopParams;
 	loopParams.Wav = "hh";
-
+	loopParams.Id = highestLoopIndex + 1;
 	auto loop = std::make_shared<Loop>(loopParams, mixerParams);
 	AddLoop(loop);
 
@@ -140,7 +159,6 @@ void LoopTake::Record(std::vector<unsigned int> channels)
 {
 	_recordedSampCount = 0;
 	_loops.clear();
-	auto loopNum = 0;
 
 	for (auto chan : channels)
 	{
@@ -148,7 +166,6 @@ void LoopTake::Record(std::vector<unsigned int> channels)
 		loop->Record();
 
 		_loops.push_back(loop);
-		loopNum++;
 	}
 }
 

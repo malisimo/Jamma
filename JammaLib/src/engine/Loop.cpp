@@ -163,11 +163,11 @@ int Loop::OnOverwrite(float samp, int indexOffset)
 	if ((STATE_RECORDING != _state) &&
 		(STATE_OVERDUBBING != _state) &&
 		(STATE_PUNCHEDIN != _state))
-		return;
+		return indexOffset;
 
 	auto bufSize = (unsigned long)_buffer.size();
 
-	if (bufSize < (_index + indexOffset))
+	if (bufSize <= (_index + indexOffset))
 	{
 		if (bufSize >= _MaxBufferSize)
 			return indexOffset;
@@ -251,7 +251,7 @@ void Loop::OnPlayRaw(const std::shared_ptr<base::MultiAudioSink> dest,
 	}
 }
 
-unsigned int Loop::InputChannel()
+unsigned int Loop::InputChannel() const
 {
 	return _mixer->InputChannel();
 }
@@ -259,6 +259,11 @@ unsigned int Loop::InputChannel()
 void Loop::SetInputChannel(unsigned int channel)
 {
 	_mixer->SetInputChannel(channel);
+}
+
+unsigned long Loop::Id() const
+{
+	return _loopParams.Id;
 }
 
 bool Loop::Load(const io::WavReadWriter& readWriter)

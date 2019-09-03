@@ -27,7 +27,7 @@ namespace base
 			}
 		}
 		virtual void OnWrite(const std::shared_ptr<base::MultiAudioSource> src,
-			unsigned int numSamps) { };
+			unsigned int numSamps) {}
 		virtual void EndMultiWrite(unsigned int numSamps) { return EndMultiWrite(numSamps, false); }
 		virtual void EndMultiWrite(unsigned int numSamps, bool updateIndex)
 		{
@@ -36,7 +36,7 @@ namespace base
 				auto channel = InputChannel(chan);
 				channel->EndWrite(numSamps, updateIndex);
 			}
-		};
+		}
 		virtual void OnWriteChannel(unsigned int channel,
 			const std::shared_ptr<base::AudioSource> src,
 			unsigned int numSamps)
@@ -44,7 +44,7 @@ namespace base
 			auto chan = InputChannel(channel);
 			if (chan)
 				src->OnPlay(chan, numSamps);
-		};
+		}
 		virtual void OnWriteChannel(unsigned int channel,
 			float samp,
 			unsigned int indexOffset)
@@ -52,7 +52,7 @@ namespace base
 			auto chan = InputChannel(channel);
 			if (chan)
 				chan->OnWrite(samp, indexOffset);
-		};
+		}
 		virtual unsigned int NumInputChannels() const { return 0; };
 
 		std::shared_ptr<MultiAudioSink> shared_from_this()

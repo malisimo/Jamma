@@ -1,12 +1,14 @@
 #pragma once
 
 #include <string>
+#include "Sharable.h"
 #include "../resources/Resource.h"
 #include "../resources/ResourceLib.h"
 
 namespace base
 {
-	class ResourceUser
+	class ResourceUser :
+		public virtual Sharable
 	{
 	public:
 		bool InitResources(resources::ResourceLib& resourceLib)
@@ -22,11 +24,13 @@ namespace base
 
 			return res;
 		};
+		void SetUpdateResourceFunc(std::function<void(std::shared_ptr<ResourceUser>)> func) { _updateResourceFunc = func; }
 
 	protected:
 		virtual bool _InitResources(resources::ResourceLib& resourceLib) { return true; };
 		virtual bool _ReleaseResources() { return true; };
 
 		bool _resourcesInitialised;
+		std::function<void(std::shared_ptr<ResourceUser>)> _updateResourceFunc;
 	};
 }

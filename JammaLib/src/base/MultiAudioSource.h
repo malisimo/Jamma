@@ -33,7 +33,7 @@ namespace base
 				auto channel = OutputChannel(chan);
 				channel->EndPlay(numSamps);
 			}
-		};
+		}
 		virtual void OnPlayChannel(unsigned int channel,
 			const std::shared_ptr<base::AudioSink> dest,
 			unsigned int numSamps)

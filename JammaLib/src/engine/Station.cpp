@@ -80,6 +80,15 @@ void Station::EndMultiPlay(unsigned int numSamps)
 		take->EndMultiPlay(numSamps);
 }
 
+void Station::OnWriteChannel(unsigned int channel,
+	const std::shared_ptr<base::AudioSource> src,
+	unsigned int numSamps)
+{
+	for (auto& take : _loopTakes)
+		take->OnWriteChannel(channel, src, numSamps);
+}
+
+// TODO: Remove method
 void Station::OnWrite(const std::shared_ptr<base::MultiAudioSource> src, unsigned int numSamps)
 {
 	for (auto& take : _loopTakes)
@@ -127,12 +136,9 @@ ActionResult Station::OnAction(TriggerAction action)
 	case TriggerAction::TRIGGER_REC_START:
 	{
 		auto newLoopTake = AddTake();
-
-		for (auto chan : action.InputChannels)
-			newLoopTake->AddLoop(chan);
-
 		newLoopTake->Record(action.InputChannels);
 
+		res.Id = newLoopTake->Id();
 		res.IsEaten = true;
 		break;
 	}
@@ -170,7 +176,15 @@ void Station::OnTick(Time curTime, unsigned int samps)
 
 std::shared_ptr<LoopTake> Station::AddTake()
 {
+	unsigned long highestTakeIndex = 0;
+	for (auto& take : _loopTakes)
+	{
+		if (take->Id() > highestTakeIndex)
+			highestTakeIndex = take->Id();
+	}
+
 	LoopTakeParams takeParams;
+	takeParams.Id = highestTakeIndex + 1;
 
 	auto take = std::make_shared<LoopTake>(takeParams);
 	AddTake(take);
@@ -194,7 +208,7 @@ void Station::AddTrigger(std::shared_ptr<Trigger> trigger)
 
 void Station::Reset()
 {
-	for (auto take : _loopTakes)
+	for (auto& take : _loopTakes)
 	{
 		auto child = std::find(_children.begin(), _children.end(), take);
 		if (_children.end() != child)
@@ -202,7 +216,7 @@ void Station::Reset()
 	}
 	_loopTakes.clear();
 
-	for (auto trigger : _triggers)
+	for (auto& trigger : _triggers)
 	{
 		auto child = std::find(_children.begin(), _children.end(), trigger);
 		if (_children.end() != child)
