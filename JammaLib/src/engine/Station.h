@@ -70,7 +70,6 @@ namespace engine
 	protected:
 		static unsigned int CalcTakeHeight(unsigned int stationHeight, unsigned int numTakes);
 
-		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
 		void ArrangeTakes();
 		std::optional<std::shared_ptr<LoopTake>> TryGetTake(unsigned long id);
 

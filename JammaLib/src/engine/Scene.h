@@ -162,6 +162,6 @@ namespace engine
 		std::shared_ptr<Loop> _masterLoop;
 		unsigned int _audioCallbackCount;
 		graphics::Camera _camera;
-		std::vector<std::weak_ptr<ResourceUser>> _resourcesToUpdate;
+		std::vector<std::shared_ptr<ResourceUser>> _resourcesToUpdate;
 	};
 }

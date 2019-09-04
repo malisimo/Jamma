@@ -23,11 +23,13 @@ Image::Image(ImageParams params) :
 
 void Image::SetSize(Size2d size)
 {
-	ReleaseResources();
+	//ReleaseResources();
 
 	Sizeable::SetSize(size);
 
-	InitVertexArray();
+	//_drawParams.UpdateResourceFunc(ResourceUser::shared_from_this());
+
+	//InitVertexArray();
 }
 
 void Image::Draw(DrawContext& ctx)

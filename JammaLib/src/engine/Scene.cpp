@@ -130,13 +130,13 @@ void Scene::Draw3d(DrawContext& ctx)
 
 void Scene::UpdateResources(ResourceLib& resourceLib)
 {
-	for (auto r : _resourcesToUpdate)
+	for (size_t i = 0; i < _resourcesToUpdate.size(); i++)
 	{
-		auto res = r.lock();
-
-		if (res)
-			res->InitResources(resourceLib);
+		auto& r = _resourcesToUpdate[i];
+		r->InitResources(resourceLib);
 	}
+
+	_resourcesToUpdate.clear();
 }
 
 bool Scene::_InitResources(ResourceLib& resourceLib)
@@ -428,5 +428,17 @@ void Scene::AddStation(std::shared_ptr<Station> station)
 
 void Scene::AddResourceToUpdate(std::shared_ptr<ResourceUser> resource)
 {
-	_resourcesToUpdate.push_back(resource);
+	bool foundResource = false;
+
+	for (auto& r : _resourcesToUpdate)
+	{
+		if (r == resource)
+		{
+			foundResource = true;
+			break;
+		}
+	}
+
+	if (!foundResource)
+		_resourcesToUpdate.push_back(resource);
 }
