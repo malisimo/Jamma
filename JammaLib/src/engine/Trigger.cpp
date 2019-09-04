@@ -25,10 +25,10 @@ Trigger::Trigger(TriggerParams trigParams) :
 	_isLastDitchDown(false),
 	_isLastActivateDownRaw(false),
 	_isLastDitchDownRaw(false),
-	_textureRecording(ImageParams(DrawableParams{ trigParams.TextureRecording }, SizeableParams{ trigParams.Size,trigParams.MinSize }, "texture")),
-	_textureDitchDown(ImageParams(DrawableParams{ trigParams.TextureDitchDown }, SizeableParams{ trigParams.Size,trigParams.MinSize }, "texture")),
-	_textureOverdubbing(ImageParams(DrawableParams{ trigParams.TextureOverdubbing }, SizeableParams{ trigParams.Size,trigParams.MinSize }, "texture")),
-	_texturePunchedIn(ImageParams(DrawableParams{ trigParams.TexturePunchedIn }, SizeableParams{ trigParams.Size,trigParams.MinSize }, "texture"))
+	_textureRecording(ImageParams(DrawableParams{ std::function<void(std::shared_ptr<ResourceUser>)>(), trigParams.TextureRecording }, SizeableParams{ trigParams.Size,trigParams.MinSize }, "texture")),
+	_textureDitchDown(ImageParams(DrawableParams{ std::function<void(std::shared_ptr<ResourceUser>)>(), trigParams.TextureDitchDown }, SizeableParams{ trigParams.Size,trigParams.MinSize }, "texture")),
+	_textureOverdubbing(ImageParams(DrawableParams{ std::function<void(std::shared_ptr<ResourceUser>)>(), trigParams.TextureOverdubbing }, SizeableParams{ trigParams.Size,trigParams.MinSize }, "texture")),
+	_texturePunchedIn(ImageParams(DrawableParams{ std::function<void(std::shared_ptr<ResourceUser>)>(), trigParams.TexturePunchedIn }, SizeableParams{ trigParams.Size,trigParams.MinSize }, "texture"))
 {
 }
 

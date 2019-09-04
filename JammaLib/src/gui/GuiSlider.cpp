@@ -18,7 +18,7 @@ GuiSlider::GuiSlider(GuiSliderParams params) :
 	_initValue(params.InitValue),
 	_valueOffset(0.0),
 	_dragElement(GuiElementParams(
-		DrawableParams{ params.DragTexture },
+		DrawableParams{ std::function<void(std::shared_ptr<ResourceUser>)>(), params.DragTexture },
 		MoveableParams(params.Position, params.ModelPosition, params.ModelScale),
 		SizeableParams{ params.DragControlSize, params.DragControlSize },
 		params.DragOverTexture,

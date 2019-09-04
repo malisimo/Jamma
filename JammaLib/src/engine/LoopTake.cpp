@@ -35,6 +35,7 @@ std::optional<std::shared_ptr<LoopTake>> LoopTake::FromFile(LoopTakeParams takeP
 
 	LoopParams loopParams;
 	loopParams.Wav = "hh";
+	loopParams.UpdateResourceFunc = takeParams.UpdateResourceFunc;
 
 	for (auto loopStruct : takeStruct.Loops)
 	{
@@ -131,7 +132,7 @@ std::shared_ptr<Loop> LoopTake::AddLoop(unsigned int chan)
 
 	audio::WireMixBehaviourParams wire;
 	wire.Channels = { chan };
-	auto mixerParams = Loop::GetMixerParams({ 110, loopHeight }, wire);
+	auto mixerParams = Loop::GetMixerParams({ 110, loopHeight }, wire, _drawParams.UpdateResourceFunc);
 	
 	unsigned long highestLoopIndex = 0;
 	for (auto& loop : _loops)
@@ -143,6 +144,7 @@ std::shared_ptr<Loop> LoopTake::AddLoop(unsigned int chan)
 	LoopParams loopParams;
 	loopParams.Wav = "hh";
 	loopParams.Id = highestLoopIndex + 1;
+	loopParams.UpdateResourceFunc = _drawParams.UpdateResourceFunc;
 	auto loop = std::make_shared<Loop>(loopParams, mixerParams);
 	AddLoop(loop);
 
@@ -153,6 +155,8 @@ void LoopTake::AddLoop(std::shared_ptr<Loop> loop)
 {
 	_loops.push_back(loop);
 	_children.push_back(loop);
+
+	ArrangeLoops();
 }
 
 void LoopTake::Record(std::vector<unsigned int> channels)
@@ -226,4 +230,6 @@ void LoopTake::ArrangeLoops()
 
 		loopCount++;
 	}
+
+	_drawParams.UpdateResourceFunc(ResourceUser::shared_from_this());
 }

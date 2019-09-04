@@ -24,7 +24,7 @@ namespace engine
 	{
 	public:
 		LoopParams() :
-			base::GuiElementParams(DrawableParams{ "" },
+			base::GuiElementParams(DrawableParams{ std::function<void(std::shared_ptr<base::ResourceUser>)>(), "" },
 				MoveableParams(utils::Position2d{ 0, 0 }, utils::Position3d{ 0, 0, 0 }, 1.0),
 				SizeableParams{ 1,1 },
 				"",
@@ -117,8 +117,12 @@ namespace engine
 		}
 
 	public:
-		static std::optional<std::shared_ptr<Loop>> FromFile(LoopParams loopParams, io::JamFile::Loop loopStruct, std::wstring dir);
-		static audio::AudioMixerParams GetMixerParams(utils::Size2d loopSize, audio::BehaviourParams behaviour);
+		static std::optional<std::shared_ptr<Loop>> FromFile(LoopParams loopParams,
+			io::JamFile::Loop loopStruct,
+			std::wstring dir);
+		static audio::AudioMixerParams GetMixerParams(utils::Size2d loopSize,
+			audio::BehaviourParams behaviour,
+			std::function<void(std::shared_ptr<base::ResourceUser>)> updateResourceFunc);
 
 		virtual utils::Position2d Position() const override;
 		virtual void SetSize(utils::Size2d size) override;

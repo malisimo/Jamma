@@ -8,7 +8,8 @@
 
 namespace base
 {
-	class DrawableParams
+	class DrawableParams :
+		public ResourceUserParams
 	{
 	public:
 		std::string Texture;
@@ -18,7 +19,7 @@ namespace base
 	{
 	public:
 		Drawable(DrawableParams params) :
-			ResourceUser(),
+			ResourceUser(params),
 			_drawParams(params),
 			_texture(std::weak_ptr<resources::TextureResource>())
 		{

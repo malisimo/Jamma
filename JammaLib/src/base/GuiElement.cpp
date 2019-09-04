@@ -15,10 +15,10 @@ GuiElement::GuiElement(GuiElementParams params) :
 	Sizeable(params),
 	_guiParams(params),
 	_state(STATE_NORMAL),
-	_texture(ImageParams(DrawableParams{ params.Texture }, SizeableParams{ params.Size,params.MinSize }, "texture")),
-	_overTexture(ImageParams(DrawableParams{ params.OverTexture }, SizeableParams{ params.Size,params.MinSize }, "texture")),
-	_downTexture(ImageParams(DrawableParams{ params.DownTexture }, SizeableParams{ params.Size,params.MinSize }, "texture")),
-	_outTexture(ImageParams(DrawableParams{ params.OutTexture }, SizeableParams{ params.Size,params.MinSize }, "texture")),
+	_texture(ImageParams(DrawableParams{ std::function<void(std::shared_ptr<ResourceUser>)>(), params.Texture }, SizeableParams{ params.Size,params.MinSize }, "texture")),
+	_overTexture(ImageParams(DrawableParams{ std::function<void(std::shared_ptr<ResourceUser>)>(), params.OverTexture }, SizeableParams{ params.Size,params.MinSize }, "texture")),
+	_downTexture(ImageParams(DrawableParams{ std::function<void(std::shared_ptr<ResourceUser>)>(), params.DownTexture }, SizeableParams{ params.Size,params.MinSize }, "texture")),
+	_outTexture(ImageParams(DrawableParams{ std::function<void(std::shared_ptr<ResourceUser>)>(), params.OutTexture }, SizeableParams{ params.Size,params.MinSize }, "texture")),
 	_children({})
 {
 }

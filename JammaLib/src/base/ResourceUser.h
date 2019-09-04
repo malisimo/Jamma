@@ -7,9 +7,23 @@
 
 namespace base
 {
+	class ResourceUser;
+
+	class ResourceUserParams
+	{
+	public:
+		std::function<void(std::shared_ptr<ResourceUser>)> UpdateResourceFunc;
+	};
+
 	class ResourceUser :
 		public virtual Sharable
 	{
+	public:
+		ResourceUser(ResourceUserParams resourceParams) :
+			_resourcesInitialised(false),
+			_resourceParams(resourceParams)
+		{ }
+
 	public:
 		bool InitResources(resources::ResourceLib& resourceLib)
 		{
@@ -24,13 +38,18 @@ namespace base
 
 			return res;
 		};
-		void SetUpdateResourceFunc(std::function<void(std::shared_ptr<ResourceUser>)> func) { _updateResourceFunc = func; }
+		
+		std::shared_ptr<ResourceUser> shared_from_this()
+		{
+			return std::dynamic_pointer_cast<ResourceUser>(
+				Sharable::shared_from_this());
+		}
 
 	protected:
 		virtual bool _InitResources(resources::ResourceLib& resourceLib) { return true; };
 		virtual bool _ReleaseResources() { return true; };
 
 		bool _resourcesInitialised;
-		std::function<void(std::shared_ptr<ResourceUser>)> _updateResourceFunc;
+		ResourceUserParams _resourceParams;
 	};
 }

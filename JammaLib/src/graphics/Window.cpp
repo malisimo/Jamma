@@ -331,6 +331,7 @@ void Window::Render()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	_drawContext.SetSize(_config.Size);
+	_scene.UpdateResources(_resourceLib);
 	_scene.Draw3d(_drawContext);
 	_scene.Draw(_drawContext);
 }

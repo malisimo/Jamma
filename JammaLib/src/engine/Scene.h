@@ -130,6 +130,7 @@ namespace engine
 
 		void InitAudio();
 		void CloseAudio();
+		void UpdateResources(resources::ResourceLib& resourceLib);
 		
 	protected:
 		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
@@ -142,6 +143,7 @@ namespace engine
 		glm::mat4 View();
 
 		void AddStation(std::shared_ptr<Station> station);
+		void AddResourceToUpdate(std::shared_ptr<ResourceUser> resource);
 
 	protected:
 		static std::mutex _Mutex;
@@ -160,5 +162,6 @@ namespace engine
 		std::shared_ptr<Loop> _masterLoop;
 		unsigned int _audioCallbackCount;
 		graphics::Camera _camera;
+		std::vector<std::weak_ptr<ResourceUser>> _resourcesToUpdate;
 	};
 }

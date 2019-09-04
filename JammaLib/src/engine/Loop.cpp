@@ -25,6 +25,7 @@ Loop::Loop(LoopParams loopParams,
 	_mixer(nullptr),
 	_model(nullptr)
 {
+	mixerParams.UpdateResourceFunc = _drawParams.UpdateResourceFunc;
 	_mixer = std::make_unique<AudioMixer>(mixerParams);
 
 	GuiModelParams modelParams;
@@ -32,6 +33,7 @@ Loop::Loop(LoopParams loopParams,
 	modelParams.ModelScale = .1f;
 	modelParams.ModelTexture = "grid";
 	modelParams.ModelShader = "texture_shaded";
+	modelParams.UpdateResourceFunc = _drawParams.UpdateResourceFunc;
 	_model = std::make_shared<GuiModel>(modelParams);
 
 	_children.push_back(_mixer);
@@ -69,7 +71,7 @@ std::optional<std::shared_ptr<Loop>> Loop::FromFile(LoopParams loopParams, io::J
 		break;
 	}
 
-	auto mixerParams = GetMixerParams(loopParams.Size, behaviour);
+	auto mixerParams = GetMixerParams(loopParams.Size, behaviour, loopParams.UpdateResourceFunc);
 
 	loopParams.Wav = utils::EncodeUtf8(dir) + "/" + loopStruct.Name;
 	auto loop = std::make_shared<Loop>(loopParams, mixerParams);
@@ -80,12 +82,15 @@ std::optional<std::shared_ptr<Loop>> Loop::FromFile(LoopParams loopParams, io::J
 	return loop;
 }
 
-audio::AudioMixerParams Loop::GetMixerParams(utils::Size2d loopSize, audio::BehaviourParams behaviour)
+audio::AudioMixerParams Loop::GetMixerParams(utils::Size2d loopSize,
+	audio::BehaviourParams behaviour,
+	std::function<void(std::shared_ptr<ResourceUser>)> updateResourceFunc)
 {
 	AudioMixerParams mixerParams;
 	mixerParams.Size = { 160, 320 };
 	mixerParams.Position = { 6, 6 };
 	mixerParams.Behaviour = behaviour;
+	mixerParams.UpdateResourceFunc = updateResourceFunc;
 
 	return mixerParams;
 }
@@ -98,7 +103,7 @@ utils::Position2d Loop::Position() const
 
 void Loop::SetSize(utils::Size2d size)
 {
-	auto mixerParams = GetMixerParams(size, audio::WireMixBehaviourParams());
+	auto mixerParams = GetMixerParams(size, audio::WireMixBehaviourParams(), _loopParams.UpdateResourceFunc);
 
 	_mixer->SetSize(mixerParams.Size);
 

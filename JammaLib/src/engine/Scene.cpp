@@ -10,6 +10,7 @@ using namespace io;
 using namespace graphics;
 using namespace resources;
 using namespace utils;
+using namespace std::placeholders;
 
 std::mutex Scene::_Mutex = std::mutex();
 
@@ -31,10 +32,11 @@ Scene::Scene(SceneParams params) :
 			Position2d{ 0,0 },
 			Position3d{ 0, 0, 100 },
 			1.0),
-		0))
+		0)),
+	_resourcesToUpdate({})
 {
 	GuiLabelParams labelParams(GuiElementParams(
-		DrawableParams{ "" },
+		DrawableParams{ std::function<void(std::shared_ptr<base::ResourceUser>)>(), "" },
 		MoveableParams(utils::Position2d{ 10, 10 }, utils::Position3d{ 10, 10, 0 }, 1.0),
 		SizeableParams{ 200,80 },
 		"",
@@ -54,6 +56,8 @@ std::optional<std::shared_ptr<Scene>> Scene::FromFile(SceneParams sceneParams,
 	auto globalClock = std::make_shared<Timer>();
 	auto scene = std::make_shared<Scene>(sceneParams);
 
+	std::function<void(std::shared_ptr<ResourceUser>)> updateFunc = std::bind(&Scene::AddResourceToUpdate, scene, _1);
+
 	TriggerParams trigParams;
 	trigParams.Size = { 24, 24 };
 	trigParams.Position = { 6, 6 };	
@@ -63,12 +67,14 @@ std::optional<std::shared_ptr<Scene>> Scene::FromFile(SceneParams sceneParams,
 	trigParams.TextureOverdubbing = "orange";
 	trigParams.TexturePunchedIn = "purple";
 	trigParams.DebounceMs = 120;
+	trigParams.UpdateResourceFunc = updateFunc;
 
 	StationParams stationParams;
 	stationParams.Position = { 20, 20 };
 	stationParams.ModelPosition = { -50, -20 };
 	stationParams.Size = { 140, 80 };
 	stationParams.GlobalClock = globalClock;
+	stationParams.UpdateResourceFunc = updateFunc;
 
 	for (auto stationStruct : jamStruct.Stations)
 	{
@@ -122,8 +128,21 @@ void Scene::Draw3d(DrawContext& ctx)
 	glCtx.PopMvp();
 }
 
+void Scene::UpdateResources(ResourceLib& resourceLib)
+{
+	for (auto r : _resourcesToUpdate)
+	{
+		auto res = r.lock();
+
+		if (res)
+			res->InitResources(resourceLib);
+	}
+}
+
 bool Scene::_InitResources(ResourceLib& resourceLib)
 {
+	_resourcesToUpdate.clear();
+
 	_label->InitResources(resourceLib);
 
 	for (auto& station : _stations)
@@ -405,4 +424,9 @@ void Scene::AddStation(std::shared_ptr<Station> station)
 {
 	_stations.push_back(station);
 	station->Init();
+}
+
+void Scene::AddResourceToUpdate(std::shared_ptr<ResourceUser> resource)
+{
+	_resourcesToUpdate.push_back(resource);
 }
