@@ -15,7 +15,7 @@ namespace gui
 	{
 	public:
 		GuiSliderParams() :
-			base::GuiElementParams(DrawableParams{ std::function<void(std::shared_ptr<base::ResourceUser>)>(), "" },
+			base::GuiElementParams(DrawableParams{ "" },
 				MoveableParams(utils::Position2d{ 0, 0 }, utils::Position3d{ 0, 0, 0 }, 1.0),
 				SizeableParams{ 1,1 },
 				"",
@@ -96,8 +96,8 @@ namespace gui
 		virtual bool Redo(std::shared_ptr<base::ActionUndo> undo) override;
 
 	protected:
-		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
-		virtual bool _ReleaseResources() override;
+		virtual void _InitResources(resources::ResourceLib& resourceLib, bool forceInit) override;
+		virtual void _ReleaseResources() override;
 
 		static double CalcValueOffset(GuiSliderParams params, utils::Position2d dragPos, utils::Position2d initDragPos, double initValue);
 		static utils::Position2d CalcDragPos(GuiSliderParams params, double value);

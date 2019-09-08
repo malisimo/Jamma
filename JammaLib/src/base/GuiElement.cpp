@@ -13,12 +13,13 @@ GuiElement::GuiElement(GuiElementParams params) :
 	Drawable(params),
 	Moveable(params),
 	Sizeable(params),
+	_changesMade(false),
 	_guiParams(params),
 	_state(STATE_NORMAL),
-	_texture(ImageParams(DrawableParams{ std::function<void(std::shared_ptr<ResourceUser>)>(), params.Texture }, SizeableParams{ params.Size,params.MinSize }, "texture")),
-	_overTexture(ImageParams(DrawableParams{ std::function<void(std::shared_ptr<ResourceUser>)>(), params.OverTexture }, SizeableParams{ params.Size,params.MinSize }, "texture")),
-	_downTexture(ImageParams(DrawableParams{ std::function<void(std::shared_ptr<ResourceUser>)>(), params.DownTexture }, SizeableParams{ params.Size,params.MinSize }, "texture")),
-	_outTexture(ImageParams(DrawableParams{ std::function<void(std::shared_ptr<ResourceUser>)>(), params.OutTexture }, SizeableParams{ params.Size,params.MinSize }, "texture")),
+	_texture(ImageParams(DrawableParams{ params.Texture }, SizeableParams{ params.Size,params.MinSize }, "texture")),
+	_overTexture(ImageParams(DrawableParams{ params.OverTexture }, SizeableParams{ params.Size,params.MinSize }, "texture")),
+	_downTexture(ImageParams(DrawableParams{ params.DownTexture }, SizeableParams{ params.Size,params.MinSize }, "texture")),
+	_outTexture(ImageParams(DrawableParams{ params.OutTexture }, SizeableParams{ params.Size,params.MinSize }, "texture")),
 	_children({})
 {
 }
@@ -34,6 +35,14 @@ void GuiElement::Init()
 	}
 }
 
+void GuiElement::InitResources(resources::ResourceLib& resourceLib, bool forceInit)
+{
+	ResourceUser::InitResources(resourceLib, forceInit);
+
+	for (auto& child : _children)
+		child->InitResources(resourceLib, forceInit);
+};
+
 void GuiElement::SetSize(Size2d size)
 {
 	Sizeable::SetSize(size);
@@ -42,6 +51,19 @@ void GuiElement::SetSize(Size2d size)
 	_overTexture.SetSize(_sizeParams.Size);
 	_downTexture.SetSize(_sizeParams.Size);
 	_outTexture.SetSize(_sizeParams.Size);
+}
+
+void GuiElement::CommitChanges()
+{
+	if (_changesMade)
+		_CommitChanges();
+
+	_changesMade = false;
+
+	for (auto& child : _children)
+	{
+		child->CommitChanges();
+	}
 }
 
 void GuiElement::Draw(DrawContext& ctx)
@@ -190,20 +212,18 @@ bool GuiElement::HitTest(Position2d localPos)
 	return false;
 }
 
-bool GuiElement::_InitResources(ResourceLib& resourceLib)
+void GuiElement::_InitResources(ResourceLib& resourceLib, bool forceInit)
 {
-	_texture.InitResources(resourceLib);
-	_overTexture.InitResources(resourceLib);
-	_downTexture.InitResources(resourceLib);
-	_outTexture.InitResources(resourceLib);
+	_texture.InitResources(resourceLib, forceInit);
+	_overTexture.InitResources(resourceLib, forceInit);
+	_downTexture.InitResources(resourceLib, forceInit);
+	_outTexture.InitResources(resourceLib, forceInit);
 
 	for (auto& child : _children)
-		child->InitResources(resourceLib);
-
-	return false;
+		child->InitResources(resourceLib, forceInit);
 }
 
-bool GuiElement::_ReleaseResources()
+void GuiElement::_ReleaseResources()
 {
 	for (auto& child : _children)
 		child->ReleaseResources();
@@ -212,6 +232,8 @@ bool GuiElement::_ReleaseResources()
 	_overTexture.ReleaseResources();
 	_downTexture.ReleaseResources();
 	_outTexture.ReleaseResources();
+}
 
-	return true;
+void GuiElement::_CommitChanges()
+{
 }

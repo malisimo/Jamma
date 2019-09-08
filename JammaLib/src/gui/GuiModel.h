@@ -9,7 +9,7 @@ namespace gui
 	{
 	public:
 		GuiModelParams() :
-			base::GuiElementParams(DrawableParams{ std::function<void(std::shared_ptr<base::ResourceUser>)>(), "" },
+			base::GuiElementParams(DrawableParams{ "" },
 				MoveableParams(utils::Position2d{ 0, 0 }, utils::Position3d{ 0, 0, 0 }, 1.0),
 				SizeableParams{ 1,1 },
 				"",
@@ -51,14 +51,15 @@ namespace gui
 		void SetGeometry(std::vector<float> coords, std::vector<float> uvs);
 
 	protected:
-		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
-		virtual bool _ReleaseResources() override;
+		virtual void _InitResources(resources::ResourceLib& resourceLib, bool forceInit) override;
+		virtual void _ReleaseResources() override;
 
 		bool InitTexture(resources::ResourceLib& resourceLib);
 		bool InitShader(resources::ResourceLib& resourceLib);
 		bool InitVertexArray(std::vector<float> verts, std::vector<float> uvs);
 
 	protected:
+		bool _resourcesInitialised;
 		GuiModelParams _modelParams;
 		GLuint _vertexArray;
 		GLuint _vertexBuffer[3];

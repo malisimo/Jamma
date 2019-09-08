@@ -7,49 +7,45 @@
 
 namespace base
 {
-	class ResourceUser;
-
-	class ResourceUserParams
+	class ResourceUser
 	{
 	public:
-		std::function<void(std::shared_ptr<ResourceUser>)> UpdateResourceFunc;
-	};
-
-	class ResourceUser :
-		public virtual Sharable
-	{
-	public:
-		ResourceUser(ResourceUserParams resourceParams) :
-			_resourcesInitialised(false),
-			_resourceParams(resourceParams)
+		ResourceUser() :
+			_resourcesInitialised(false)
 		{ }
 
 	public:
-		bool InitResources(resources::ResourceLib& resourceLib)
+		virtual void InitResources(resources::ResourceLib& resourceLib, bool forceInit)
 		{
-			_resourcesInitialised = _InitResources(resourceLib);
-			return _resourcesInitialised;
+			if (forceInit)
+			{
+				ReleaseResources();
+
+				_InitResources(resourceLib, true);
+				_resourcesInitialised = true;
+			}
+			else
+			{
+				if (!_resourcesInitialised)
+					_InitResources(resourceLib, false);
+
+				_resourcesInitialised = true;
+			}
 		};
 
-		bool ReleaseResources()
+		void ReleaseResources()
 		{
-			auto res = _resourcesInitialised ? _ReleaseResources() : false;
+			if (_resourcesInitialised)
+				_ReleaseResources();
+
 			_resourcesInitialised = false;
-
-			return res;
 		};
-		
-		std::shared_ptr<ResourceUser> shared_from_this()
-		{
-			return std::dynamic_pointer_cast<ResourceUser>(
-				Sharable::shared_from_this());
-		}
 
 	protected:
-		virtual bool _InitResources(resources::ResourceLib& resourceLib) { return true; };
-		virtual bool _ReleaseResources() { return true; };
+		virtual void _InitResources(resources::ResourceLib& resourceLib, bool forceInit) { };
+		virtual void _ReleaseResources() { };
 
+	private:
 		bool _resourcesInitialised;
-		ResourceUserParams _resourceParams;
 	};
 }

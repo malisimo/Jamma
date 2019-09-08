@@ -18,7 +18,7 @@ GuiSlider::GuiSlider(GuiSliderParams params) :
 	_initValue(params.InitValue),
 	_valueOffset(0.0),
 	_dragElement(GuiElementParams(
-		DrawableParams{ std::function<void(std::shared_ptr<ResourceUser>)>(), params.DragTexture },
+		DrawableParams{ params.DragTexture },
 		MoveableParams(params.Position, params.ModelPosition, params.ModelScale),
 		SizeableParams{ params.DragControlSize, params.DragControlSize },
 		params.DragOverTexture,
@@ -218,16 +218,16 @@ bool GuiSlider::Redo(std::shared_ptr<ActionUndo> undo)
 	return false;
 }
 
-bool GuiSlider::_InitResources(ResourceLib& resourceLib)
+void GuiSlider::_InitResources(ResourceLib& resourceLib, bool forceInit)
 {
-	_dragElement.InitResources(resourceLib);
-	return GuiElement::_InitResources(resourceLib);
+	_dragElement.InitResources(resourceLib, forceInit);
+	GuiElement::_InitResources(resourceLib, forceInit);
 }
 
-bool GuiSlider::_ReleaseResources()
+void GuiSlider::_ReleaseResources()
 {
 	_dragElement.ReleaseResources();
-	return GuiElement::_ReleaseResources();
+	GuiElement::_ReleaseResources();
 }
 
 void GuiSlider::OnValueChange(bool bypassUpdates)

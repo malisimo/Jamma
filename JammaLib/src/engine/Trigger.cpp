@@ -25,10 +25,10 @@ Trigger::Trigger(TriggerParams trigParams) :
 	_isLastDitchDown(false),
 	_isLastActivateDownRaw(false),
 	_isLastDitchDownRaw(false),
-	_textureRecording(ImageParams(DrawableParams{ std::function<void(std::shared_ptr<ResourceUser>)>(), trigParams.TextureRecording }, SizeableParams{ trigParams.Size,trigParams.MinSize }, "texture")),
-	_textureDitchDown(ImageParams(DrawableParams{ std::function<void(std::shared_ptr<ResourceUser>)>(), trigParams.TextureDitchDown }, SizeableParams{ trigParams.Size,trigParams.MinSize }, "texture")),
-	_textureOverdubbing(ImageParams(DrawableParams{ std::function<void(std::shared_ptr<ResourceUser>)>(), trigParams.TextureOverdubbing }, SizeableParams{ trigParams.Size,trigParams.MinSize }, "texture")),
-	_texturePunchedIn(ImageParams(DrawableParams{ std::function<void(std::shared_ptr<ResourceUser>)>(), trigParams.TexturePunchedIn }, SizeableParams{ trigParams.Size,trigParams.MinSize }, "texture"))
+	_textureRecording(ImageParams(DrawableParams{ trigParams.TextureRecording }, SizeableParams{ trigParams.Size,trigParams.MinSize }, "texture")),
+	_textureDitchDown(ImageParams(DrawableParams{ trigParams.TextureDitchDown }, SizeableParams{ trigParams.Size,trigParams.MinSize }, "texture")),
+	_textureOverdubbing(ImageParams(DrawableParams{ trigParams.TextureOverdubbing }, SizeableParams{ trigParams.Size,trigParams.MinSize }, "texture")),
+	_texturePunchedIn(ImageParams(DrawableParams{ trigParams.TexturePunchedIn }, SizeableParams{ trigParams.Size,trigParams.MinSize }, "texture"))
 {
 }
 
@@ -113,7 +113,7 @@ void Trigger::OnTick(Time curTime, unsigned int samps)
 {
 	if ((TriggerState::TRIGSTATE_DEFAULT != _state) &&
 		(TriggerState::TRIGSTATE_DITCHDOWN != _state))
-		_recordSampCount++;
+		_recordSampCount+= samps;
 
 	if (0 == _debounceTimeMs)
 		return;
@@ -565,24 +565,22 @@ void Trigger::EndPunchIn()
 	}
 }
 
-bool Trigger::_InitResources(ResourceLib& resourceLib)
+void Trigger::_InitResources(ResourceLib& resourceLib, bool forceInit)
 {
-	_textureRecording.InitResources(resourceLib);
-	_textureDitchDown.InitResources(resourceLib);
-	_textureOverdubbing.InitResources(resourceLib);
-	_texturePunchedIn.InitResources(resourceLib);
+	_textureRecording.InitResources(resourceLib, forceInit);
+	_textureDitchDown.InitResources(resourceLib, forceInit);
+	_textureOverdubbing.InitResources(resourceLib, forceInit);
+	_texturePunchedIn.InitResources(resourceLib, forceInit);
 
-	return GuiElement::_InitResources(resourceLib);
+	GuiElement::_InitResources(resourceLib, forceInit);
 }
 
-bool Trigger::_ReleaseResources()
+void Trigger::_ReleaseResources()
 {
-	auto res = GuiElement::_ReleaseResources();
+	GuiElement::_ReleaseResources();
 
 	_textureRecording.ReleaseResources();
 	_textureDitchDown.ReleaseResources();
 	_textureOverdubbing.ReleaseResources();
 	_texturePunchedIn.ReleaseResources();
-
-	return res;
 }

@@ -127,14 +127,15 @@ namespace engine
 		virtual actions::ActionResult OnAction(actions::TouchMoveAction action) override;
 		virtual actions::ActionResult OnAction(actions::KeyAction action) override;
 		virtual void OnTick(Time curTime, unsigned int samps) override;
+		virtual void InitResources(resources::ResourceLib& resourceLib, bool forceInit) override;
 
 		void InitAudio();
 		void CloseAudio();
-		void UpdateResources(resources::ResourceLib& resourceLib);
+		void CommitChanges();
 		
 	protected:
-		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
-		virtual bool _ReleaseResources() override;
+		virtual void _InitResources(resources::ResourceLib& resourceLib, bool forceInit) override;
+		virtual void _ReleaseResources() override;
 
 		static int AudioCallback(void* outBuffer, void* inBuffer, unsigned int numSamps, double streamTime, RtAudioStreamStatus status, void* userData);
 		void OnAudio(float* inBuffer, float* outBuffer, unsigned int numSamps);
@@ -143,7 +144,6 @@ namespace engine
 		glm::mat4 View();
 
 		void AddStation(std::shared_ptr<Station> station);
-		void AddResourceToUpdate(std::shared_ptr<ResourceUser> resource);
 
 	protected:
 		static std::mutex _Mutex;
@@ -162,6 +162,5 @@ namespace engine
 		std::shared_ptr<Loop> _masterLoop;
 		unsigned int _audioCallbackCount;
 		graphics::Camera _camera;
-		std::vector<std::shared_ptr<ResourceUser>> _resourcesToUpdate;
 	};
 }

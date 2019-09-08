@@ -17,7 +17,7 @@ namespace engine
 	{
 	public:
 		LoopTakeParams() :
-			base::GuiElementParams(DrawableParams{ std::function<void(std::shared_ptr<base::ResourceUser>)>(), "" },
+			base::GuiElementParams(DrawableParams{ "" },
 				MoveableParams(utils::Position2d{ 0, 0 }, utils::Position3d{ 0, 0, 0 }, 1.0),
 				SizeableParams{ 1,1 },
 				"",
@@ -81,8 +81,9 @@ namespace engine
 			unsigned int numSamps);
 		virtual void EndMultiWrite(unsigned int numSamps, bool updateIndex) override;
 
-		void OnPlayRaw(const std::shared_ptr<MultiAudioSink> dest, unsigned int delaySamps, unsigned int numSamps);
-		
+		void OnPlayRaw(const std::shared_ptr<MultiAudioSink> dest,
+			unsigned int delaySamps,
+			unsigned int numSamps);		
 		unsigned long Id() const;
 		unsigned long SourceId() const;
 		LoopTakeSource SourceType() const;
@@ -97,7 +98,8 @@ namespace engine
 	protected:
 		static unsigned int CalcLoopHeight(unsigned int takeHeight, unsigned int numLoops);
 
-		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
+		virtual void _InitResources(resources::ResourceLib& resourceLib, bool forceInit) override;
+		virtual void _CommitChanges() override;
 		void ArrangeLoops();
 
 	protected:
@@ -108,5 +110,6 @@ namespace engine
 		LoopTakeSource _sourceType;
 		unsigned long _recordedSampCount;
 		std::vector<std::shared_ptr<Loop>> _loops;
+		std::vector<std::shared_ptr<Loop>> _backLoops;
 	};
 }

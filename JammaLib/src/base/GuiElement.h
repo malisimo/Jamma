@@ -67,6 +67,7 @@ namespace base
 	public:
 		virtual ActionDirection Direction() const override { return ACTIONDIR_DUPLEX; }
 		virtual void Init();
+		virtual void InitResources(resources::ResourceLib& resourceLib, bool forceInit) override;
 		virtual void SetSize(utils::Size2d size) override;
 		virtual void Draw(DrawContext& ctx) override;
 		virtual void Draw3d(DrawContext& ctx) override;
@@ -76,6 +77,7 @@ namespace base
 		virtual actions::ActionResult OnAction(actions::TouchAction action) override;
 		virtual actions::ActionResult OnAction(actions::TouchMoveAction action) override;
 
+		void CommitChanges();
 		void SetParent(std::shared_ptr<GuiElement> parent);
 		actions::TouchAction GlobalToLocal(actions::TouchAction action);
 		actions::TouchAction ParentToLocal(actions::TouchAction action);
@@ -91,10 +93,12 @@ namespace base
 		}
 
 	protected:
-		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
-		virtual bool _ReleaseResources() override;
+		virtual void _InitResources(resources::ResourceLib& resourceLib, bool forceInit) override;
+		virtual void _ReleaseResources() override;
+		virtual void _CommitChanges();
 
 	protected:
+		bool _changesMade;
 		GuiElementParams _guiParams;
 		GuiElementState _state;
 		graphics::Image _texture;

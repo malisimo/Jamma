@@ -56,7 +56,7 @@ void GuiModel::SetGeometry(std::vector<float> verts, std::vector<float> uvs)
 	// TODO: Cause InitResources() to get called
 }
 
-bool GuiModel::_InitResources(ResourceLib& resourceLib)
+void GuiModel::_InitResources(ResourceLib& resourceLib, bool forceInit)
 {
 	auto validated = true;
 
@@ -67,10 +67,10 @@ bool GuiModel::_InitResources(ResourceLib& resourceLib)
 	if (validated)
 		validated = InitVertexArray(_modelParams.Verts, _modelParams.Uvs);
 
-	return validated && GlUtils::CheckError("GuiModel::Init()");
+	GlUtils::CheckError("GuiModel::Init()");
 }
 
-bool GuiModel::_ReleaseResources()
+void GuiModel::_ReleaseResources()
 {
 	glDeleteBuffers(2, _vertexBuffer);
 	_vertexBuffer[0] = 0;
@@ -78,8 +78,6 @@ bool GuiModel::_ReleaseResources()
 
 	glDeleteVertexArrays(1, &_vertexArray);
 	_vertexArray = 0;
-
-	return true;
 }
 
 bool GuiModel::InitTexture(ResourceLib& resourceLib)
@@ -125,7 +123,6 @@ bool GuiModel::InitShader(ResourceLib & resourceLib)
 bool GuiModel::InitVertexArray(std::vector<float> verts, std::vector<float> uvs)
 {
 	_numTris = (unsigned int)verts.size() / 9;
-
 	auto numFaces = _numTris / 2;
 
 	glGenVertexArrays(1, &_vertexArray);

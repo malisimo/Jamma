@@ -45,7 +45,6 @@ std::optional<std::shared_ptr<Station>> Station::FromFile(StationParams stationP
 	Size2d takeSize = { stationParams.Size.Width - (2 * gap.Width), takeHeight };
 	LoopTakeParams takeParams;
 	takeParams.Size = { 80, 80 };
-	takeParams.UpdateResourceFunc = stationParams.UpdateResourceFunc;
 	
 	auto takeCount = 0u;
 	for (auto takeStruct : stationStruct.LoopTakes)
@@ -185,7 +184,6 @@ std::shared_ptr<LoopTake> Station::AddTake()
 	}
 
 	LoopTakeParams takeParams;
-	takeParams.UpdateResourceFunc = _drawParams.UpdateResourceFunc;
 	takeParams.Id = highestTakeIndex + 1;
 
 	auto take = std::make_shared<LoopTake>(takeParams);
@@ -196,11 +194,12 @@ std::shared_ptr<LoopTake> Station::AddTake()
 
 void Station::AddTake(std::shared_ptr<LoopTake> take)
 {
-	_loopTakes.push_back(take);
+	_backLoopTakes.push_back(take);
 	_children.push_back(take);
 
 	ArrangeTakes();
-	_drawParams.UpdateResourceFunc(ResourceUser::shared_from_this());
+	_resourcesInitialised = false;
+	_changesMade = true;
 }
 
 void Station::AddTrigger(std::shared_ptr<Trigger> trigger)
@@ -236,6 +235,12 @@ unsigned int Station::CalcTakeHeight(unsigned int stationHeight, unsigned int nu
 		return 0;
 
 	return (stationHeight - ((2 + (numTakes - 1)) * _Gap.Width)) / numTakes;
+}
+
+void Station::_CommitChanges()
+{
+	std::swap(_backLoopTakes, _loopTakes);
+	_backLoopTakes = _loopTakes;
 }
 
 void Station::ArrangeTakes()

@@ -143,7 +143,6 @@ TEST(Loop, PlayWrapsAround) {
 	AudioMixerParams mixerParams;
 	mixerParams.Size = { 160, 320 };
 	mixerParams.Position = { 6, 6 };
-	mixerParams.SliderParams = {};
 	mixerParams.Behaviour = mixBehaviour;
 
 	LoopParams loopParams;

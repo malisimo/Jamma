@@ -13,7 +13,7 @@ namespace engine
 	{
 	public:
 		StationParams() :
-			base::GuiElementParams(DrawableParams{ std::function<void(std::shared_ptr<base::ResourceUser>)>(), "" },
+			base::GuiElementParams(DrawableParams{ "" },
 				MoveableParams(utils::Position2d{ 0, 0 }, utils::Position3d{ 0, 0, 0 }, 1.0),
 				SizeableParams{ 1,1 },
 				"",
@@ -70,6 +70,7 @@ namespace engine
 	protected:
 		static unsigned int CalcTakeHeight(unsigned int stationHeight, unsigned int numTakes);
 
+		virtual void _CommitChanges() override;
 		void ArrangeTakes();
 		std::optional<std::shared_ptr<LoopTake>> TryGetTake(unsigned long id);
 
@@ -79,5 +80,7 @@ namespace engine
 		std::shared_ptr<Timer> _globalClock;
 		std::vector<std::shared_ptr<LoopTake>> _loopTakes;
 		std::vector<std::shared_ptr<Trigger>> _triggers;
+
+		std::vector<std::shared_ptr<LoopTake>> _backLoopTakes;
 	};
 }

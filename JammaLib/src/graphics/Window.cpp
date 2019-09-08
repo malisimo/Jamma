@@ -74,7 +74,7 @@ void Window::LoadResources()
 
 void Window::InitScene()
 {
-	_scene.InitResources(_resourceLib);
+	_scene.InitResources(_resourceLib, true);
 }
 
 void Window::ShowMessage(LPCWSTR message)
@@ -331,7 +331,8 @@ void Window::Render()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	_drawContext.SetSize(_config.Size);
-	_scene.UpdateResources(_resourceLib);
+	_scene.CommitChanges();
+	_scene.InitResources(_resourceLib, false);
 	_scene.Draw3d(_drawContext);
 	_scene.Draw(_drawContext);
 }

@@ -17,15 +17,17 @@ Loop::Loop(LoopParams loopParams,
 	audio::AudioMixerParams mixerParams) :
 	GuiElement(loopParams),
 	AudioSink(),
+	_modelNeedsUpdating(false),
 	_playPos(0),
 	_pitch(1.0),
 	_length(0),
 	_state(STATE_PLAYING),
 	_loopParams(loopParams),
 	_mixer(nullptr),
-	_model(nullptr)
+	_model(nullptr),
+	_buffer({}),
+	_backBuffer({})
 {
-	mixerParams.UpdateResourceFunc = _drawParams.UpdateResourceFunc;
 	_mixer = std::make_unique<AudioMixer>(mixerParams);
 
 	GuiModelParams modelParams;
@@ -33,7 +35,6 @@ Loop::Loop(LoopParams loopParams,
 	modelParams.ModelScale = .1f;
 	modelParams.ModelTexture = "grid";
 	modelParams.ModelShader = "texture_shaded";
-	modelParams.UpdateResourceFunc = _drawParams.UpdateResourceFunc;
 	_model = std::make_shared<GuiModel>(modelParams);
 
 	_children.push_back(_mixer);
@@ -71,7 +72,7 @@ std::optional<std::shared_ptr<Loop>> Loop::FromFile(LoopParams loopParams, io::J
 		break;
 	}
 
-	auto mixerParams = GetMixerParams(loopParams.Size, behaviour, loopParams.UpdateResourceFunc);
+	auto mixerParams = GetMixerParams(loopParams.Size, behaviour);
 
 	loopParams.Wav = utils::EncodeUtf8(dir) + "/" + loopStruct.Name;
 	auto loop = std::make_shared<Loop>(loopParams, mixerParams);
@@ -83,14 +84,12 @@ std::optional<std::shared_ptr<Loop>> Loop::FromFile(LoopParams loopParams, io::J
 }
 
 audio::AudioMixerParams Loop::GetMixerParams(utils::Size2d loopSize,
-	audio::BehaviourParams behaviour,
-	std::function<void(std::shared_ptr<ResourceUser>)> updateResourceFunc)
+	audio::BehaviourParams behaviour)
 {
 	AudioMixerParams mixerParams;
 	mixerParams.Size = { 160, 320 };
 	mixerParams.Position = { 6, 6 };
 	mixerParams.Behaviour = behaviour;
-	mixerParams.UpdateResourceFunc = updateResourceFunc;
 
 	return mixerParams;
 }
@@ -103,7 +102,7 @@ utils::Position2d Loop::Position() const
 
 void Loop::SetSize(utils::Size2d size)
 {
-	auto mixerParams = GetMixerParams(size, audio::WireMixBehaviourParams(), _loopParams.UpdateResourceFunc);
+	auto mixerParams = GetMixerParams(size, audio::WireMixBehaviourParams());
 
 	_mixer->SetSize(mixerParams.Size);
 
@@ -117,7 +116,7 @@ void Loop::Draw3d(DrawContext& ctx)
 	auto pos = ModelPosition();
 	auto scale = ModelScale();
 
-	auto frac = _length == 0 ? 0.0 : std::max(0.0, std::min(1.0, ((double)(_index % _length)) / ((double)_length)));
+	auto frac = _length == 0 ? 0.0 : std::max(0.0, std::min(1.0, ((double)(_playPos % _length)) / ((double)_length)));
 
 	_modelScreenPos = glCtx.ProjectScreen(pos);
 	glCtx.PushMvp(glm::translate(glm::mat4(1.0), glm::vec3(pos.X, pos.Y, pos.Z)));
@@ -182,13 +181,13 @@ int Loop::OnOverwrite(float samp, int indexOffset)
 			if (newBufSize > _MaxBufferSize)
 				newBufSize = _MaxBufferSize;
 
-			_buffer.resize(newBufSize);
+			//_buffer.resize(newBufSize);
 			// buffer must always be larger than _MaxFadeSamps!
 			//_length = newBufSize - _MaxFadeSamps;
 		}
 	}
-
-	_buffer[_index + indexOffset] = samp;
+	else
+		_buffer[_index + indexOffset] = samp;
 
 	return indexOffset + 1;
 }
@@ -207,7 +206,8 @@ void Loop::EndWrite(unsigned int numSamps, bool updateIndex)
 	_index += numSamps;
 	_length = _index;
 
-	UpdateLoopModel();
+	_modelNeedsUpdating = true;
+	_changesMade = true;
 }
 
 void Loop::EndMultiPlay(unsigned int numSamps)
@@ -218,11 +218,11 @@ void Loop::EndMultiPlay(unsigned int numSamps)
 	if (0 == _length)
 		return;
 		
-	_index += numSamps;
+	_playPos += numSamps;
 
 	auto bufSize = _length + _MaxFadeSamps;
-	while (_index > bufSize)
-		_index -= _length;
+	while (_playPos > bufSize)
+		_playPos -= _length;
 
 	for (unsigned int chan = 0; chan < NumOutputChannels(); chan++)
 	{
@@ -241,7 +241,7 @@ void Loop::OnPlayRaw(const std::shared_ptr<base::MultiAudioSink> dest,
 	if (0 == _length)
 		return;
 
-	auto index = _index + delaySamps;
+	auto index = _playPos + delaySamps;
 	auto bufSize = _length + _MaxFadeSamps;
 	while (index >= bufSize)
 		index -= _length;
@@ -302,7 +302,9 @@ void Loop::Record()
 {
 	Reset();
 	_state = STATE_RECORDING;
-	_buffer = std::vector<float>(_MaxFadeSamps);
+	_buffer = std::vector<float>(_MaxFadeSamps+90000);
+
+	_changesMade = true;
 }
 
 void Loop::Play(unsigned long index, unsigned long length)
@@ -324,7 +326,7 @@ void Loop::Play(unsigned long index, unsigned long length)
 void Loop::Ditch()
 {
 	Reset();
-	_buffer = std::vector<float>(_MaxFadeSamps);
+	_buffer = std::vector<float>(_MaxFadeSamps); // TODO: backbuffer?
 }
 
 void Loop::Overdub()
@@ -342,12 +344,19 @@ void Loop::PunchOut()
 	_state = STATE_OVERDUBBING;
 }
 
+void Loop::_CommitChanges()
+{
+	if (_modelNeedsUpdating)
+		UpdateLoopModel();
+}
+
 void Loop::Reset()
 {
 	_index = 0;
 	_playPos = 0;
 	_length = 0;
 	_state = STATE_INACTIVE;
+	_changesMade = true;
 }
 
 void Loop::UpdateLoopModel()
@@ -381,6 +390,7 @@ void Loop::UpdateLoopModel()
 	}
 
 	_model->SetGeometry(verts, uvs);
+	_modelNeedsUpdating = false;
 }
 
 double Loop::CalcDrawRadius()

@@ -59,7 +59,7 @@ void Image::Draw3d(DrawContext& ctx)
 {
 }
 
-bool Image::_InitResources(ResourceLib& resourceLib)
+void Image::_InitResources(ResourceLib& resourceLib, bool forceInit)
 {
 	auto validated = true;
 
@@ -70,10 +70,10 @@ bool Image::_InitResources(ResourceLib& resourceLib)
 	if (validated)
 		validated = InitVertexArray();
 
-	return validated && GlUtils::CheckError("Image::Init()");
+	GlUtils::CheckError("Image::Init()");
 }
 
-bool Image::_ReleaseResources()
+void Image::_ReleaseResources()
 {
 	glDeleteBuffers(2, _vertexBuffer);
 	_vertexBuffer[0] = 0;
@@ -81,8 +81,6 @@ bool Image::_ReleaseResources()
 
 	glDeleteVertexArrays(1, &_vertexArray);
 	_vertexArray = 0;
-
-	return true;
 }
 
 bool Image::InitTexture(ResourceLib& resourceLib)

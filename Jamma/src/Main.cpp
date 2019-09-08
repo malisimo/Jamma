@@ -107,7 +107,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
 
 	auto defaults = LoadIni();
 
-	SceneParams sceneParams(DrawableParams{ std::function<void(std::shared_ptr<base::ResourceUser>)>(), "" }, SizeableParams{ 1400, 1000 });
+	SceneParams sceneParams(DrawableParams{ "" }, SizeableParams{ 1400, 1000 });
 	JamFile jam;
 	RigFile rig;
 

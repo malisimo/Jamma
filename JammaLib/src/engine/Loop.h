@@ -24,7 +24,7 @@ namespace engine
 	{
 	public:
 		LoopParams() :
-			base::GuiElementParams(DrawableParams{ std::function<void(std::shared_ptr<base::ResourceUser>)>(), "" },
+			base::GuiElementParams(DrawableParams{ "" },
 				MoveableParams(utils::Position2d{ 0, 0 }, utils::Position3d{ 0, 0, 0 }, 1.0),
 				SizeableParams{ 1,1 },
 				"",
@@ -91,10 +91,16 @@ namespace engine
 		// Move
 		Loop(Loop&& other) :
 			GuiElement(other._guiParams),
+			_modelNeedsUpdating(other._modelNeedsUpdating),
 			_playPos(other._playPos),
+			_pitch(other._pitch),
+			_length(other._length),
+			_state(other._state),
 			_loopParams{other._loopParams},
 			_mixer(std::move(other._mixer)),
-			_model(std::move(other._model))
+			_model(std::move(other._model)),
+			_buffer(std::move(other._buffer)),
+			_backBuffer(std::move(other._backBuffer))
 		{
 			other._index = 0;
 			other._loopParams = LoopParams();
@@ -106,11 +112,18 @@ namespace engine
 			if (this != &other)
 			{
 				ReleaseResources();
-				std::swap(_guiParams, other._guiParams),
+				std::swap(_modelNeedsUpdating, other._modelNeedsUpdating);
+				std::swap(_playPos, other._playPos);
+				std::swap(_pitch, other._pitch);
+				std::swap(_length, other._length);
+				std::swap(_state, other._state);
+				std::swap(_guiParams, other._guiParams);
 				std::swap(_index, other._index);
 				std::swap(_loopParams, other._loopParams);
 				_mixer.swap(other._mixer);
 				_model.swap(other._model);
+				_buffer.swap(other._buffer);
+				_backBuffer.swap(other._backBuffer);
 			}
 
 			return *this;
@@ -121,8 +134,7 @@ namespace engine
 			io::JamFile::Loop loopStruct,
 			std::wstring dir);
 		static audio::AudioMixerParams GetMixerParams(utils::Size2d loopSize,
-			audio::BehaviourParams behaviour,
-			std::function<void(std::shared_ptr<base::ResourceUser>)> updateResourceFunc);
+			audio::BehaviourParams behaviour);
 
 		virtual utils::Position2d Position() const override;
 		virtual void SetSize(utils::Size2d size) override;
@@ -133,11 +145,11 @@ namespace engine
 		inline virtual int OnWrite(float samp, int indexOffset) override;
 		inline virtual int OnOverwrite(float samp, int indexOffset) override;
 		virtual void EndWrite(unsigned int numSamps, bool updateIndex) override;
+
 		void OnPlayRaw(const std::shared_ptr<base::MultiAudioSink> dest,
 			unsigned int channel,
 			unsigned int delaySamps,
 			unsigned int numSamps);
-
 		unsigned int InputChannel() const;
 		void SetInputChannel(unsigned int channel);
 		unsigned long Id() const;
@@ -151,6 +163,8 @@ namespace engine
 		void PunchOut();
 
 	protected:
+		virtual void _CommitChanges() override;
+
 		void Reset();
 		void UpdateLoopModel();
 		double CalcDrawRadius();
@@ -167,13 +181,15 @@ namespace engine
 		static const unsigned int _MaxBufferSize = 40000000;
 		static const unsigned int _GrainSamps = 1100;
 
+		bool _modelNeedsUpdating;
 		unsigned long _playPos;
 		double _pitch;
 		unsigned long _length;
 		LoopVisualState _state;
 		LoopParams _loopParams;
 		std::shared_ptr<audio::AudioMixer> _mixer;
-		std::vector<float> _buffer;
 		std::shared_ptr<gui::GuiModel> _model;
+		std::vector<float> _buffer;
+		std::vector<float> _backBuffer;
 	};
 }

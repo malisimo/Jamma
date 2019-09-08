@@ -72,8 +72,8 @@ namespace graphics
 		virtual void Draw3d(base::DrawContext& ctx) override;
 
 	protected:
-		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
-		virtual bool _ReleaseResources() override;
+		virtual void _InitResources(resources::ResourceLib& resourceLib, bool forceInit) override;
+		virtual void _ReleaseResources() override;
 
 		bool InitTexture(resources::ResourceLib& resourceLib);
 		bool InitShader(resources::ResourceLib& resourceLib);

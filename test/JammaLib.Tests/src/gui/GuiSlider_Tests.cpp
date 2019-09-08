@@ -36,11 +36,12 @@ private:
 TEST(GuiSlider, DoesUndo) {
 	auto dragLength = 100;
 	auto dragSize = 20;
+	auto dragGap = 2;
 
 	auto sliderParams = GuiSliderParams();
-	sliderParams.DragLength = dragLength;
 	sliderParams.Position = { 0, 0 };
 	sliderParams.Size = { (unsigned int)dragSize, (unsigned int)(dragLength + dragSize) };
+	sliderParams.DragGap = { (unsigned int)dragGap, (unsigned int)dragGap };
 	sliderParams.DragControlSize = { (unsigned int)dragSize, (unsigned int)dragSize };
 	sliderParams.DragControlOffset = { 0, 0 };
 	sliderParams.InitValue = 0.0;
@@ -82,11 +83,12 @@ TEST(GuiSlider, ReceiverGetsValue) {
 	auto expectedValue = 0.5;
 	auto dragLength = 100;
 	auto dragSize = 20;
+	auto dragGap = 5;
 
 	auto sliderParams = GuiSliderParams();
-	sliderParams.DragLength = dragLength;
 	sliderParams.Position = { 0, 0 };
 	sliderParams.Size = { (unsigned int)(dragLength + dragSize), (unsigned int)dragSize };
+	sliderParams.DragGap = { (unsigned int)dragGap, (unsigned int)dragGap };
 	sliderParams.DragControlSize = { (unsigned int)dragSize, (unsigned int)dragSize };
 	sliderParams.DragControlOffset = { 0, 0 };
 	sliderParams.InitValue = 0.0;

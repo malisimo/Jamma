@@ -182,7 +182,7 @@ namespace engine
 	{
 	public:
 		TriggerParams() :
-			base::GuiElementParams(DrawableParams{ std::function<void(std::shared_ptr<base::ResourceUser>)>(), "" },
+			base::GuiElementParams(DrawableParams{ "" },
 			MoveableParams(utils::Position2d{ 0, 0 }, utils::Position3d{ 0, 0, 0 }, 1.0),
 			SizeableParams{ 1,1 },
 			"",
@@ -237,8 +237,8 @@ namespace engine
 		void Reset();
 
 	protected:
-		virtual bool _InitResources(resources::ResourceLib& resourceLib) override;
-		virtual bool _ReleaseResources() override;
+		virtual void _InitResources(resources::ResourceLib& resourceLib, bool forceInit) override;
+		virtual void _ReleaseResources() override;
 
 	private:
 		bool IgnoreRepeats(bool isActivate,

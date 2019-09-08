@@ -21,7 +21,8 @@ LoopTake::LoopTake(LoopTakeParams params) :
 	MultiAudioSource(),
 	_id(params.Id),
 	_recordedSampCount(0),
-	_loops()
+	_loops({}),
+	_backLoops({})
 {
 }
 
@@ -35,7 +36,6 @@ std::optional<std::shared_ptr<LoopTake>> LoopTake::FromFile(LoopTakeParams takeP
 
 	LoopParams loopParams;
 	loopParams.Wav = "hh";
-	loopParams.UpdateResourceFunc = takeParams.UpdateResourceFunc;
 
 	for (auto loopStruct : takeStruct.Loops)
 	{
@@ -132,7 +132,7 @@ std::shared_ptr<Loop> LoopTake::AddLoop(unsigned int chan)
 
 	audio::WireMixBehaviourParams wire;
 	wire.Channels = { chan };
-	auto mixerParams = Loop::GetMixerParams({ 110, loopHeight }, wire, _drawParams.UpdateResourceFunc);
+	auto mixerParams = Loop::GetMixerParams({ 110, loopHeight }, wire);
 	
 	unsigned long highestLoopIndex = 0;
 	for (auto& loop : _loops)
@@ -144,7 +144,6 @@ std::shared_ptr<Loop> LoopTake::AddLoop(unsigned int chan)
 	LoopParams loopParams;
 	loopParams.Wav = "hh";
 	loopParams.Id = highestLoopIndex + 1;
-	loopParams.UpdateResourceFunc = _drawParams.UpdateResourceFunc;
 	auto loop = std::make_shared<Loop>(loopParams, mixerParams);
 	AddLoop(loop);
 
@@ -153,24 +152,26 @@ std::shared_ptr<Loop> LoopTake::AddLoop(unsigned int chan)
 
 void LoopTake::AddLoop(std::shared_ptr<Loop> loop)
 {
-	_loops.push_back(loop);
+	_backLoops.push_back(loop);
 	_children.push_back(loop);
 
 	ArrangeLoops();
+	_resourcesInitialised = false;
+	_changesMade = true;
 }
 
 void LoopTake::Record(std::vector<unsigned int> channels)
 {
 	_recordedSampCount = 0;
-	_loops.clear();
+	_backLoops.clear();
 
 	for (auto chan : channels)
 	{
 		auto loop = AddLoop(chan);
 		loop->Record();
-
-		_loops.push_back(loop);
 	}
+
+	_changesMade = true;
 }
 
 unsigned long LoopTake::NumRecordedSamps() const
@@ -206,13 +207,17 @@ unsigned int LoopTake::CalcLoopHeight(unsigned int takeHeight, unsigned int numL
 	return (takeHeight - ((2 + (numLoops - 1)) * _Gap.Width)) / numLoops;
 }
 
-bool LoopTake::_InitResources(ResourceLib& resourceLib)
+void LoopTake::_InitResources(ResourceLib& resourceLib, bool forceInit)
 {
-	GuiElement::_InitResources(resourceLib);
+	GuiElement::_InitResources(resourceLib, forceInit);
 	
 	ArrangeLoops();
+}
 
-	return false;
+void LoopTake::_CommitChanges()
+{
+	std::swap(_backLoops, _loops);
+	_backLoops.clear(); // TODO: Undo?
 }
 
 void LoopTake::ArrangeLoops()
@@ -230,6 +235,4 @@ void LoopTake::ArrangeLoops()
 
 		loopCount++;
 	}
-
-	_drawParams.UpdateResourceFunc(ResourceUser::shared_from_this());
 }
