@@ -53,7 +53,8 @@ void GuiModel::SetGeometry(std::vector<float> verts, std::vector<float> uvs)
 {
 	_modelParams.Verts = verts;
 	_modelParams.Uvs = uvs;
-	// TODO: Cause InitResources() to get called
+
+	ReleaseResources();
 }
 
 void GuiModel::_InitResources(ResourceLib& resourceLib, bool forceInit)
