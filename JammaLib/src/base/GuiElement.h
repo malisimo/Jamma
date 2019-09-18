@@ -77,7 +77,7 @@ namespace base
 		virtual actions::ActionResult OnAction(actions::TouchAction action) override;
 		virtual actions::ActionResult OnAction(actions::TouchMoveAction action) override;
 
-		void CommitChanges();
+		std::vector<actions::JobAction> CommitChanges();
 		void SetParent(std::shared_ptr<GuiElement> parent);
 		actions::TouchAction GlobalToLocal(actions::TouchAction action);
 		actions::TouchAction ParentToLocal(actions::TouchAction action);
@@ -95,7 +95,7 @@ namespace base
 	protected:
 		virtual void _InitResources(resources::ResourceLib& resourceLib, bool forceInit) override;
 		virtual void _ReleaseResources() override;
-		virtual void _CommitChanges();
+		virtual std::vector<actions::JobAction> _CommitChanges();
 
 	protected:
 		bool _changesMade;

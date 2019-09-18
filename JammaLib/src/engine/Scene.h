@@ -2,7 +2,9 @@
 #include <memory>
 #include <algorithm>
 #include <mutex>
+#include <shared_mutex>
 #include "../resources/ResourceLib.h"
+#include "../actions/JobAction.h"
 #include "../audio/AudioDevice.h"
 #include "../audio/ChannelMixer.h"
 #include "../graphics/Image.h"
@@ -10,9 +12,9 @@
 #include "../graphics/GlDrawContext.h"
 #include "../gui/GuiLabel.h"
 #include "../gui/GuiSlider.h"
-#include "Tickable.h"
 #include "../io/JamFile.h"
 #include "../io/RigFile.h"
+#include "Tickable.h"
 #include "Drawable.h"
 #include "ActionReceiver.h"
 #include "AudioSource.h"
@@ -43,7 +45,13 @@ namespace engine
 	{
 	public:
 		Scene(SceneParams params);
-		~Scene() { ReleaseResources(); }
+		~Scene()
+		{
+			ReleaseResources();
+
+			_isSceneQuitting = true;
+			_jobRunner.join();
+		}
 
 		// Copy
 		Scene(const Scene&) = delete;
@@ -127,11 +135,13 @@ namespace engine
 		virtual actions::ActionResult OnAction(actions::TouchMoveAction action) override;
 		virtual actions::ActionResult OnAction(actions::KeyAction action) override;
 		virtual void OnTick(Time curTime, unsigned int samps) override;
+		virtual void OnJobTick(Time curTime);
 		virtual void InitResources(resources::ResourceLib& resourceLib, bool forceInit) override;
 
 		void InitAudio();
 		void CloseAudio();
 		void CommitChanges();
+		std::mutex& GetAudioMutex();
 		
 	protected:
 		virtual void _InitResources(resources::ResourceLib& resourceLib, bool forceInit) override;
@@ -140,15 +150,15 @@ namespace engine
 		static int AudioCallback(void* outBuffer, void* inBuffer, unsigned int numSamps, double streamTime, RtAudioStreamStatus status, void* userData);
 		void OnAudio(float* inBuffer, float* outBuffer, unsigned int numSamps);
 		bool OnUndo(std::shared_ptr<base::ActionUndo> undo);
+		void JobLoop();
 		void InitSize();
 		glm::mat4 View();
 
 		void AddStation(std::shared_ptr<Station> station);
 
 	protected:
-		static std::mutex _Mutex;
-
 		bool _isSceneTouching;
+		bool _isSceneQuitting;
 		utils::Position2d _initTouchDownPosition;
 		utils::Position3d _initTouchCamPosition;
 		glm::mat4 _viewProj;
@@ -162,5 +172,9 @@ namespace engine
 		std::shared_ptr<Loop> _masterLoop;
 		unsigned int _audioCallbackCount;
 		graphics::Camera _camera;
+		std::thread _jobRunner;
+		std::shared_mutex _jobMutex;
+		std::list<actions::JobAction> _jobList;
+		std::mutex _audioMutex;
 	};
 }

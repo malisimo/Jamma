@@ -296,47 +296,50 @@
     <ClInclude Include="lib\rtaudio\include\soundcard.h">
       <Filter>lib\rtaudio\include</Filter>
     </ClInclude>
-    <ClInclude Include="src\base\MultiAudioSink.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\base\Audible.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\base\MultiAudible.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\base\Sharable.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\io\JamFile.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\io\Json.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\io\RigFile.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="src\io\WavReadWriter.h">
       <Filter>src\audio</Filter>
     </ClInclude>
-    <ClInclude Include="src\io\FileReadWriter.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\utils\PathUtils.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\io\InitFile.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\io\TextReadWriter.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="src\utils\ArrayUtils.h">
-      <Filter>include</Filter>
+      <Filter>src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\Audible.h">
+      <Filter>src\base</Filter>
     </ClInclude>
     <ClInclude Include="src\graphics\Camera.h">
-      <Filter>include</Filter>
+      <Filter>src\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\io\FileReadWriter.h">
+      <Filter>src\io</Filter>
+    </ClInclude>
+    <ClInclude Include="src\io\JamFile.h">
+      <Filter>src\io</Filter>
+    </ClInclude>
+    <ClInclude Include="src\io\Json.h">
+      <Filter>src\io</Filter>
+    </ClInclude>
+    <ClInclude Include="src\io\RigFile.h">
+      <Filter>src\io</Filter>
+    </ClInclude>
+    <ClInclude Include="src\io\InitFile.h">
+      <Filter>src\io</Filter>
+    </ClInclude>
+    <ClInclude Include="src\io\TextReadWriter.h">
+      <Filter>src\io</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\MultiAudioSink.h">
+      <Filter>src\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\MultiAudible.h">
+      <Filter>src\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\actions\JobAction.h">
+      <Filter>src\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\Sharable.h">
+      <Filter>src\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utils\PathUtils.h">
+      <Filter>src\utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -475,29 +478,32 @@
     <ClCompile Include="src\stdafx.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\io\JamFile.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\io\Json.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\io\RigFile.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\io\WavReadWriter.cpp">
       <Filter>src\audio</Filter>
-    </ClCompile>
-    <ClCompile Include="src\utils\PathUtils.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\io\InitFile.cpp">
-      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\io\TextReadWriter.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\actions\JobAction.cpp">
+      <Filter>src\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\JamFile.cpp">
+      <Filter>src\io</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utils\PathUtils.cpp">
+      <Filter>src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\RigFile.cpp">
+      <Filter>src\io</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\Json.cpp">
+      <Filter>src\io</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\InitFile.cpp">
+      <Filter>src\io</Filter>
+    </ClCompile>
     <ClCompile Include="src\graphics\Camera.cpp">
-      <Filter>src</Filter>
+      <Filter>src\engine</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

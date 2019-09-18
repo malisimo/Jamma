@@ -12,6 +12,8 @@ using gui::GuiSliderParams;
 using gui::GuiModel;
 using gui::GuiModelParams;
 using graphics::GlDrawContext;
+using actions::ActionResult;
+using actions::JobAction;
 
 Loop::Loop(LoopParams loopParams,
 	audio::AudioMixerParams mixerParams) :
@@ -344,10 +346,34 @@ void Loop::PunchOut()
 	_state = STATE_OVERDUBBING;
 }
 
-void Loop::_CommitChanges()
+std::vector<JobAction> Loop::_CommitChanges()
 {
 	if (_modelNeedsUpdating)
+	{
+		_modelNeedsUpdating = false;
+
+		JobAction job;
+		job.JobActionType = JobAction::JOB_RENDERWAVE;
+		job.Receiver = ActionReceiver::shared_from_this();
+		return { job };
+	}
+
+	return {};
+}
+
+ActionResult Loop::OnAction(JobAction action)
+{
+	if (JobAction::JOB_RENDERWAVE == action.JobActionType)
+	{
 		UpdateLoopModel();
+		ActionResult res;
+		res.IsEaten = true;
+		res.ResultType = actions::ACTIONRESULT_DEFAULT;
+
+		return res;
+	}
+
+	return { false, actions::ACTIONRESULT_DEFAULT };
 }
 
 void Loop::Reset()
@@ -360,7 +386,7 @@ void Loop::Reset()
 }
 
 void Loop::UpdateLoopModel()
-{	
+{
 	std::vector<float> verts;
 	std::vector<float> uvs;
 

@@ -10,8 +10,11 @@ using graphics::GlDrawContext;
 
 GuiModel::GuiModel(GuiModelParams params) :
 	GuiElement(params),
+	_geometryNeedsUpdating(false),
 	_modelParams(params),
-	_numTris(0)
+	_numTris(0),
+	_backVerts({}),
+	_backUvs({})
 {
 }
 
@@ -51,10 +54,11 @@ void GuiModel::Draw3d(DrawContext& ctx)
 
 void GuiModel::SetGeometry(std::vector<float> verts, std::vector<float> uvs)
 {
-	_modelParams.Verts = verts;
-	_modelParams.Uvs = uvs;
+	_backVerts = verts;
+	_backUvs = uvs;
 
-	ReleaseResources();
+	_geometryNeedsUpdating = true;
+	_resourcesNeedInitialising = true;
 }
 
 void GuiModel::_InitResources(ResourceLib& resourceLib, bool forceInit)
@@ -66,7 +70,16 @@ void GuiModel::_InitResources(ResourceLib& resourceLib, bool forceInit)
 	if (validated)
 		validated = InitShader(resourceLib);
 	if (validated)
+	{
+		if (_geometryNeedsUpdating)
+		{
+			_geometryNeedsUpdating = false;
+			_modelParams.Verts = _backVerts;
+			_modelParams.Uvs = _backUvs;
+		}
+
 		validated = InitVertexArray(_modelParams.Verts, _modelParams.Uvs);
+	}
 
 	GlUtils::CheckError("GuiModel::Init()");
 }

@@ -53,17 +53,26 @@ void GuiElement::SetSize(Size2d size)
 	_outTexture.SetSize(_sizeParams.Size);
 }
 
-void GuiElement::CommitChanges()
+std::vector<JobAction> GuiElement::CommitChanges()
 {
+	std::vector<JobAction> jobList = {};
 	if (_changesMade)
-		_CommitChanges();
+	{
+		auto jobs = _CommitChanges();
+		if (!jobs.empty())
+			jobList.insert(jobList.end(), jobs.begin(), jobs.end());
+	}
 
 	_changesMade = false;
 
 	for (auto& child : _children)
 	{
-		child->CommitChanges();
+		auto jobs = child->CommitChanges();
+		if (!jobs.empty())
+			jobList.insert(jobList.end(), jobs.begin(), jobs.end());
 	}
+
+	return jobList;
 }
 
 void GuiElement::Draw(DrawContext& ctx)
@@ -234,6 +243,7 @@ void GuiElement::_ReleaseResources()
 	_outTexture.ReleaseResources();
 }
 
-void GuiElement::_CommitChanges()
+std::vector<JobAction> GuiElement::_CommitChanges()
 {
+	return {};
 }

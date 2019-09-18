@@ -9,6 +9,7 @@
 #include "../actions/KeyAction.h"
 #include "../actions/DoubleAction.h"
 #include "../actions/TriggerAction.h"
+#include "../actions/JobAction.h"
 #include "../actions/ActionResult.h"
 
 namespace base
@@ -24,6 +25,7 @@ namespace base
 		virtual actions::ActionResult OnAction(actions::KeyAction action) { return { false, actions::ACTIONRESULT_DEFAULT }; };
 		virtual actions::ActionResult OnAction(actions::DoubleAction action) { return { false, actions::ACTIONRESULT_DEFAULT }; };
 		virtual actions::ActionResult OnAction(actions::TriggerAction action) { return { false, actions::ACTIONRESULT_DEFAULT }; };
+		virtual actions::ActionResult OnAction(actions::JobAction action) { return { false, actions::ACTIONRESULT_DEFAULT }; };
 
 		std::shared_ptr<ActionReceiver> shared_from_this()
 		{

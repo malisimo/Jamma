@@ -212,6 +212,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\actions\ActionResult.h" />
+    <ClInclude Include="src\actions\JobAction.h" />
     <ClInclude Include="src\base\MultiAudible.h" />
     <ClInclude Include="src\base\Audible.h" />
     <ClInclude Include="src\audio\ChannelMixer.h" />
@@ -310,6 +311,7 @@
     <ClCompile Include="src\audio\ChannelMixer.cpp" />
     <ClCompile Include="src\actions\DoubleAction.cpp" />
     <ClCompile Include="src\actions\TriggerAction.cpp" />
+    <ClCompile Include="src\actions\JobAction.cpp" />
     <ClCompile Include="src\graphics\Camera.cpp" />
     <ClCompile Include="src\io\InitFile.cpp" />
     <ClCompile Include="src\io\RigFile.cpp" />

@@ -12,12 +12,11 @@ using namespace resources;
 using namespace utils;
 using namespace std::placeholders;
 
-std::mutex Scene::_Mutex = std::mutex();
-
 Scene::Scene(SceneParams params) :
 	Drawable(params),
 	Sizeable(params),
 	_isSceneTouching(false),
+	_isSceneQuitting(false),
 	_viewProj(glm::mat4()),
 	_overlayViewProj(glm::mat4()),
 	_channelMixer(std::make_shared<ChannelMixer>(ChannelMixerParams{})),
@@ -32,7 +31,8 @@ Scene::Scene(SceneParams params) :
 			Position2d{ 0,0 },
 			Position3d{ 0, 0, 100 },
 			1.0),
-		0))
+		0)),
+	_audioMutex(std::mutex())
 {
 	GuiLabelParams labelParams(GuiElementParams(
 		DrawableParams{ "" },
@@ -45,6 +45,8 @@ Scene::Scene(SceneParams params) :
 	_label = std::make_unique<GuiLabel>(labelParams);
 
 	_audioDevice = std::make_unique<AudioDevice>();
+
+	_jobRunner = std::thread([this]() { this->JobLoop(); });
 }
 
 std::optional<std::shared_ptr<Scene>> Scene::FromFile(SceneParams sceneParams,
@@ -261,10 +263,38 @@ void Scene::OnTick(Time curTime, unsigned int samps)
 	}
 }
 
+void Scene::OnJobTick(Time curTime)
+{
+	actions::JobAction job;
+
+	{
+		std::shared_lock lock(_jobMutex);
+
+		if (_jobList.empty())
+			return;
+
+		job = _jobList.front();
+		_jobList.pop_front();
+
+		// Run only the newest job,
+		// removing previous identical jobs
+		for (auto j = _jobList.begin(); j != _jobList.end();)
+		{
+			if (*j == job)
+				j = _jobList.erase(j);
+			else
+				++j;
+		}
+	}
+
+	auto receiver = job.Receiver.lock();
+	if (receiver)
+		receiver->OnAction(job);
+}
+
 void Scene::InitAudio()
 {
-	std::unique_lock<std::mutex> lck(_Mutex, std::defer_lock);
-	lck.lock();
+	std::scoped_lock lock(_audioMutex);
 
 	auto dev = AudioDevice::Open(Scene::AudioCallback,
 		[](RtAudioError::Type type, const std::string& err) { std::cout << "[" << type << " RtAudio Error] " << err << std::endl; },
@@ -286,29 +316,39 @@ void Scene::InitAudio()
 		_audioCallbackCount = 0;
 		_audioDevice->Start();
 	}
-
-	lck.unlock();
 }
 
 void Scene::CloseAudio()
 {
-	std::unique_lock<std::mutex> lck(_Mutex, std::defer_lock);
-	lck.lock();
-
+	std::scoped_lock lock(_audioMutex);
 	_audioDevice->Stop();
-
-	lck.unlock();
 }
 
 void Scene::CommitChanges()
 {
-	std::unique_lock<std::mutex> lck(_Mutex, std::defer_lock);
-	lck.lock();
+	std::vector<JobAction> jobList = {};
 
-	for (auto& station : _stations)
-		station->CommitChanges();
+	{
+		std::scoped_lock lock(_audioMutex);
 
-	lck.unlock();
+		for (auto& station : _stations)
+		{
+			auto jobs = station->CommitChanges();
+			if (!jobs.empty())
+				jobList.insert(jobList.end(), jobs.begin(), jobs.end());
+		}
+	}
+
+	if (!jobList.empty())
+	{
+		std::scoped_lock lock(_jobMutex); // Deadlock!!
+		_jobList.insert(_jobList.end(), jobList.begin(), jobList.end());
+	}
+}
+
+std::mutex& Scene::GetAudioMutex()
+{
+	return _audioMutex;
 }
 
 int Scene::AudioCallback(void* outBuffer,
@@ -318,13 +358,9 @@ int Scene::AudioCallback(void* outBuffer,
 	RtAudioStreamStatus status,
 	void* userData)
 {
-	std::unique_lock<std::mutex> lck(_Mutex, std::defer_lock);
-	lck.lock();
-
 	Scene* scene = (Scene*)userData;
+	std::scoped_lock lock(scene->GetAudioMutex());
 	scene->OnAudio((float*)inBuffer, (float*)outBuffer, numSamps);
-
-	lck.unlock();
 
 	return 0;
 }
@@ -427,4 +463,13 @@ void Scene::AddStation(std::shared_ptr<Station> station)
 {
 	_stations.push_back(station);
 	station->Init();
+}
+
+void Scene::JobLoop()
+{
+	while (!_isSceneQuitting)
+	{
+		OnJobTick(Timer::GetTime());
+		std::this_thread::sleep_for(std::chrono::milliseconds(120));
+	}
 }

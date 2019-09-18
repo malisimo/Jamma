@@ -60,7 +60,10 @@ namespace gui
 
 	protected:
 		bool _resourcesInitialised;
+		bool _geometryNeedsUpdating;
 		GuiModelParams _modelParams;
+		std::vector<float> _backVerts;
+		std::vector<float> _backUvs;
 		GLuint _vertexArray;
 		GLuint _vertexBuffer[3];
 		unsigned int _numTris;

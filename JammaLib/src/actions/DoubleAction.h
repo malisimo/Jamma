@@ -37,5 +37,4 @@ namespace actions
 	public:
 		double _value;
 	};
-
 }

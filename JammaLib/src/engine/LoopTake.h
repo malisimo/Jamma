@@ -99,7 +99,7 @@ namespace engine
 		static unsigned int CalcLoopHeight(unsigned int takeHeight, unsigned int numLoops);
 
 		virtual void _InitResources(resources::ResourceLib& resourceLib, bool forceInit) override;
-		virtual void _CommitChanges() override;
+		virtual std::vector<actions::JobAction> _CommitChanges() override;
 		void ArrangeLoops();
 
 	protected:

@@ -70,7 +70,7 @@ namespace engine
 	protected:
 		static unsigned int CalcTakeHeight(unsigned int stationHeight, unsigned int numTakes);
 
-		virtual void _CommitChanges() override;
+		virtual std::vector<actions::JobAction> _CommitChanges() override;
 		void ArrangeTakes();
 		std::optional<std::shared_ptr<LoopTake>> TryGetTake(unsigned long id);
 

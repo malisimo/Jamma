@@ -11,6 +11,7 @@ using actions::ActionResult;
 using actions::KeyAction;
 using actions::TouchAction;
 using actions::TriggerAction;
+using actions::JobAction;
 using gui::GuiSliderParams;
 using audio::AudioMixerParams;
 using audio::WireMixBehaviourParams;
@@ -198,7 +199,6 @@ void Station::AddTake(std::shared_ptr<LoopTake> take)
 	_children.push_back(take);
 
 	ArrangeTakes();
-	_resourcesInitialised = false;
 	_changesMade = true;
 }
 
@@ -237,10 +237,12 @@ unsigned int Station::CalcTakeHeight(unsigned int stationHeight, unsigned int nu
 	return (stationHeight - ((2 + (numTakes - 1)) * _Gap.Width)) / numTakes;
 }
 
-void Station::_CommitChanges()
+std::vector<JobAction> Station::_CommitChanges()
 {
 	std::swap(_backLoopTakes, _loopTakes);
 	_backLoopTakes = _loopTakes;
+
+	return {};
 }
 
 void Station::ArrangeTakes()

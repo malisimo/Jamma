@@ -11,18 +11,20 @@ namespace base
 	{
 	public:
 		ResourceUser() :
-			_resourcesInitialised(false)
+			_resourcesInitialised(false),
+			_resourcesNeedInitialising(false)
 		{ }
 
 	public:
 		virtual void InitResources(resources::ResourceLib& resourceLib, bool forceInit)
 		{
-			if (forceInit)
+			if (forceInit || _resourcesNeedInitialising)
 			{
 				ReleaseResources();
 
 				_InitResources(resourceLib, true);
 				_resourcesInitialised = true;
+				_resourcesNeedInitialising = false;
 			}
 			else
 			{
@@ -44,6 +46,8 @@ namespace base
 	protected:
 		virtual void _InitResources(resources::ResourceLib& resourceLib, bool forceInit) { };
 		virtual void _ReleaseResources() { };
+
+		bool _resourcesNeedInitialising;
 
 	private:
 		bool _resourcesInitialised;

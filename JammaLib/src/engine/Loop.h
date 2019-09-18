@@ -145,6 +145,7 @@ namespace engine
 		inline virtual int OnWrite(float samp, int indexOffset) override;
 		inline virtual int OnOverwrite(float samp, int indexOffset) override;
 		virtual void EndWrite(unsigned int numSamps, bool updateIndex) override;
+		virtual actions::ActionResult OnAction(actions::JobAction action) override;
 
 		void OnPlayRaw(const std::shared_ptr<base::MultiAudioSink> dest,
 			unsigned int channel,
@@ -163,7 +164,7 @@ namespace engine
 		void PunchOut();
 
 	protected:
-		virtual void _CommitChanges() override;
+		virtual std::vector<actions::JobAction> _CommitChanges() override;
 
 		void Reset();
 		void UpdateLoopModel();

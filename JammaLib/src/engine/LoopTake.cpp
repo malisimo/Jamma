@@ -10,6 +10,7 @@ using engine::Trigger;
 using resources::ResourceLib;
 using actions::ActionResult;
 using actions::TriggerAction;
+using actions::JobAction;
 using audio::AudioMixer;
 using audio::AudioMixerParams;
 using utils::Size2d;
@@ -156,7 +157,6 @@ void LoopTake::AddLoop(std::shared_ptr<Loop> loop)
 	_children.push_back(loop);
 
 	ArrangeLoops();
-	_resourcesInitialised = false;
 	_changesMade = true;
 }
 
@@ -214,10 +214,12 @@ void LoopTake::_InitResources(ResourceLib& resourceLib, bool forceInit)
 	ArrangeLoops();
 }
 
-void LoopTake::_CommitChanges()
+std::vector<JobAction> LoopTake::_CommitChanges()
 {
 	std::swap(_backLoops, _loops);
 	_backLoops.clear(); // TODO: Undo?
+
+	return {};
 }
 
 void LoopTake::ArrangeLoops()
