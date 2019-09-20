@@ -141,6 +141,11 @@ std::shared_ptr<Loop> LoopTake::AddLoop(unsigned int chan)
 		if (loop->Id() > highestLoopIndex)
 			highestLoopIndex = loop->Id();
 	}
+	for (auto& loop : _backLoops)
+	{
+		if (loop->Id() > highestLoopIndex)
+			highestLoopIndex = loop->Id();
+	}
 
 	LoopParams loopParams;
 	loopParams.Wav = "hh";
@@ -155,6 +160,7 @@ void LoopTake::AddLoop(std::shared_ptr<Loop> loop)
 {
 	_backLoops.push_back(loop);
 	_children.push_back(loop);
+	Init();
 
 	ArrangeLoops();
 	_changesMade = true;
@@ -216,24 +222,32 @@ void LoopTake::_InitResources(ResourceLib& resourceLib, bool forceInit)
 
 std::vector<JobAction> LoopTake::_CommitChanges()
 {
-	std::swap(_backLoops, _loops);
-	_backLoops.clear(); // TODO: Undo?
-
+	_loops = _backLoops; // TODO: Undo?
 	return {};
 }
 
 void LoopTake::ArrangeLoops()
 {
-	auto numLoops = (unsigned int)_loops.size();
+	auto numLoops = (unsigned int)_backLoops.size();
+
+	if (0 == numLoops)
+		return;
 
 	auto loopHeight = CalcLoopHeight(_sizeParams.Size.Height, numLoops);
 	utils::Size2d loopSize = { _sizeParams.Size.Width - (2 * _Gap.Width), _sizeParams.Size.Height - (2 * _Gap.Height) };
 
 	auto loopCount = 0;
-	for (auto& loop : _loops)
+	auto dScale = 0.1;
+	auto dTotalScale = 0.4 / ((double)numLoops);
+
+	for (auto& loop : _backLoops)
 	{
-		loop->SetSize(loopSize);
-		loop->SetModelPosition({ (float)_Gap.Width, (float)(_Gap.Height + (loopCount * loopHeight)), 0.0 });
+		//loop->SetSize(loopSize);
+		//loop->SetPosition({ (float)_Gap.Width, (float)(_Gap.Height + (loopCount * loopHeight)) });
+		loop->SetModelPosition({ 0.0f, 0.0f, 0.0f });
+		loop->SetModelScale(1.0 + (loopCount * dScale) - (dTotalScale * 0.5));
+
+		std::cout << "[Arranging loop " << loop->Id() << "] Scale: " << 1.0 + (loopCount * dScale) - (dTotalScale * 0.5) << std::endl;
 
 		loopCount++;
 	}

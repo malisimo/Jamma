@@ -197,6 +197,7 @@ void Station::AddTake(std::shared_ptr<LoopTake> take)
 {
 	_backLoopTakes.push_back(take);
 	_children.push_back(take);
+	Init();
 
 	ArrangeTakes();
 	_changesMade = true;
@@ -239,24 +240,25 @@ unsigned int Station::CalcTakeHeight(unsigned int stationHeight, unsigned int nu
 
 std::vector<JobAction> Station::_CommitChanges()
 {
-	std::swap(_backLoopTakes, _loopTakes);
-	_backLoopTakes = _loopTakes;
-
+	_loopTakes = _backLoopTakes; // TODO: Undo?
 	return {};
 }
 
 void Station::ArrangeTakes()
 {
-	auto numTakes = (unsigned int)_loopTakes.size();
+	auto numTakes = (unsigned int)_backLoopTakes.size();
 
-	auto takeHeight = CalcTakeHeight(_sizeParams.Size.Height, numTakes);
+	auto takeHeight = 5.0f;// CalcTakeHeight(_sizeParams.Size.Height, numTakes);
 	utils::Size2d takeSize = { _sizeParams.Size.Width - (2 * _Gap.Width), _sizeParams.Size.Height - (2 * _Gap.Height) };
 
 	auto takeCount = 0;
-	for (auto& take : _loopTakes)
+	for (auto& take : _backLoopTakes)
 	{
-		take->SetSize(takeSize);
-		take->SetPosition({ (int)_Gap.Width, (int)(_Gap.Height + (takeCount * takeHeight)) });
+		//take->SetSize(takeSize);
+		take->SetPosition({ 0, (int)(_Gap.Height + (takeCount * 100 * takeHeight)) });
+		take->SetModelPosition({0.0f, (float)(takeCount * takeHeight), 0.0f });
+		take->SetModelScale(1.0);
+		std::cout << "[Arranging take " << take->Id() << "] Y: " << (float)(takeCount * takeHeight) << std::endl;
 
 		takeCount++;
 	}

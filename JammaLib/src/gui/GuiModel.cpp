@@ -50,6 +50,7 @@ void GuiModel::Draw3d(DrawContext& ctx)
 		child->Draw3d(ctx);
 
 	glCtx.PopMvp();
+	glCtx.PopMvp();
 }
 
 void GuiModel::SetGeometry(std::vector<float> verts, std::vector<float> uvs)

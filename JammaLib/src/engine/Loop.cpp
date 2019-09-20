@@ -144,7 +144,7 @@ void Loop::OnPlay(const std::shared_ptr<MultiAudioSink> dest,
 	if (STATE_PLAYING != _state)
 		return;
 	
-	auto index = _index;
+	auto index = _playPos;
 	auto bufSize = _length + _MaxFadeSamps;
 	while (index >= bufSize)
 		index -= _length;
@@ -354,6 +354,7 @@ std::vector<JobAction> Loop::_CommitChanges()
 
 		JobAction job;
 		job.JobActionType = JobAction::JOB_RENDERWAVE;
+		job.SourceId = Id();
 		job.Receiver = ActionReceiver::shared_from_this();
 		return { job };
 	}

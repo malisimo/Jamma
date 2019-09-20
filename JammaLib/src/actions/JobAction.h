@@ -16,7 +16,7 @@ namespace actions
 
 		bool operator==(const JobAction& other) {
 			if (other.JobActionType == JobActionType)
-				return true;
+				return other.SourceId == SourceId;
 
 			return false;
 		}
@@ -28,6 +28,7 @@ namespace actions
 		};
 
 		JobType JobActionType;
+		unsigned long SourceId;
 		std::weak_ptr<base::ActionReceiver> Receiver;
 	};
 }
