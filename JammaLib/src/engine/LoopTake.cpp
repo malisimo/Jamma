@@ -49,10 +49,11 @@ std::optional<std::shared_ptr<LoopTake>> LoopTake::FromFile(LoopTakeParams takeP
 	return take;
 }
 
-utils::Position2d LoopTake::Position() const
+void LoopTake::SetSize(utils::Size2d size)
 {
-	auto pos = ModelPosition();
-	return { (int)round(pos.X), (int)round(pos.Y) };
+	GuiElement::SetSize(size);
+
+	ArrangeLoops();
 }
 
 void LoopTake::OnPlay(const std::shared_ptr<MultiAudioSink> dest,
@@ -210,7 +211,14 @@ unsigned int LoopTake::CalcLoopHeight(unsigned int takeHeight, unsigned int numL
 	if (0 == numLoops)
 		return 0;
 
-	return (takeHeight - ((2 + (numLoops - 1)) * _Gap.Width)) / numLoops;
+	auto minHeight = 5;
+	int totalGap = (numLoops + 1) * (int)_Gap.Width;
+	int height = (((int)takeHeight) - totalGap) / (int)numLoops;
+
+	if (height < minHeight)
+		return minHeight;
+
+	return height;
 }
 
 void LoopTake::_InitResources(ResourceLib& resourceLib, bool forceInit)
@@ -236,14 +244,14 @@ void LoopTake::ArrangeLoops()
 	auto loopHeight = CalcLoopHeight(_sizeParams.Size.Height, numLoops);
 	utils::Size2d loopSize = { _sizeParams.Size.Width - (2 * _Gap.Width), _sizeParams.Size.Height - (2 * _Gap.Height) };
 
-	auto loopCount = 0;
+	auto loopCount = 0u;
 	auto dScale = 0.1;
 	auto dTotalScale = 0.4 / ((double)numLoops);
 
 	for (auto& loop : _backLoops)
 	{
-		//loop->SetSize(loopSize);
-		//loop->SetPosition({ (float)_Gap.Width, (float)(_Gap.Height + (loopCount * loopHeight)) });
+		loop->SetPosition({ (int)_Gap.Width, (int)(_Gap.Height + (loopCount * loopHeight)) });
+		loop->SetSize(loopSize);
 		loop->SetModelPosition({ 0.0f, 0.0f, 0.0f });
 		loop->SetModelScale(1.0 + (loopCount * dScale) - (dTotalScale * 0.5));
 

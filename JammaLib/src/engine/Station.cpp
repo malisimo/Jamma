@@ -62,6 +62,14 @@ std::optional<std::shared_ptr<Station>> Station::FromFile(StationParams stationP
 	return station;
 }
 
+void Station::SetSize(utils::Size2d size)
+{
+	GuiElement::SetSize(size);
+
+	ArrangeTakes();
+}
+
+
 utils::Position2d Station::Position() const
 {
 	return _modelScreenPos;
@@ -235,7 +243,14 @@ unsigned int Station::CalcTakeHeight(unsigned int stationHeight, unsigned int nu
 	if (0 == numTakes)
 		return 0;
 
-	return (stationHeight - ((2 + (numTakes - 1)) * _Gap.Width)) / numTakes;
+	int minHeight = 5;
+	int totalGap = (numTakes + 1) * _Gap.Width;
+	int height = (((int)stationHeight) - totalGap) / (int)numTakes;
+
+	if (height < minHeight)
+		return minHeight;
+
+	return height;
 }
 
 std::vector<JobAction> Station::_CommitChanges()
@@ -248,14 +263,14 @@ void Station::ArrangeTakes()
 {
 	auto numTakes = (unsigned int)_backLoopTakes.size();
 
-	auto takeHeight = 5.0f;// CalcTakeHeight(_sizeParams.Size.Height, numTakes);
-	utils::Size2d takeSize = { _sizeParams.Size.Width - (2 * _Gap.Width), _sizeParams.Size.Height - (2 * _Gap.Height) };
+	auto takeHeight = CalcTakeHeight(_sizeParams.Size.Height, numTakes);
+	utils::Size2d takeSize = { _sizeParams.Size.Width - (2 * _Gap.Width), takeHeight - (2 * _Gap.Height) };
 
 	auto takeCount = 0;
 	for (auto& take : _backLoopTakes)
 	{
-		//take->SetSize(takeSize);
-		take->SetPosition({ 0, (int)(_Gap.Height + (takeCount * 100 * takeHeight)) });
+		take->SetPosition({ 0, (int)(_Gap.Height + (takeCount * takeHeight)) });
+		take->SetSize(takeSize);
 		take->SetModelPosition({0.0f, (float)(takeCount * takeHeight), 0.0f });
 		take->SetModelScale(1.0);
 		std::cout << "[Arranging take " << take->Id() << "] Y: " << (float)(takeCount * takeHeight) << std::endl;

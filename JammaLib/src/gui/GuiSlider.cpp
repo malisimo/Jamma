@@ -67,11 +67,6 @@ void GuiSlider::SetSize(Size2d size)
 	GuiElement::SetSize(size);
 
 	OnValueChange(true);
-
-	_texture.SetSize(_sizeParams.Size);
-	_overTexture.SetSize(_sizeParams.Size);
-	_downTexture.SetSize(_sizeParams.Size);
-	_outTexture.SetSize(_sizeParams.Size);
 }
 
 bool GuiSlider::HitTest(Position2d localPos)
@@ -177,7 +172,7 @@ ActionResult GuiSlider::OnAction(TouchMoveAction action)
 	auto dPos = action.Position - _initClickPos;
 	auto dragPos = _initDragPos + dPos;
 
-	_valueOffset = CalcValueOffset(_sliderParams, dragPos, _initDragPos, _initValue);
+	_valueOffset = CalcValueOffset(_sliderParams, _sizeParams.Size, dragPos, _initDragPos, _initValue);
 	std::cout << "InitValue: " << _initValue << ", ValueOffset: " << _valueOffset << " = " << (_initValue + _valueOffset) << std::endl;
 
 	OnValueChange(false);
@@ -233,13 +228,14 @@ void GuiSlider::_ReleaseResources()
 void GuiSlider::OnValueChange(bool bypassUpdates)
 {
 	auto value = _initValue + _valueOffset;
-	_dragElement.SetPosition(CalcDragPos(_sliderParams, value));
+	_dragElement.SetPosition(CalcDragPos(_sliderParams, _sizeParams.Size, value));
 
 	if (_receiver && !bypassUpdates)
 		_receiver->OnAction(DoubleAction(value));
 }
 
 double GuiSlider::CalcValueOffset(GuiSliderParams params,
+	utils::Size2d size,
 	Position2d dragPos,
 	Position2d initDragPos,
 	double initValue)
@@ -247,7 +243,7 @@ double GuiSlider::CalcValueOffset(GuiSliderParams params,
 	auto valRange = params.Max - params.Min;
 	double dragFrac = 0.0;
 
-	auto dragLength = CalcDragLength(params);
+	auto dragLength = CalcDragLength(params, size);
 
 	if (dragLength > 0)
 		dragFrac = GuiSliderParams::SLIDER_VERTICAL == params.Orientation ?
@@ -269,10 +265,10 @@ double GuiSlider::CalcValueOffset(GuiSliderParams params,
 	auto newDragPos = GuiSliderParams::SLIDER_VERTICAL == params.Orientation ?
 		Position2d{
 			params.DragControlOffset.X,
-			((int)round(dragFrac * CalcDragLength(params))) + params.DragControlOffset.Y
+			((int)round(dragFrac * CalcDragLength(params, size))) + params.DragControlOffset.Y
 	} :
 		Position2d{
-			((int)round(dragFrac * CalcDragLength(params))) + params.DragControlOffset.X,
+			((int)round(dragFrac * CalcDragLength(params, size))) + params.DragControlOffset.X,
 			params.DragControlOffset.Y
 	};
 
@@ -280,12 +276,13 @@ double GuiSlider::CalcValueOffset(GuiSliderParams params,
 	auto dDrag = GuiSliderParams::SLIDER_VERTICAL == params.Orientation ?
 		dDragPos.Y :
 		dDragPos.X;
-	auto dDragFrac = ((double)dDrag) / ((double)CalcDragLength(params));
+	auto dDragFrac = ((double)dDrag) / ((double)CalcDragLength(params, size));
 
 	return valRange * dDragFrac;
 }
 
 utils::Position2d GuiSlider::CalcDragPos(GuiSliderParams params,
+	utils::Size2d size,
 	double value)
 {
 	auto valRange = params.Max - params.Min;
@@ -294,17 +291,31 @@ utils::Position2d GuiSlider::CalcDragPos(GuiSliderParams params,
 	return GuiSliderParams::SLIDER_VERTICAL == params.Orientation ?
 		Position2d{
 			params.DragControlOffset.X,
-			((int)round(valFrac * CalcDragLength(params))) + params.DragControlOffset.Y
+			((int)round(valFrac * CalcDragLength(params, size))) + params.DragControlOffset.Y
 	} :
 		Position2d{
-			((int)round(valFrac * CalcDragLength(params))) + params.DragControlOffset.X,
+			((int)round(valFrac * CalcDragLength(params, size))) + params.DragControlOffset.X,
 			params.DragControlOffset.Y
 	};
 }
 
-unsigned int GuiSlider::CalcDragLength(GuiSliderParams params)
+unsigned int GuiSlider::CalcDragLength(GuiSliderParams params,
+	utils::Size2d size)
 {
-	return GuiSliderParams::SLIDER_VERTICAL == params.Orientation ?
-		params.Size.Height - params.DragControlSize.Height - (2 * params.DragGap.Height) :
-		params.Size.Width - params.DragControlSize.Width - (2 * params.DragGap.Width);
+	if (GuiSliderParams::SLIDER_VERTICAL == params.Orientation)
+	{
+		auto h = params.DragControlSize.Height + (2 * params.DragGap.Height);
+		if (h > size.Height)
+			return size.Height;
+		else
+			return size.Height - h;
+	}
+	else
+	{
+		auto w = params.DragControlSize.Width + (2 * params.DragGap.Width);
+		if (w > params.Size.Width)
+			return params.Size.Width;
+		else
+			return params.Size.Width - w;
+	}
 }

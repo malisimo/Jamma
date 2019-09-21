@@ -99,9 +99,13 @@ namespace gui
 		virtual void _InitResources(resources::ResourceLib& resourceLib, bool forceInit) override;
 		virtual void _ReleaseResources() override;
 
-		static double CalcValueOffset(GuiSliderParams params, utils::Position2d dragPos, utils::Position2d initDragPos, double initValue);
-		static utils::Position2d CalcDragPos(GuiSliderParams params, double value);
-		static unsigned int CalcDragLength(GuiSliderParams params);
+		static double CalcValueOffset(GuiSliderParams params,
+			utils::Size2d size,
+			utils::Position2d dragPos,
+			utils::Position2d initDragPos,
+			double initValue);
+		static utils::Position2d CalcDragPos(GuiSliderParams params, utils::Size2d size, double value);
+		static unsigned int CalcDragLength(GuiSliderParams params, utils::Size2d size);
 		void OnValueChange(bool bypassUpdate);
 
 	private:

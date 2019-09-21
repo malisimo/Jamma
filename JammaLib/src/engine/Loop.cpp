@@ -34,7 +34,7 @@ Loop::Loop(LoopParams loopParams,
 
 	GuiModelParams modelParams;
 	modelParams.Size = { 12, 14 };
-	modelParams.ModelScale = .1f;
+	modelParams.ModelScale = 1.0f;
 	modelParams.ModelTexture = "grid";
 	modelParams.ModelShader = "texture_shaded";
 	_model = std::make_shared<GuiModel>(modelParams);
@@ -89,7 +89,7 @@ audio::AudioMixerParams Loop::GetMixerParams(utils::Size2d loopSize,
 	audio::BehaviourParams behaviour)
 {
 	AudioMixerParams mixerParams;
-	mixerParams.Size = { 160, 320 };
+	mixerParams.Size = { 110, loopSize.Height };
 	mixerParams.Position = { 6, 6 };
 	mixerParams.Behaviour = behaviour;
 
@@ -422,11 +422,11 @@ void Loop::UpdateLoopModel()
 
 double Loop::CalcDrawRadius()
 {
-	auto minRadius = 200.0;
-	auto maxRadius = 800.0;
-	auto radius = 120.0 * log(_length) - 1000;
+	auto minRadius = 100.0;
+	auto maxRadius = 400.0;
+	auto radius = 70.0 * log(_length) - 600;
 
-	return std::clamp(radius, 200.0, 800.0);
+	return std::clamp(radius, minRadius, maxRadius);
 }
 
 std::tuple<std::vector<float>, std::vector<float>, float, float>

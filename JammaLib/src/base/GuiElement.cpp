@@ -124,9 +124,10 @@ void GuiElement::Draw3d(DrawContext& ctx)
 
 ActionResult GuiElement::OnAction(KeyAction action)
 {
-	for (auto& child : _children)
+	for (auto child = _children.rbegin();
+		child != _children.rend(); ++child)
 	{
-		auto res = child->OnAction(action);
+		auto res = (*child)->OnAction(action);
 
 		if (res.IsEaten)
 			return res;
@@ -137,10 +138,11 @@ ActionResult GuiElement::OnAction(KeyAction action)
 
 ActionResult GuiElement::OnAction(TouchAction action)
 {
-	for (auto& child : _children)
+	for (auto child = _children.rbegin();
+		child != _children.rend(); ++child)
 	{
-		auto res = child->OnAction(child->ParentToLocal(action));
-		
+		auto res = (*child)->OnAction((*child)->ParentToLocal(action));
+
 		if (res.IsEaten)
 			return res;
 	}
@@ -153,9 +155,10 @@ ActionResult GuiElement::OnAction(TouchAction action)
 
 ActionResult GuiElement::OnAction(TouchMoveAction action)
 {
-	for (auto& child : _children)
+	for (auto child = _children.rbegin();
+		child != _children.rend(); ++child)
 	{
-		auto res = child->OnAction(child->ParentToLocal(action));
+		auto res = (*child)->OnAction((*child)->ParentToLocal(action));
 
 		if (res.IsEaten)
 			return res;

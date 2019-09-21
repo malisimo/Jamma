@@ -47,6 +47,7 @@ namespace engine
 			io::JamFile::Station stationStruct,
 			std::wstring dir);
 
+		virtual void SetSize(utils::Size2d size) override;
 		virtual	utils::Position2d Position() const override;
 		virtual MultiAudioDirection MultiAudibleDirection() const override { return MULTIAUDIO_BOTH; }
 		virtual void OnPlay(const std::shared_ptr<base::MultiAudioSink> dest, unsigned int numSamps) override;

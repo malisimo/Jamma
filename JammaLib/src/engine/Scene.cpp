@@ -29,7 +29,7 @@ Scene::Scene(SceneParams params) :
 	_camera(CameraParams(
 		MoveableParams(
 			Position2d{ 0,0 },
-			Position3d{ 0, 0, 100 },
+			Position3d{ 0, 0, 420 },
 			1.0),
 		0)),
 	_audioMutex(std::mutex())
@@ -70,7 +70,7 @@ std::optional<std::shared_ptr<Scene>> Scene::FromFile(SceneParams sceneParams,
 	StationParams stationParams;
 	stationParams.Position = { 20, 20 };
 	stationParams.ModelPosition = { -50, -20 };
-	stationParams.Size = { 140, 80 };
+	stationParams.Size = { 140, 300 };
 	stationParams.GlobalClock = globalClock;
 
 	for (auto stationStruct : jamStruct.Stations)
@@ -433,7 +433,7 @@ void Scene::InitSize()
 	auto ar = _sizeParams.Size.Height > 0 ?
 		(float)_sizeParams.Size.Width / (float)_sizeParams.Size.Height :
 		1.0f;
-	auto projection = glm::perspective(glm::radians(60.0f), ar, 0.5f, 300.0f);
+	auto projection = glm::perspective(glm::radians(80.0f), ar, 10.0f, 1000.0f);
 	_viewProj = projection * View();
 
 	auto hScale = _sizeParams.Size.Width > 0 ? 2.0f / (float)_sizeParams.Size.Width : 1.0f;

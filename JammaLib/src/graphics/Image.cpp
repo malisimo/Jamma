@@ -23,13 +23,7 @@ Image::Image(ImageParams params) :
 
 void Image::SetSize(Size2d size)
 {
-	//ReleaseResources();
-
 	Sizeable::SetSize(size);
-
-	//_drawParams.UpdateResourceFunc(ResourceUser::shared_from_this());
-
-	//InitVertexArray();
 }
 
 void Image::Draw(DrawContext& ctx)
@@ -39,6 +33,10 @@ void Image::Draw(DrawContext& ctx)
 
 	if (!texture || !shader)
 		return;
+
+	auto& glCtx = dynamic_cast<GlDrawContext&>(ctx);
+
+	glCtx.PushMvp(glm::scale(glm::mat4(1.0), glm::vec3(_sizeParams.Size.Width, _sizeParams.Size.Height, 1.f)));
 
 	glUseProgram(shader->GetId());
 	shader->SetUniforms(dynamic_cast<GlDrawContext&>(ctx));
@@ -53,6 +51,8 @@ void Image::Draw(DrawContext& ctx)
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindVertexArray(0);
 	glUseProgram(0);
+
+	glCtx.PopMvp();
 }
 
 void Image::Draw3d(DrawContext& ctx)
@@ -132,11 +132,11 @@ bool Image::InitVertexArray()
 
 	GLfloat verts[] = {
 		0.0f, 0.0f, 0.0f,
-		(float)_sizeParams.Size.Width, 0.0f, 0.0f,
-		0.0f,  (float)_sizeParams.Size.Height, 0.0f,
-		0.0f,  (float)_sizeParams.Size.Height, 0.0f,
-		(float)_sizeParams.Size.Width, 0.0f, 0.0f,
-		(float)_sizeParams.Size.Width, (float)_sizeParams.Size.Height, 0.0f,
+		1.0f, 0.0f, 0.0f,
+		0.0f,  1.0f, 0.0f,
+		0.0f,  1.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,
+		1.0f, 1.0f, 0.0f,
 	};
 
 	glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer[0]);
