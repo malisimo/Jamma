@@ -62,6 +62,7 @@ namespace audio
 		void ToDac(float* outBuf, unsigned int numChannels, unsigned int numSamps);
 		const std::shared_ptr<base::MultiAudioSource> Source();
 		const std::shared_ptr<base::MultiAudioSink> Sink();
+		void InitPlay(unsigned int delaySamps, unsigned int blockSize);
 
 	public:
 		static const unsigned int DefaultBufferSize = 3000;

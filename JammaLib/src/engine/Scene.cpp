@@ -372,6 +372,7 @@ void Scene::OnAudio(float* inBuf, float* outBuf, unsigned int numSamps)
 		auto inDeviceInfo = nullptr == _audioDevice ?
 			RtAudio::DeviceInfo() : _audioDevice->GetInputStreamInfo();
 		_channelMixer->FromAdc(inBuf, inDeviceInfo.inputChannels, numSamps);
+		_channelMixer->InitPlay(0, numSamps);
 
 		for (auto& station : _stations)
 		{

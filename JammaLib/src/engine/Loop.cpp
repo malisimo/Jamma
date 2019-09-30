@@ -20,7 +20,7 @@ Loop::Loop(LoopParams loopParams,
 	GuiElement(loopParams),
 	AudioSink(),
 	_modelNeedsUpdating(false),
-	_playPos(0),
+	_playIndex(0),
 	_pitch(1.0),
 	_length(0),
 	_state(STATE_PLAYING),
@@ -118,7 +118,7 @@ void Loop::Draw3d(DrawContext& ctx)
 	auto pos = ModelPosition();
 	auto scale = ModelScale();
 
-	auto frac = _length == 0 ? 0.0 : std::max(0.0, std::min(1.0, ((double)(_playPos % _length)) / ((double)_length)));
+	auto frac = _length == 0 ? 0.0 : std::max(0.0, std::min(1.0, ((double)(_playIndex % _length)) / ((double)_length)));
 
 	_modelScreenPos = glCtx.ProjectScreen(pos);
 	glCtx.PushMvp(glm::translate(glm::mat4(1.0), glm::vec3(pos.X, pos.Y, pos.Z)));
@@ -131,32 +131,6 @@ void Loop::Draw3d(DrawContext& ctx)
 	glCtx.PopMvp();
 	glCtx.PopMvp();
 	glCtx.PopMvp();
-}
-
-void Loop::OnPlay(const std::shared_ptr<MultiAudioSink> dest,
-	unsigned int numSamps)
-{
-	// Mixer will stereo spread the mono wav
-	// and adjust level
-	if (0 == _length)
-		return;
-
-	if (STATE_PLAYING != _state)
-		return;
-	
-	auto index = _playPos;
-	auto bufSize = _length + _MaxFadeSamps;
-	while (index >= bufSize)
-		index -= _length;
-
-	for (auto i = 0u; i < numSamps; i++)
-	{
-		_mixer->OnPlay(dest, _buffer[index], i);
-		
-		index++;
-		if (index >= bufSize)
-			index -= _length;
-	}
 }
 
 int Loop::OnWrite(float samp, int indexOffset)
@@ -173,7 +147,7 @@ int Loop::OnOverwrite(float samp, int indexOffset)
 
 	auto bufSize = (unsigned long)_buffer.size();
 
-	if (bufSize <= (_index + indexOffset))
+	if (bufSize <= (_writeIndex + indexOffset))
 	{
 		if (bufSize >= _MaxBufferSize)
 			return indexOffset;
@@ -189,7 +163,7 @@ int Loop::OnOverwrite(float samp, int indexOffset)
 		}
 	}
 	else
-		_buffer[_index + indexOffset] = samp;
+		_buffer[_writeIndex + indexOffset] = samp;
 
 	return indexOffset + 1;
 }
@@ -205,11 +179,37 @@ void Loop::EndWrite(unsigned int numSamps, bool updateIndex)
 	if (!updateIndex)
 		return;
 
-	_index += numSamps;
-	_length = _index;
+	_writeIndex += numSamps;
+	_length = _writeIndex;
 
 	_modelNeedsUpdating = true;
 	_changesMade = true;
+}
+
+void Loop::OnPlay(const std::shared_ptr<MultiAudioSink> dest,
+	unsigned int numSamps)
+{
+	// Mixer will stereo spread the mono wav
+	// and adjust level
+	if (0 == _length)
+		return;
+
+	if (STATE_PLAYING != _state)
+		return;
+
+	auto index = _playIndex;
+	auto bufSize = _length + _MaxFadeSamps;
+	while (index >= bufSize)
+		index -= _length;
+
+	for (auto i = 0u; i < numSamps; i++)
+	{
+		_mixer->OnPlay(dest, _buffer[index], i);
+
+		index++;
+		if (index >= bufSize)
+			index -= _length;
+	}
 }
 
 void Loop::EndMultiPlay(unsigned int numSamps)
@@ -220,11 +220,11 @@ void Loop::EndMultiPlay(unsigned int numSamps)
 	if (0 == _length)
 		return;
 		
-	_playPos += numSamps;
+	_playIndex += numSamps;
 
 	auto bufSize = _length + _MaxFadeSamps;
-	while (_playPos > bufSize)
-		_playPos -= _length;
+	while (_playIndex > bufSize)
+		_playIndex -= _length;
 
 	for (unsigned int chan = 0; chan < NumOutputChannels(); chan++)
 	{
@@ -243,7 +243,7 @@ void Loop::OnPlayRaw(const std::shared_ptr<base::MultiAudioSink> dest,
 	if (0 == _length)
 		return;
 
-	auto index = _playPos + delaySamps;
+	auto index = _playIndex + delaySamps;
 	auto bufSize = _length + _MaxFadeSamps;
 	while (index >= bufSize)
 		index -= _length;
@@ -319,10 +319,14 @@ void Loop::Play(unsigned long index, unsigned long length)
 		return;
 	}
 
-	_playPos = (index + _MaxFadeSamps) >= bufSize ? (bufSize-1) : index + _MaxFadeSamps;
+	_playIndex = (index + _MaxFadeSamps) >= bufSize ? (bufSize-1) : index + _MaxFadeSamps;
 	_length = (length + _MaxFadeSamps) <= bufSize ? length : bufSize - _MaxFadeSamps;
 	
 	_state = length > 0 ? STATE_PLAYING : STATE_INACTIVE;
+	std::stringstream ss;
+	ss << "G:/Projects/loop_" << Id() << "_" << _loopParams.TakeId << ".wav";
+
+	auto loadOpt = io::WavReadWriter().Write(utils::DecodeUtf8(ss.str()), _buffer, _length, 44100);
 }
 
 void Loop::Ditch()
@@ -379,8 +383,8 @@ ActionResult Loop::OnAction(JobAction action)
 
 void Loop::Reset()
 {
-	_index = 0;
-	_playPos = 0;
+	_writeIndex = 0;
+	_playIndex = 0;
 	_length = 0;
 	_state = STATE_INACTIVE;
 	_changesMade = true;

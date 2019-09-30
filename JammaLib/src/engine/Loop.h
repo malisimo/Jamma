@@ -92,17 +92,17 @@ namespace engine
 		Loop(Loop&& other) :
 			GuiElement(other._guiParams),
 			_modelNeedsUpdating(other._modelNeedsUpdating),
-			_playPos(other._playPos),
 			_pitch(other._pitch),
 			_length(other._length),
 			_state(other._state),
+			_playIndex(other._playIndex),
 			_loopParams{other._loopParams},
 			_mixer(std::move(other._mixer)),
 			_model(std::move(other._model)),
 			_buffer(std::move(other._buffer)),
 			_backBuffer(std::move(other._backBuffer))
 		{
-			other._index = 0;
+			other._writeIndex = 0;
 			other._loopParams = LoopParams();
 			other._mixer = std::make_unique<audio::AudioMixer>(audio::AudioMixerParams());
 		}
@@ -113,12 +113,12 @@ namespace engine
 			{
 				ReleaseResources();
 				std::swap(_modelNeedsUpdating, other._modelNeedsUpdating);
-				std::swap(_playPos, other._playPos);
 				std::swap(_pitch, other._pitch);
 				std::swap(_length, other._length);
 				std::swap(_state, other._state);
 				std::swap(_guiParams, other._guiParams);
-				std::swap(_index, other._index);
+				std::swap(_writeIndex, other._writeIndex);
+				std::swap(_playIndex, other._playIndex);
 				std::swap(_loopParams, other._loopParams);
 				_mixer.swap(other._mixer);
 				_model.swap(other._model);
@@ -183,7 +183,7 @@ namespace engine
 		static const unsigned int _GrainSamps = 1100;
 
 		bool _modelNeedsUpdating;
-		unsigned long _playPos;
+		unsigned long _playIndex;
 		double _pitch;
 		unsigned long _length;
 		LoopVisualState _state;

@@ -151,6 +151,7 @@ std::shared_ptr<Loop> LoopTake::AddLoop(unsigned int chan)
 	LoopParams loopParams;
 	loopParams.Wav = "hh";
 	loopParams.Id = highestLoopIndex + 1;
+	loopParams.TakeId = _id;
 	auto loop = std::make_shared<Loop>(loopParams, mixerParams);
 	AddLoop(loop);
 

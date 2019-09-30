@@ -43,6 +43,17 @@ void ChannelMixer::FromAdc(float* inBuf, unsigned int numChannels, unsigned int 
 	}
 }
 
+void ChannelMixer::InitPlay(unsigned int delaySamps, unsigned int blockSize)
+{
+	for (auto chan = 0u; chan < _adcMixer->NumOutputChannels(); chan++)
+	{
+		auto buf = _adcMixer->Channel(chan);
+
+		if (buf)
+			buf->Delay(delaySamps + blockSize);
+	}
+}
+
 void ChannelMixer::ToDac(float* outBuf, unsigned int numChannels, unsigned int numSamps)
 {
 	if (numSamps < 1 || numChannels < 1)

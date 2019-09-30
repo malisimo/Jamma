@@ -4,7 +4,7 @@ using namespace audio;
 
 AudioBuffer::AudioBuffer() :
 	AudioSource({}),
-	_index(0),
+	_playIndex(0),
 	_length(0),
 	_buffer(std::vector<float>(0, 0.0f))
 {
@@ -12,7 +12,7 @@ AudioBuffer::AudioBuffer() :
 
 AudioBuffer::AudioBuffer(unsigned int size) :
 	AudioSource({}),
-	_index(0),
+	_playIndex(0),
 	_length(0),
 	_buffer(std::vector<float>(size, 0.0f))
 {
@@ -28,7 +28,7 @@ void AudioBuffer::OnPlay(const std::shared_ptr<base::AudioSink> dest,
 	if (_length == 0)
 		return;
 
-	auto index = _index;
+	auto index = _playIndex;
 	while (index >= _length)
 		index -= _length;
 
@@ -47,10 +47,10 @@ void AudioBuffer::OnPlay(const std::shared_ptr<base::AudioSink> dest,
 void AudioBuffer::EndPlay(unsigned int numSamps)
 {
 	auto bufSize = (unsigned int)_buffer.size();
-	_index += numSamps;
+	_playIndex += numSamps;
 
-	while (bufSize <= _index)
-		_index -= bufSize;
+	while (bufSize <= _playIndex)
+		_playIndex -= bufSize;
 
 	_length += numSamps;
 	if (_length > bufSize)
@@ -61,10 +61,10 @@ inline int AudioBuffer::OnWrite(float samp, int indexOffset)
 {
 	auto bufSize = (unsigned int)_buffer.size();
 
-	while (bufSize <= _index + indexOffset)
+	while (bufSize <= _writeIndex + indexOffset)
 		indexOffset -= (int)_buffer.size();
 
-	_buffer[_index + indexOffset]+= samp;
+	_buffer[_writeIndex + indexOffset]+= samp;
 
 	return indexOffset + 1;
 }
@@ -73,10 +73,10 @@ inline int AudioBuffer::OnOverwrite(float samp, int indexOffset)
 {
 	auto bufSize = (unsigned int)_buffer.size();
 
-	while (bufSize <= _index + indexOffset)
+	while (bufSize <= _writeIndex + indexOffset)
 		indexOffset -= (int)_buffer.size();
 
-	_buffer[_index + indexOffset] = samp;
+	_buffer[_writeIndex + indexOffset] = samp;
 
 	return indexOffset + 1;
 }
@@ -92,7 +92,7 @@ void AudioBuffer::EndWrite(unsigned int numSamps, bool updateIndex)
 		_length = (unsigned int)_buffer.size();
 
 	if (updateIndex)
-		SetIndex(_index + numSamps);
+		_SetWriteIndex(_writeIndex + numSamps);
 }
 
 void AudioBuffer::SetSize(unsigned int size)
@@ -100,20 +100,20 @@ void AudioBuffer::SetSize(unsigned int size)
 	_buffer.resize(size);
 }
 
-void AudioBuffer::SetIndex(unsigned int index)
+void AudioBuffer::_SetWriteIndex(unsigned int index)
 {
 	auto bufSize = (unsigned int)_buffer.size();
 
 	if (0 == bufSize)
 	{
-		_index = 0;
+		_writeIndex = 0;
 		return;
 	}
 
 	while (index >= bufSize)
 		index-= bufSize;
 
-	_index = index;
+	_writeIndex = index;
 }
 
 unsigned int AudioBuffer::NumSamps() const
@@ -141,9 +141,12 @@ std::vector<float>::iterator AudioBuffer::Delay(unsigned int sampsDelay)
 	auto bufSize = (unsigned int)_buffer.size();
 
 	if (0 == bufSize)
+	{
+		_playIndex = 0;
 		return _buffer.begin();
+	}
 
 	auto sampsBehind = sampsDelay >= bufSize ? bufSize - 1 : sampsDelay;
-	auto offset = sampsBehind > _index ? (_index + bufSize) - sampsBehind : _index - sampsBehind;
-	return (_buffer.begin() + offset);
+	_playIndex = sampsBehind > _writeIndex ? (_writeIndex + bufSize) - sampsBehind : _writeIndex - sampsBehind;
+	return (_buffer.begin() + _playIndex);
 }

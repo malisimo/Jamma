@@ -10,7 +10,7 @@ namespace base
 		public virtual Audible
 	{
 	public:
-		AudioSink() : _index(0) {}
+		AudioSink() : _writeIndex(0) {}
 
 	public:
 		virtual AudioDirection AudibleDirection() const override { return AUDIO_SINK; }
@@ -33,6 +33,6 @@ namespace base
 		}
 
 	protected:
-		unsigned int _index;
+		unsigned long _writeIndex;
 	};
 }
