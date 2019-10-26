@@ -31,24 +31,24 @@ std::optional<RigFile> RigFile::FromStream(std::stringstream ss)
 	rig.Version = VERSION_V;
 	rig.Name = std::get<std::string>(rigParams.KeyValues["name"]);
 
-	auto gotAudio = false;
-	auto iter = rigParams.KeyValues.find("audio");
+	auto gotUser = false;
+	auto iter = rigParams.KeyValues.find("user");
 	if (iter != rigParams.KeyValues.end())
 	{
-		if (rigParams.KeyValues["audio"].index() == 6)
+		if (rigParams.KeyValues["user"].index() == 6)
 		{
-			auto audioJson = std::get<Json::JsonPart>(rigParams.KeyValues["audio"]);
-			auto audioOpt = AudioSettings::FromJson(audioJson);
+			auto userJson = std::get<Json::JsonPart>(rigParams.KeyValues["user"]);
+			auto userOpt = UserConfig::FromJson(userJson);
 
-			if (audioOpt.has_value())
+			if (userOpt.has_value())
 			{
-				rig.Audio = audioOpt.value();
-				gotAudio = true;
+				rig.User = userOpt.value();
+				gotUser = true;
 			}
 		}
 	}
 
-	if (!gotAudio)
+	if (!gotUser)
 		return std::nullopt;
 
 	iter = rigParams.KeyValues.find("triggers");
@@ -77,64 +77,6 @@ std::optional<RigFile> RigFile::FromStream(std::stringstream ss)
 bool RigFile::ToStream(RigFile rig, std::stringstream ss)
 {
 	return false;
-}
-
-std::optional<RigFile::AudioSettings> RigFile::AudioSettings::FromJson(Json::JsonPart json)
-{
-	std::string name;
-	unsigned int bufSize = 0;
-	unsigned int latency = 0;
-	unsigned int numChannelsIn = 0;
-	unsigned int numChannelsOut = 0;
-
-	auto iter = json.KeyValues.find("name");
-	if (iter != json.KeyValues.end())
-	{
-		if (json.KeyValues["name"].index() == 4)
-			name = std::get<std::string>(json.KeyValues["name"]);
-	}
-
-	iter = json.KeyValues.find("bufsize");
-	if (iter != json.KeyValues.end())
-	{
-		if (json.KeyValues["bufsize"].index() == 2)
-			bufSize = std::get<unsigned long>(json.KeyValues["bufsize"]);
-	}
-
-	iter = json.KeyValues.find("numchannelsin");
-	if (iter != json.KeyValues.end())
-	{
-		if (json.KeyValues["numchannelsin"].index() == 2)
-			numChannelsIn = std::get<unsigned long>(json.KeyValues["numchannelsin"]);
-	}
-
-	iter = json.KeyValues.find("numchannelsout");
-	if (iter != json.KeyValues.end())
-	{
-		if (json.KeyValues["numchannelsout"].index() == 2)
-			numChannelsOut = std::get<unsigned long>(json.KeyValues["numchannelsout"]);
-	}
-
-	if ((0 == bufSize) || name.empty())
-		return std::nullopt;
-
-	if ((0 == numChannelsIn) && (0 == numChannelsOut))
-		return std::nullopt;
-
-	iter = json.KeyValues.find("latency");
-	if (iter != json.KeyValues.end())
-	{
-		if (json.KeyValues["latency"].index() == 2)
-			latency = std::get<unsigned long>(json.KeyValues["latency"]);
-	}
-
-	AudioSettings audio;
-	audio.Name = name;
-	audio.BufSize = bufSize;
-	audio.Latency = latency;
-	audio.NumChannelsIn = numChannelsIn;
-	audio.NumChannelsOut = numChannelsOut;
-	return audio;
 }
 
 std::optional<RigFile::TriggerPair> RigFile::TriggerPair::FromJson(Json::JsonPart json)

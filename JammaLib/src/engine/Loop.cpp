@@ -118,12 +118,15 @@ void Loop::Draw3d(DrawContext& ctx)
 	auto pos = ModelPosition();
 	auto scale = ModelScale();
 
-	auto frac = _length == 0 ? 0.0 : std::max(0.0, std::min(1.0, ((double)(_playIndex % _length)) / ((double)_length)));
+	auto index = STATE_RECORDING == _state ? _writeIndex : _playIndex;
+	index = index > _MaxFadeSamps ? index - _MaxFadeSamps : index;
+
+	auto frac = _length == 0 ? 0.0 : 1.0 - std::max(0.0, std::min(1.0, ((double)(index % _length)) / ((double)_length)));
 
 	_modelScreenPos = glCtx.ProjectScreen(pos);
 	glCtx.PushMvp(glm::translate(glm::mat4(1.0), glm::vec3(pos.X, pos.Y, pos.Z)));
 	glCtx.PushMvp(glm::scale(glm::mat4(1.0), glm::vec3(scale, scale, scale)));
-	glCtx.PushMvp(glm::rotate(glm::mat4(1.0), (float)(TWOPI * frac), glm::vec3(0.0f, 1.0f, 0.0f)));
+	glCtx.PushMvp(glm::rotate(glm::mat4(1.0), (float)(TWOPI * (frac + 0.7)), glm::vec3(0.0f, 1.0f, 0.0f)));
 
 	for (auto& child : _children)
 		child->Draw3d(ctx);
@@ -180,7 +183,7 @@ void Loop::EndWrite(unsigned int numSamps, bool updateIndex)
 		return;
 
 	_writeIndex += numSamps;
-	_length = _writeIndex;
+	_length = _writeIndex > _MaxFadeSamps ? _writeIndex - _MaxFadeSamps : _writeIndex;
 
 	_modelNeedsUpdating = true;
 	_changesMade = true;

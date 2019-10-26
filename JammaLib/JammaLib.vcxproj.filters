@@ -341,6 +341,9 @@
     <ClInclude Include="src\utils\PathUtils.h">
       <Filter>src\utils</Filter>
     </ClInclude>
+    <ClInclude Include="src\io\UserConfig.h">
+      <Filter>src\io</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lib\glew\glew.c">
@@ -481,9 +484,6 @@
     <ClCompile Include="src\io\WavReadWriter.cpp">
       <Filter>src\audio</Filter>
     </ClCompile>
-    <ClCompile Include="src\io\TextReadWriter.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\actions\JobAction.cpp">
       <Filter>src\actions</Filter>
     </ClCompile>
@@ -504,6 +504,12 @@
     </ClCompile>
     <ClCompile Include="src\graphics\Camera.cpp">
       <Filter>src\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\UserConfig.cpp">
+      <Filter>src\io</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\TextReadWriter.cpp">
+      <Filter>src\io</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

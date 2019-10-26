@@ -81,7 +81,7 @@ std::optional<io::RigFile> LoadRig(io::InitFile& ini)
 {
 	io::TextReadWriter txtFile;
 
-	std::string rigJson = "{\"name\":\"default\",\"audio\":{\"name\":\"default\",\"bufsize\":512,\"numchannelsin\":2,\"numchannelsout\":2},\"triggers\":[{\"name\":\"Trig1\",\"stationtype\":0,\"pairs\":[{\"activatedown\":49,\"activateup\":49,\"ditchdown\":50,\"ditchup\":50}],\"input\":[0,1]}";
+	std::string rigJson = "{\"name\":\"default\",\"user\":{\"audio\":{\"name\":\"default\",\"bufsize\":512,\"numchannelsin\":2,\"numchannelsout\":2},\"loop\":{\"fadeTime\":400},\"trigger\":{\"preDelay\":400,\"debounceSamps\":280}},\"triggers\":[{\"name\":\"Trig1\",\"stationtype\":0,\"pairs\":[{\"activatedown\":49,\"activateup\":49,\"ditchdown\":50,\"ditchup\":50}],\"input\":[0,1]}";
 	auto res = txtFile.Read(ini.Rig, MAX_JSON_CHARS);
 	if (!res.has_value())
 	{

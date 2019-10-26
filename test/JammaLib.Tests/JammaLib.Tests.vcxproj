@@ -59,6 +59,7 @@
     <ClCompile Include="src\graphics\Window_Tests.cpp" />
     <ClCompile Include="src\audio\ChannelMixer_Tests.cpp" />
     <ClCompile Include="src\gui\GuiSlider_Tests.cpp" />
+    <ClCompile Include="src\io\UserConfig_Tests.cpp" />
     <ClCompile Include="src\io\RigFile_Tests.cpp" />
     <ClCompile Include="src\io\Json_Tests.cpp" />
     <ClCompile Include="src\io\JamFile_Tests.cpp" />
