@@ -44,7 +44,8 @@ namespace engine
 		public base::ActionReceiver
 	{
 	public:
-		Scene(SceneParams params);
+		Scene(SceneParams params,
+			UserConfig user);
 		~Scene()
 		{
 			ReleaseResources();
@@ -176,5 +177,6 @@ namespace engine
 		std::shared_mutex _jobMutex;
 		std::list<actions::JobAction> _jobList;
 		std::mutex _audioMutex;
+		UserConfig _userConfig;
 	};
 }

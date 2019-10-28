@@ -344,6 +344,9 @@
     <ClInclude Include="src\io\UserConfig.h">
       <Filter>src\io</Filter>
     </ClInclude>
+    <ClInclude Include="src\utils\MathUtils.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lib\glew\glew.c">

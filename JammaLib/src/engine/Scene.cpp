@@ -12,7 +12,8 @@ using namespace resources;
 using namespace utils;
 using namespace std::placeholders;
 
-Scene::Scene(SceneParams params) :
+Scene::Scene(SceneParams params,
+	UserConfig user) :
 	Drawable(params),
 	Sizeable(params),
 	_isSceneTouching(false),
@@ -32,7 +33,8 @@ Scene::Scene(SceneParams params) :
 			Position3d{ 0, 0, 420 },
 			1.0),
 		0)),
-	_audioMutex(std::mutex())
+	_audioMutex(std::mutex()),
+	_userConfig(user)
 {
 	GuiLabelParams labelParams(GuiElementParams(
 		DrawableParams{ "" },
@@ -55,7 +57,7 @@ std::optional<std::shared_ptr<Scene>> Scene::FromFile(SceneParams sceneParams,
 	std::wstring dir)
 {
 	auto globalClock = std::make_shared<Timer>();
-	auto scene = std::make_shared<Scene>(sceneParams);
+	auto scene = std::make_shared<Scene>(sceneParams, rigStruct.User);
 
 	TriggerParams trigParams;
 	trigParams.Size = { 24, 24 };
