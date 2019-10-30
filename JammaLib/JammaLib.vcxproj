@@ -335,6 +335,7 @@
     <ClCompile Include="src\base\GuiElement.cpp" />
     <ClCompile Include="src\io\TextReadWriter.cpp" />
     <ClCompile Include="src\io\UserConfig.cpp" />
+    <ClCompile Include="src\utils\MathUtils.cpp" />
     <ClCompile Include="src\utils\PathUtils.cpp" />
     <ClCompile Include="src\utils\ImageUtils.cpp" />
     <ClCompile Include="src\gui\GuiLabel.cpp" />

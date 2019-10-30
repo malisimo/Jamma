@@ -66,7 +66,7 @@ namespace io
 		unsigned int DelayRecordingSamps(int error) const {
 			if (error < 0)
 			{
-				if (IntroSamps() < -error)
+				if (-error > (int)IntroSamps())
 					return 0;
 			}
 
@@ -83,7 +83,6 @@ namespace io
 			return IntroSamps() + loopSamp;
 		}
 
-		std::string Name;
 		AudioSettings Audio;
 		LoopSettings Loop;
 		TriggerSettings Trigger;

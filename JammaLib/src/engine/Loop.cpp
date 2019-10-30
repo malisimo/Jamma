@@ -326,10 +326,6 @@ void Loop::Play(unsigned long index, unsigned long length)
 	_length = (length + _MaxFadeSamps) <= bufSize ? length : bufSize - _MaxFadeSamps;
 	
 	_state = length > 0 ? STATE_PLAYING : STATE_INACTIVE;
-	std::stringstream ss;
-	ss << "G:/Projects/loop_" << Id() << "_" << _loopParams.TakeId << ".wav";
-
-	auto loadOpt = io::WavReadWriter().Write(utils::DecodeUtf8(ss.str()), _buffer, _length, 44100);
 }
 
 void Loop::Ditch()

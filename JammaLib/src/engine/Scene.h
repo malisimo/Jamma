@@ -45,7 +45,7 @@ namespace engine
 	{
 	public:
 		Scene(SceneParams params,
-			UserConfig user);
+			io::UserConfig user);
 		~Scene()
 		{
 			ReleaseResources();
@@ -177,6 +177,6 @@ namespace engine
 		std::shared_mutex _jobMutex;
 		std::list<actions::JobAction> _jobList;
 		std::mutex _audioMutex;
-		UserConfig _userConfig;
+		io::UserConfig _userConfig;
 	};
 }

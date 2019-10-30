@@ -80,10 +80,13 @@ std::optional<std::shared_ptr<Scene>> Scene::FromFile(SceneParams sceneParams,
 		auto station = Station::FromFile(stationParams, stationStruct, dir);
 		if (station.has_value())
 		{
-			auto trigger = Trigger::FromFile(trigParams, rigStruct.Triggers[0]);
+			if (rigStruct.Triggers.size() > 0)
+			{
+				auto trigger = Trigger::FromFile(trigParams, rigStruct.Triggers[0]);
 
-			if (trigger.has_value())
-				station.value()->AddTrigger(trigger.value());
+				if (trigger.has_value())
+					station.value()->AddTrigger(trigger.value());
+			}
 
 			scene->AddStation(station.value());
 		}

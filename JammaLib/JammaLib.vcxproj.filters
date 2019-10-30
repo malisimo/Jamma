@@ -514,5 +514,8 @@
     <ClCompile Include="src\io\TextReadWriter.cpp">
       <Filter>src\io</Filter>
     </ClCompile>
+    <ClCompile Include="src\utils\MathUtils.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

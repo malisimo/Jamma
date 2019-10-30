@@ -11,14 +11,7 @@ using namespace io;
 
 std::optional<UserConfig> UserConfig::FromJson(Json::JsonPart json)
 {
-	if (json.KeyValues.find("name") == json.KeyValues.end())
-		return std::nullopt;
-
-	if (json.KeyValues["name"].index() != 4)
-		return std::nullopt;
-
 	UserConfig cfg;
-	cfg.Name = std::get<std::string>(json.KeyValues["name"]);
 
 	auto gotAudio = false;
 	auto iter = json.KeyValues.find("audio");

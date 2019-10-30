@@ -5,10 +5,14 @@
 //
 ///////////////////////////////////////////////////////////
 
-#pragma once
+#include "MathUtils.h"
 
-namespace utils
+unsigned int utils::ModNeg(int v, unsigned int len)
 {
-	unsigned int ModNeg(int v, unsigned int len);
-	unsigned long ModNeg(int v, unsigned long len);
+	return (v % len + len) % len;
+}
+
+unsigned long utils::ModNeg(int v, unsigned long len)
+{
+	return (v % len + len) % len;
 }
