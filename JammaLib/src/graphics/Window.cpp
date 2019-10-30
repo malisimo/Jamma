@@ -356,7 +356,7 @@ void Window::Release()
 		DestroyWindow(_wnd);
 }
 
-ActionResult Window::OnAction(WindowAction winAction)
+ActionResult Window::OnAction(WindowAction winAction, std::optional<io::UserConfig> cfg)
 {
 	auto isEaten = false;
 
@@ -383,7 +383,7 @@ ActionResult Window::OnAction(WindowAction winAction)
 	return { isEaten };
 }
 
-ActionResult Window::OnAction(TouchAction touchAction)
+ActionResult Window::OnAction(TouchAction touchAction, std::optional<io::UserConfig> cfg)
 {
 	switch (touchAction.Touch)
 	{
@@ -406,15 +406,15 @@ ActionResult Window::OnAction(TouchAction touchAction)
 		break;
 	}
 
-	return _scene.OnAction(touchAction);
+	return _scene.OnAction(touchAction, cfg);
 }
 
-ActionResult Window::OnAction(TouchMoveAction touchAction)
+ActionResult Window::OnAction(TouchMoveAction touchAction, std::optional<io::UserConfig> cfg)
 {
-	return _scene.OnAction(touchAction);
+	return _scene.OnAction(touchAction, cfg);
 }
 
-ActionResult Window::OnAction(KeyAction keyAction)
+ActionResult Window::OnAction(KeyAction keyAction, std::optional<io::UserConfig> cfg)
 {
 	// Handle modifiers
 	int modifiers = _modifiers;
@@ -447,7 +447,7 @@ ActionResult Window::OnAction(KeyAction keyAction)
 	_modifiers = (actions::Modifier)modifiers;
 	keyAction.Modifiers = _modifiers;
 
-	return _scene.OnAction(keyAction);
+	return _scene.OnAction(keyAction, cfg);
 }
 
 void APIENTRY Window::MessageCallback(GLenum source,
@@ -551,7 +551,7 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 				break;
 			}
 			winAction.Size = { LOWORD(lParam), HIWORD(lParam) };
-			window->OnAction(winAction);
+			window->OnAction(winAction, std::nullopt);
 			return 0;
 		}
 
@@ -670,7 +670,7 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 		touchAction.State = TouchAction::TOUCH_DOWN;
 		touchAction.Index = 0;
 		touchAction.Position = { x, winHeight - y };
-		window->OnAction(touchAction);
+		window->OnAction(touchAction, std::nullopt);
 
 		return 0;
 	}
@@ -686,7 +686,7 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 		touchAction.State = TouchAction::TOUCH_UP;
 		touchAction.Index = 0;
 		touchAction.Position = { x, winHeight - y };
-		window->OnAction(touchAction);
+		window->OnAction(touchAction, std::nullopt);
 
 		return 0;
 	}
@@ -702,7 +702,7 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 		touchAction.State = TouchAction::TOUCH_DOWN;
 		touchAction.Index = 2;
 		touchAction.Position = { x, winHeight - y };
-		window->OnAction(touchAction);
+		window->OnAction(touchAction, std::nullopt);
 
 		return 0;
 	}
@@ -718,7 +718,7 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 		touchAction.State = TouchAction::TOUCH_UP;
 		touchAction.Index = 2;
 		touchAction.Position = { x, winHeight - y };
-		window->OnAction(touchAction);
+		window->OnAction(touchAction, std::nullopt);
 
 		return 0;
 	}
@@ -734,7 +734,7 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 		touchAction.State = TouchAction::TOUCH_DOWN;
 		touchAction.Index = 1;
 		touchAction.Position = { x, winHeight - y };
-		window->OnAction(touchAction);
+		window->OnAction(touchAction, std::nullopt);
 
 		return 0;
 	}
@@ -750,7 +750,7 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 		touchAction.State = TouchAction::TOUCH_UP;
 		touchAction.Index = 1;
 		touchAction.Position = { x, winHeight - y };
-		window->OnAction(touchAction);
+		window->OnAction(touchAction, std::nullopt);
 
 		return 0;
 	}
@@ -769,7 +769,7 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 		TouchMoveAction touchAction;
 		touchAction.Touch = TouchAction::TOUCH_MOUSE;
 		touchAction.Position = { x, winHeight - y };
-		window->OnAction(touchAction);
+		window->OnAction(touchAction, std::nullopt);
 
 		/*MOUSEOVERSTATE mouseoverstate = MOUSEOVER_NORMAL;
 
@@ -830,7 +830,7 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 		touchAction.Index = 4;
 		touchAction.Value = delta;
 		touchAction.Position = { x, winHeight - y };
-		window->OnAction(touchAction);
+		window->OnAction(touchAction, std::nullopt);
 
 		return 0;
 	}
@@ -852,7 +852,7 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 			keyAction.KeyChar = (unsigned int)wParam;
 			keyAction.KeyActionType = KeyAction::KEY_DOWN;
 
-			window->OnAction(keyAction);
+			window->OnAction(keyAction, std::nullopt);
 		}
 
 		return 0;
@@ -865,7 +865,7 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 		keyAction.KeyChar = (unsigned int)wParam;
 		keyAction.KeyActionType = KeyAction::KEY_UP;
 
-		window->OnAction(keyAction);
+		window->OnAction(keyAction, std::nullopt);
 
 		return 0;
 	}
@@ -885,7 +885,7 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 			keyAction.IsSystem = true;
 			keyAction.KeyActionType = KeyAction::KEY_DOWN;
 
-			window->OnAction(keyAction);
+			window->OnAction(keyAction, std::nullopt);
 		}
 		return 0;
 	}
@@ -900,7 +900,7 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 		keyAction.IsSystem = true;
 		keyAction.KeyActionType = KeyAction::KEY_UP;
 
-		window->OnAction(keyAction);
+		window->OnAction(keyAction, std::nullopt);
 		return 0;
 	}
 	case WM_DESTROY:
@@ -908,7 +908,7 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWindow, UINT message, WPARAM wPar
 		WindowAction winAction;
 		winAction.WindowEventType = WindowAction::DESTROY;
 
-		window->OnAction(winAction);
+		window->OnAction(winAction, std::nullopt);
 
 		FreeConsole();
 		PostQuitMessage(0);

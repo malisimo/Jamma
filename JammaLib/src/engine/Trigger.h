@@ -223,7 +223,7 @@ namespace engine
 		static std::optional<std::shared_ptr<Trigger>> FromFile(TriggerParams trigParams, io::RigFile::Trigger trigStruct);
 
 		virtual	utils::Position2d Position() const override;
-		virtual actions::ActionResult OnAction(actions::KeyAction action) override;
+		virtual actions::ActionResult OnAction(actions::KeyAction action, std::optional<io::UserConfig> cfg) override;
 		virtual void OnTick(Time curTime, unsigned int samps) override;
 		virtual void Draw(base::DrawContext& ctx) override;
 

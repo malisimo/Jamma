@@ -58,9 +58,9 @@ namespace engine
 			const std::shared_ptr<base::AudioSource> src,
 			unsigned int numSamps);
 		virtual void EndMultiWrite(unsigned int numSamps, bool updateIndex) override;
-		virtual actions::ActionResult OnAction(actions::KeyAction action) override;
-		virtual actions::ActionResult OnAction(actions::TouchAction action) override;
-		virtual actions::ActionResult OnAction(actions::TriggerAction action) override;
+		virtual actions::ActionResult OnAction(actions::KeyAction action, std::optional<io::UserConfig> cfg) override;
+		virtual actions::ActionResult OnAction(actions::TouchAction action, std::optional<io::UserConfig> cfg) override;
+		virtual actions::ActionResult OnAction(actions::TriggerAction action, std::optional<io::UserConfig> cfg) override;
 		virtual void OnTick(Time curTime, unsigned int samps) override;
 		
 		std::shared_ptr<LoopTake> AddTake();

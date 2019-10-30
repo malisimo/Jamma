@@ -81,7 +81,7 @@ utils::Position2d Trigger::Position() const
 	return { (int)round(pos.X), (int)round(pos.Y) };
 }
 
-ActionResult Trigger::OnAction(KeyAction action)
+ActionResult Trigger::OnAction(KeyAction action, std::optional<io::UserConfig> cfg)
 {
 	ActionResult res;
 	res.IsEaten = false;
@@ -447,7 +447,7 @@ void Trigger::StartRecording()
 		TriggerAction trigAction;
 		trigAction.ActionType = TriggerAction::TRIGGER_REC_START;
 		trigAction.InputChannels = _inputChannels;
-		auto res = _receiver->OnAction(trigAction);
+		auto res = _receiver->OnAction(trigAction, std::nullopt);
 
 		if (res.IsEaten)
 			_targetId = res.Id;
@@ -464,7 +464,7 @@ void Trigger::EndRecording()
 		trigAction.ActionType = TriggerAction::TRIGGER_REC_END;
 		trigAction.TargetId = _targetId;
 		trigAction.SampleCount = _recordSampCount;
-		_receiver->OnAction(trigAction);
+		_receiver->OnAction(trigAction, std::nullopt);
 	}
 }
 
@@ -483,7 +483,7 @@ void Trigger::Ditch()
 		trigAction.ActionType = TriggerAction::TRIGGER_DITCH;
 		trigAction.TargetId = _targetId;
 		trigAction.SampleCount = _recordSampCount;
-		_receiver->OnAction(trigAction);
+		_receiver->OnAction(trigAction, std::nullopt);
 	}
 
 	_targetId = 0;
@@ -500,7 +500,7 @@ void Trigger::StartOverdub()
 		TriggerAction trigAction;
 		trigAction.ActionType = TriggerAction::TRIGGER_OVERDUB_START;
 		trigAction.SampleCount = _recordSampCount;
-		auto res = _receiver->OnAction(trigAction);
+		auto res = _receiver->OnAction(trigAction, std::nullopt);
 
 		if (res.IsEaten)
 			_overdubTargetId = res.Id;
@@ -517,7 +517,7 @@ void Trigger::EndOverdub()
 		trigAction.ActionType = TriggerAction::TRIGGER_OVERDUB_END;
 		trigAction.TargetId = _overdubTargetId;
 		trigAction.SampleCount = _recordSampCount;
-		_receiver->OnAction(trigAction);
+		_receiver->OnAction(trigAction, std::nullopt);
 	}
 }
 
@@ -531,7 +531,7 @@ void Trigger::DitchOverdub()
 		trigAction.ActionType = TriggerAction::TRIGGER_OVERDUB_DITCH;
 		trigAction.TargetId = _overdubTargetId;
 		trigAction.SampleCount = _recordSampCount;
-		_receiver->OnAction(trigAction);
+		_receiver->OnAction(trigAction, std::nullopt);
 	}
 
 	_overdubTargetId = 0;
@@ -547,7 +547,7 @@ void Trigger::StartPunchIn()
 		trigAction.ActionType = TriggerAction::TRIGGER_PUNCHIN_START;
 		trigAction.TargetId = _overdubTargetId;
 		trigAction.SampleCount = _recordSampCount;
-		_receiver->OnAction(trigAction);
+		_receiver->OnAction(trigAction, std::nullopt);
 	}
 }
 
@@ -561,7 +561,7 @@ void Trigger::EndPunchIn()
 		trigAction.ActionType = TriggerAction::TRIGGER_PUNCHIN_END;
 		trigAction.TargetId = _overdubTargetId;
 		trigAction.SampleCount = _recordSampCount;
-		_receiver->OnAction(trigAction);
+		_receiver->OnAction(trigAction, std::nullopt);
 	}
 }
 

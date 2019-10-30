@@ -110,7 +110,7 @@ void Station::EndMultiWrite(unsigned int numSamps, bool updateIndex)
 		take->EndMultiWrite(numSamps, updateIndex);
 }
 
-ActionResult Station::OnAction(KeyAction action)
+ActionResult Station::OnAction(KeyAction action, std::optional<io::UserConfig> cfg)
 {
 	ActionResult res;
 	res.IsEaten = false;
@@ -118,7 +118,7 @@ ActionResult Station::OnAction(KeyAction action)
 
 	for (auto& trig : _triggers)
 	{
-		auto trigResult = trig->OnAction(action);
+		auto trigResult = trig->OnAction(action, cfg);
 		if (trigResult.IsEaten)
 			return trigResult;
 	}
@@ -127,12 +127,12 @@ ActionResult Station::OnAction(KeyAction action)
 	return res;
 }
 
-ActionResult Station::OnAction(TouchAction action)
+ActionResult Station::OnAction(TouchAction action, std::optional<io::UserConfig> cfg)
 {
-	return GuiElement::OnAction(action);
+	return GuiElement::OnAction(action, cfg);
 }
 
-ActionResult Station::OnAction(TriggerAction action)
+ActionResult Station::OnAction(TriggerAction action, std::optional<io::UserConfig> cfg)
 {
 	ActionResult res;
 	res.IsEaten = false;

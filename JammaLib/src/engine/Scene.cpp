@@ -152,7 +152,7 @@ void Scene::_ReleaseResources()
 	Drawable::_ReleaseResources();
 }
 
-ActionResult Scene::OnAction(TouchAction action)
+ActionResult Scene::OnAction(TouchAction action, std::optional<io::UserConfig> cfg)
 {
 	action.SetActionTime(Timer::GetTime());
 	std::cout << "Touch action " << action.Touch << " [" << action.State << "] " << action.Index << std::endl;
@@ -163,7 +163,7 @@ ActionResult Scene::OnAction(TouchAction action)
 
 		if (activeElement)
 		{
-			auto res = activeElement->OnAction(activeElement->GlobalToLocal(action));
+			auto res = activeElement->OnAction(activeElement->GlobalToLocal(action), _userConfig);
 
 			if (res.IsEaten)
 			{
@@ -181,7 +181,7 @@ ActionResult Scene::OnAction(TouchAction action)
 
 	for (auto& station : _stations)
 	{
-		auto res = station->OnAction(station->ParentToLocal(action));
+		auto res = station->OnAction(station->ParentToLocal(action), _userConfig);
 
 		if (res.IsEaten)
 		{
@@ -208,14 +208,14 @@ ActionResult Scene::OnAction(TouchAction action)
 	return res;
 }
 
-ActionResult Scene::OnAction(TouchMoveAction action)
+ActionResult Scene::OnAction(TouchMoveAction action, std::optional<io::UserConfig> cfg)
 {
 	action.SetActionTime(Timer::GetTime());
 	
 	auto activeElement = _touchDownElement.lock();
 
 	if (activeElement)
-		return activeElement->OnAction(activeElement->GlobalToLocal(action));
+		return activeElement->OnAction(activeElement->GlobalToLocal(action), _userConfig);
 	else if (_isSceneTouching)
 	{
 		auto dPos = action.Position - _initTouchDownPosition;
@@ -226,7 +226,7 @@ ActionResult Scene::OnAction(TouchMoveAction action)
 	return { false, ACTIONRESULT_DEFAULT };
 }
 
-ActionResult Scene::OnAction(KeyAction action)
+ActionResult Scene::OnAction(KeyAction action, std::optional<io::UserConfig> cfg)
 {
 	action.SetActionTime(Timer::GetTime());
 	std::cout << "Key action " << action.KeyActionType << " [" << action.KeyChar << "] IsSytem:" << action.IsSystem << ", Modifiers:" << action.Modifiers << "]" << std::endl;
@@ -242,7 +242,7 @@ ActionResult Scene::OnAction(KeyAction action)
 
 	for (auto& station : _stations)
 	{
-		auto res = station->OnAction(action);
+		auto res = station->OnAction(action, _userConfig);
 
 		if (res.IsEaten)
 		{
@@ -294,7 +294,7 @@ void Scene::OnJobTick(Time curTime)
 
 	auto receiver = job.Receiver.lock();
 	if (receiver)
-		receiver->OnAction(job);
+		receiver->OnAction(job, _userConfig);
 }
 
 void Scene::InitAudio()

@@ -73,9 +73,9 @@ namespace base
 		virtual void Draw3d(DrawContext& ctx) override;
 		virtual bool HitTest(utils::Position2d localPos);
 
-		virtual actions::ActionResult OnAction(actions::KeyAction action) override;
-		virtual actions::ActionResult OnAction(actions::TouchAction action) override;
-		virtual actions::ActionResult OnAction(actions::TouchMoveAction action) override;
+		virtual actions::ActionResult OnAction(actions::KeyAction action, std::optional<io::UserConfig> cfg) override;
+		virtual actions::ActionResult OnAction(actions::TouchAction action, std::optional<io::UserConfig> cfg) override;
+		virtual actions::ActionResult OnAction(actions::TouchMoveAction action, std::optional<io::UserConfig> cfg) override;
 
 		std::vector<actions::JobAction> CommitChanges();
 		void SetParent(std::shared_ptr<GuiElement> parent);

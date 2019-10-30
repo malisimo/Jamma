@@ -365,7 +365,7 @@ std::vector<JobAction> Loop::_CommitChanges()
 	return {};
 }
 
-ActionResult Loop::OnAction(JobAction action)
+ActionResult Loop::OnAction(JobAction action, std::optional<io::UserConfig> cfg)
 {
 	if (JobAction::JOB_RENDERWAVE == action.JobActionType)
 	{

@@ -122,12 +122,12 @@ void GuiElement::Draw3d(DrawContext& ctx)
 	glCtx.PopMvp();
 }
 
-ActionResult GuiElement::OnAction(KeyAction action)
+ActionResult GuiElement::OnAction(KeyAction action, std::optional<io::UserConfig> cfg)
 {
 	for (auto child = _children.rbegin();
 		child != _children.rend(); ++child)
 	{
-		auto res = (*child)->OnAction(action);
+		auto res = (*child)->OnAction(action, cfg);
 
 		if (res.IsEaten)
 			return res;
@@ -136,12 +136,12 @@ ActionResult GuiElement::OnAction(KeyAction action)
 	return { false, 0UL, ACTIONRESULT_DEFAULT, nullptr };
 }
 
-ActionResult GuiElement::OnAction(TouchAction action)
+ActionResult GuiElement::OnAction(TouchAction action, std::optional<io::UserConfig> cfg)
 {
 	for (auto child = _children.rbegin();
 		child != _children.rend(); ++child)
 	{
-		auto res = (*child)->OnAction((*child)->ParentToLocal(action));
+		auto res = (*child)->OnAction((*child)->ParentToLocal(action), cfg);
 
 		if (res.IsEaten)
 			return res;
@@ -153,12 +153,12 @@ ActionResult GuiElement::OnAction(TouchAction action)
 	return { false, 0UL, ACTIONRESULT_DEFAULT, nullptr };
 }
 
-ActionResult GuiElement::OnAction(TouchMoveAction action)
+ActionResult GuiElement::OnAction(TouchMoveAction action, std::optional<io::UserConfig> cfg)
 {
 	for (auto child = _children.rbegin();
 		child != _children.rend(); ++child)
 	{
-		auto res = (*child)->OnAction((*child)->ParentToLocal(action));
+		auto res = (*child)->OnAction((*child)->ParentToLocal(action), cfg);
 
 		if (res.IsEaten)
 			return res;

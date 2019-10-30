@@ -132,9 +132,9 @@ namespace engine
 		unsigned int Width() const { return _sizeParams.Size.Width; }
 		unsigned int Height() const	{ return _sizeParams.Size.Height; }
 
-		virtual actions::ActionResult OnAction(actions::TouchAction action) override;
-		virtual actions::ActionResult OnAction(actions::TouchMoveAction action) override;
-		virtual actions::ActionResult OnAction(actions::KeyAction action) override;
+		virtual actions::ActionResult OnAction(actions::TouchAction action, std::optional<io::UserConfig> cfg) override;
+		virtual actions::ActionResult OnAction(actions::TouchMoveAction action, std::optional<io::UserConfig> cfg) override;
+		virtual actions::ActionResult OnAction(actions::KeyAction action, std::optional<io::UserConfig> cfg) override;
 		virtual void OnTick(Time curTime, unsigned int samps) override;
 		virtual void OnJobTick(Time curTime);
 		virtual void InitResources(resources::ResourceLib& resourceLib, bool forceInit) override;
