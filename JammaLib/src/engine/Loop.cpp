@@ -119,7 +119,7 @@ void Loop::Draw3d(DrawContext& ctx)
 	auto scale = ModelScale();
 
 	auto index = STATE_RECORDING == _state ? _writeIndex : _playIndex;
-	index = index > _MaxFadeSamps ? index - _MaxFadeSamps : index;
+	index = index > constants::MaxLoopFadeSamps ? index - constants::MaxLoopFadeSamps : index;
 
 	auto frac = _loopLength == 0 ? 0.0 : 1.0 - std::max(0.0, std::min(1.0, ((double)(index % _loopLength)) / ((double)_loopLength)));
 
@@ -153,13 +153,13 @@ int Loop::OnOverwrite(float samp, int indexOffset)
 
 	if (bufSize <= (_writeIndex + indexOffset))
 	{
-		if (bufSize >= _MaxBufferSize)
+		if (bufSize >= constants::MaxLoopBufferSize)
 			return indexOffset;
 		else
 		{
 			auto newBufSize = bufSize * 2;
-			if (newBufSize > _MaxBufferSize)
-				newBufSize = _MaxBufferSize;
+			if (newBufSize > constants::MaxLoopBufferSize)
+				newBufSize = constants::MaxLoopBufferSize;
 
 			//_buffer.resize(newBufSize);
 		}
@@ -192,7 +192,7 @@ void Loop::EndWrite(unsigned int numSamps, bool updateIndex)
 			_endRecordingCompleted = true;
 	}
 
-	//_loopLength = _writeIndex > _MaxFadeSamps ? _writeIndex - _MaxFadeSamps : _writeIndex;
+	//_loopLength = _writeIndex > constants::MaxLoopFadeSamps ? _writeIndex - constants::MaxLoopFadeSamps : _writeIndex;
 
 	_modelNeedsUpdating = true;
 	_changesMade = true;
@@ -210,7 +210,7 @@ void Loop::OnPlay(const std::shared_ptr<MultiAudioSink> dest,
 		return;
 
 	auto index = _playIndex;
-	auto bufSize = _loopLength + _MaxFadeSamps;
+	auto bufSize = _loopLength + constants::MaxLoopFadeSamps;
 	while (index >= bufSize)
 		index -= _loopLength;
 
@@ -235,7 +235,7 @@ void Loop::EndMultiPlay(unsigned int numSamps)
 		
 	_playIndex += numSamps;
 
-	auto bufSize = _loopLength + _MaxFadeSamps;
+	auto bufSize = _loopLength + constants::MaxLoopFadeSamps;
 	while (_playIndex > bufSize)
 		_playIndex -= _loopLength;
 
@@ -257,7 +257,7 @@ void Loop::OnPlayRaw(const std::shared_ptr<base::MultiAudioSink> dest,
 		return;
 
 	auto index = _playIndex + delaySamps;
-	auto bufSize = _loopLength + _MaxFadeSamps;
+	auto bufSize = _loopLength + constants::MaxLoopFadeSamps;
 	while (index >= bufSize)
 		index -= _loopLength;
 
@@ -288,7 +288,7 @@ unsigned long Loop::Id() const
 
 bool Loop::Load(const io::WavReadWriter& readWriter)
 {
-	auto loadOpt = readWriter.Read(utils::DecodeUtf8(_loopParams.Wav), _MaxBufferSize);
+	auto loadOpt = readWriter.Read(utils::DecodeUtf8(_loopParams.Wav), constants::MaxLoopBufferSize);
 
 	if (!loadOpt.has_value())
 		return false;
@@ -306,7 +306,7 @@ bool Loop::Load(const io::WavReadWriter& readWriter)
 		_buffer[i] = buffer[i];
 	}
 
-	_loopLength = length - _MaxFadeSamps;
+	_loopLength = length - constants::MaxLoopFadeSamps;
 
 	UpdateLoopModel();
 
@@ -317,7 +317,7 @@ void Loop::Record()
 {
 	Reset();
 	_state = STATE_RECORDING;
-	_buffer = std::vector<float>(_MaxFadeSamps+90000);
+	_buffer = std::vector<float>(constants::MaxLoopFadeSamps+90000);
 
 	_changesMade = true;
 }
@@ -334,7 +334,7 @@ void Loop::Play(unsigned long index,
 		return;
 	}
 
-	_playIndex = (index + _MaxFadeSamps) >= bufSize ? (bufSize-1) : index + _MaxFadeSamps;
+	_playIndex = (index + constants::MaxLoopFadeSamps) >= bufSize ? (bufSize-1) : index + constants::MaxLoopFadeSamps;
 	_loopLength = loopLength;
 	_endRecordSampCount = 0;
 	_endRecordSamps = endRecordSamps;
@@ -352,7 +352,7 @@ void Loop::EndRecording()
 void Loop::Ditch()
 {
 	Reset();
-	_buffer = std::vector<float>(_MaxFadeSamps); // TODO: backbuffer?
+	_buffer = std::vector<float>(constants::MaxLoopFadeSamps); // TODO: backbuffer?
 }
 
 void Loop::Overdub()
@@ -434,10 +434,10 @@ void Loop::Reset()
 
 unsigned long Loop::LoopIndex() const
 {
-	if (_MaxFadeSamps > _playIndex)
+	if (constants::MaxLoopFadeSamps > _playIndex)
 		return 0;
 
-	return _playIndex - _MaxFadeSamps;
+	return _playIndex - constants::MaxLoopFadeSamps;
 }
 
 void Loop::UpdateLoopModel()
@@ -448,7 +448,7 @@ void Loop::UpdateLoopModel()
 	auto numSamps = (unsigned int)_buffer.size();
 	auto lastYMin = -10.0f;
 	auto lastYMax = 10.0f;
-	auto numGrains = (unsigned int)ceil((double)numSamps / (double)_GrainSamps);
+	auto numGrains = (unsigned int)ceil((double)numSamps / (double)constants::GrainSamps);
 	auto radius = (float)CalcDrawRadius();
 
 	for (auto grain = 1u; grain < numGrains; grain++)
@@ -502,8 +502,8 @@ std::tuple<std::vector<float>, std::vector<float>, float, float>
 
 	auto angle1 = ((float)TWOPI) * ((float)(grain - 1) / (float)numGrains);
 	auto angle2 = ((float)TWOPI) * ((float)grain / (float)numGrains);
-	auto i1 = (grain - 1) * _GrainSamps;
-	auto i2 = grain * _GrainSamps;
+	auto i1 = (grain - 1) * constants::GrainSamps;
+	auto i2 = grain * constants::GrainSamps;
 	auto gMin = utils::ArraySubMin(_buffer, i1, i2);
 	auto gMax = utils::ArraySubMax(_buffer, i1, i2);
 

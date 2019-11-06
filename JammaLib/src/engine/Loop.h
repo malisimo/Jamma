@@ -187,10 +187,7 @@ namespace engine
 			float radius);
 
 	protected:
-		static const unsigned int _MaxFadeSamps = 70000;
 		static const unsigned int _InitBufferSize = 1000000;
-		static const unsigned int _MaxBufferSize = 40000000;
-		static const unsigned int _GrainSamps = 1100;
 
 		bool _modelNeedsUpdating;
 		bool _endRecordingCompleted;
