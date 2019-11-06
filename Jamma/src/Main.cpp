@@ -57,7 +57,7 @@ std::optional<io::JamFile> LoadJam(io::InitFile& ini)
 {
 	io::TextReadWriter txtFile;
 
-	std::string jamJson = "{\"name\":\"default\",\"stations\":[{\"name\":\"Mic1\",\"stationtype\":0,\"takes\":[{\"name\":\"Take1\",\"loops\":[{\"name\":\"Loop1.wav\",\"length\":400000,\"mix\":{\"type\":\"pan\",\"chans\":[0.5,0.5]}}]}]}";
+	std::string jamJson = "{\"name\":\"default\",\"stations\":[{\"name\":\"Mic1\",\"stationtype\":0,\"takes\":[{\"name\":\"Take1\",\"loops\":[{\"name\":\"Loop1.wav\",\"length\":155822,\"mix\":{\"type\":\"pan\",\"chans\":[0.5,0.5]}}]}]}";
 	auto res = txtFile.Read(ini.Jam, MAX_JSON_CHARS);
 	if (!res.has_value())
 	{

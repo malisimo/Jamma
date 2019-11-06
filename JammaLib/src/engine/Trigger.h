@@ -223,8 +223,8 @@ namespace engine
 		static std::optional<std::shared_ptr<Trigger>> FromFile(TriggerParams trigParams, io::RigFile::Trigger trigStruct);
 
 		virtual	utils::Position2d Position() const override;
-		virtual actions::ActionResult OnAction(actions::KeyAction action, std::optional<io::UserConfig> cfg) override;
-		virtual void OnTick(Time curTime, unsigned int samps) override;
+		virtual actions::ActionResult OnAction(actions::KeyAction action) override;
+		virtual void OnTick(Time curTime, unsigned int samps, std::optional<io::UserConfig> cfg) override;
 		virtual void Draw(base::DrawContext& ctx) override;
 
 		void AddBinding(DualBinding activate, DualBinding ditch);
@@ -250,18 +250,20 @@ namespace engine
 			bool isActivate,
 			const actions::KeyAction& action,
 			int keyState);
-		bool StateMachine(bool isDown, bool isActivate);
+		bool StateMachine(bool isDown,
+			bool isActivate,
+			std::optional<io::UserConfig> cfg);
 
 		// Only call from state machine
-		void StartRecording();
-		void EndRecording();
-		void SetDitchDown();
-		void Ditch();
-		void StartOverdub();
-		void EndOverdub();
-		void DitchOverdub();
-		void StartPunchIn();
-		void EndPunchIn();
+		void StartRecording(std::optional<io::UserConfig> cfg);
+		void EndRecording(std::optional<io::UserConfig> cfg);
+		void SetDitchDown(std::optional<io::UserConfig> cfg);
+		void Ditch(std::optional<io::UserConfig> cfg);
+		void StartOverdub(std::optional<io::UserConfig> cfg);
+		void EndOverdub(std::optional<io::UserConfig> cfg);
+		void DitchOverdub(std::optional<io::UserConfig> cfg);
+		void StartPunchIn(std::optional<io::UserConfig> cfg);
+		void EndPunchIn(std::optional<io::UserConfig> cfg);
 
 	private:
 		double _debounceTimeMs;

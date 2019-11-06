@@ -187,11 +187,13 @@ unsigned long LoopTake::NumRecordedSamps() const
 	return _recordedSampCount;
 }
 
-void LoopTake::Play(unsigned long index, unsigned long length)
+void LoopTake::Play(unsigned long index,
+	unsigned long loopLength,
+	unsigned int endRecordSamps)
 {
 	for (auto& loop : _loops)
 	{
-		loop->Play(index, length);
+		loop->Play(index, loopLength, endRecordSamps);
 	}
 }
 

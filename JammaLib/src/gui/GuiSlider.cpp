@@ -103,9 +103,9 @@ void GuiSlider::Draw(DrawContext & ctx)
 	glCtx.PopMvp();
 }
 
-ActionResult GuiSlider::OnAction(TouchAction action, std::optional<io::UserConfig> cfg)
+ActionResult GuiSlider::OnAction(TouchAction action)
 {
-	auto res = GuiElement::OnAction(action, cfg);
+	auto res = GuiElement::OnAction(action);
 
 	//if (res.IsEaten)
 	//	return res;
@@ -153,12 +153,12 @@ ActionResult GuiSlider::OnAction(TouchAction action, std::optional<io::UserConfi
 		}
 	}
 
-	return GuiElement::OnAction(action, cfg);
+	return GuiElement::OnAction(action);
 }
 
-ActionResult GuiSlider::OnAction(TouchMoveAction action, std::optional<io::UserConfig> cfg)
+ActionResult GuiSlider::OnAction(TouchMoveAction action)
 {
-	auto res = GuiElement::OnAction(action, cfg);
+	auto res = GuiElement::OnAction(action);
 
 	if (res.IsEaten)
 		return res;
@@ -231,7 +231,7 @@ void GuiSlider::OnValueChange(bool bypassUpdates)
 	_dragElement.SetPosition(CalcDragPos(_sliderParams, _sizeParams.Size, value));
 
 	if (_receiver && !bypassUpdates)
-		_receiver->OnAction(DoubleAction(value), std::nullopt);
+		_receiver->OnAction(DoubleAction(value));
 }
 
 double GuiSlider::CalcValueOffset(GuiSliderParams params,

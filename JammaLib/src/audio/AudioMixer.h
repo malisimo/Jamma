@@ -121,7 +121,7 @@ namespace audio
 		AudioMixer(AudioMixerParams params);
 
 	public:
-		virtual actions::ActionResult OnAction(actions::DoubleAction val, std::optional<io::UserConfig> cfg) override;
+		virtual actions::ActionResult OnAction(actions::DoubleAction val) override;
 		virtual void InitReceivers() override;
 		virtual void SetSize(utils::Size2d size) override;
 

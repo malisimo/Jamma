@@ -110,7 +110,7 @@ void Station::EndMultiWrite(unsigned int numSamps, bool updateIndex)
 		take->EndMultiWrite(numSamps, updateIndex);
 }
 
-ActionResult Station::OnAction(KeyAction action, std::optional<io::UserConfig> cfg)
+ActionResult Station::OnAction(KeyAction action)
 {
 	ActionResult res;
 	res.IsEaten = false;
@@ -118,7 +118,7 @@ ActionResult Station::OnAction(KeyAction action, std::optional<io::UserConfig> c
 
 	for (auto& trig : _triggers)
 	{
-		auto trigResult = trig->OnAction(action, cfg);
+		auto trigResult = trig->OnAction(action);
 		if (trigResult.IsEaten)
 			return trigResult;
 	}
@@ -127,12 +127,12 @@ ActionResult Station::OnAction(KeyAction action, std::optional<io::UserConfig> c
 	return res;
 }
 
-ActionResult Station::OnAction(TouchAction action, std::optional<io::UserConfig> cfg)
+ActionResult Station::OnAction(TouchAction action)
 {
-	return GuiElement::OnAction(action, cfg);
+	return GuiElement::OnAction(action);
 }
 
-ActionResult Station::OnAction(TriggerAction action, std::optional<io::UserConfig> cfg)
+ActionResult Station::OnAction(TriggerAction action)
 {
 	ActionResult res;
 	res.IsEaten = false;
@@ -152,18 +152,33 @@ ActionResult Station::OnAction(TriggerAction action, std::optional<io::UserConfi
 		break;
 	}
 	case TriggerAction::TRIGGER_REC_END:
+	{
+		auto loopLength = action.SampleCount;
+		auto errorSamps = 0;
+
 		if (_globalClock->IsMasterLengthSet())
 		{
-			auto [loopLength, errorSamps] = _globalClock->QuantiseLength(action.SampleCount);
-			
-			if (loopTake.has_value())
-				loopTake.value()->Play(0, loopLength);
+			auto [quantisedLength, err] = _globalClock->QuantiseLength(action.SampleCount);
+			loopLength = quantisedLength;
+			errorSamps = err;
 		}
 		else
 			_globalClock->SetMasterLength(action.SampleCount);
 
+		auto cfg = action.GetUserConfig();
+		auto playPos = cfg.has_value() ?
+			cfg.value().LoopPlayPos(errorSamps, loopLength) :
+			0;
+		auto endRecordSamps = cfg.has_value() ?
+			cfg.value().EndRecordingSamps(errorSamps) :
+			0;
+
+		if (loopTake.has_value())
+			loopTake.value()->Play(playPos, loopLength, endRecordSamps);
+
 		res.IsEaten = true;
 		break;
+	}
 	case TriggerAction::TRIGGER_DITCH:
 		if (loopTake.has_value())
 			loopTake.value()->Ditch();
@@ -175,11 +190,11 @@ ActionResult Station::OnAction(TriggerAction action, std::optional<io::UserConfi
 	return res;
 }
 
-void Station::OnTick(Time curTime, unsigned int samps)
+void Station::OnTick(Time curTime, unsigned int samps, std::optional<io::UserConfig> cfg)
 {
 	for (auto& trig : _triggers)
 	{
-		trig->OnTick(curTime, samps);
+		trig->OnTick(curTime, samps, cfg);
 	}
 }
 

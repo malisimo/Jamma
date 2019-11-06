@@ -81,7 +81,7 @@ utils::Position2d Trigger::Position() const
 	return { (int)round(pos.X), (int)round(pos.Y) };
 }
 
-ActionResult Trigger::OnAction(KeyAction action, std::optional<io::UserConfig> cfg)
+ActionResult Trigger::OnAction(KeyAction action)
 {
 	ActionResult res;
 	res.IsEaten = false;
@@ -109,7 +109,7 @@ ActionResult Trigger::OnAction(KeyAction action, std::optional<io::UserConfig> c
 	return res;
 }
 
-void Trigger::OnTick(Time curTime, unsigned int samps)
+void Trigger::OnTick(Time curTime, unsigned int samps, std::optional<io::UserConfig> cfg)
 {
 	if ((TriggerState::TRIGSTATE_DEFAULT != _state) &&
 		(TriggerState::TRIGSTATE_DITCHDOWN != _state))
@@ -129,7 +129,7 @@ void Trigger::OnTick(Time curTime, unsigned int samps)
 			_lastActivateTime = curTime;
 			_isLastActivateDown = _isLastActivateDownRaw;
 
-			StateMachine(_isLastActivateDownRaw, true);
+			StateMachine(_isLastActivateDownRaw, true, cfg);
 		}
 	}
 	
@@ -142,7 +142,7 @@ void Trigger::OnTick(Time curTime, unsigned int samps)
 			_lastDitchTime = curTime;
 			_isLastDitchDown = _isLastDitchDownRaw;
 
-			StateMachine(_isLastDitchDownRaw, false);
+			StateMachine(_isLastDitchDownRaw, false, cfg);
 		}
 	}
 }
@@ -352,17 +352,19 @@ bool Trigger::TryChangeState(DualBinding& binding,
 	switch (trigResult)
 	{
 	case DualBinding::MATCH_DOWN:
-		StateMachine(true, isActivate);
+		StateMachine(true, isActivate, action.GetUserConfig());
 		return true;
 	case DualBinding::MATCH_RELEASE:
-		StateMachine(false, isActivate);
+		StateMachine(false, isActivate, action.GetUserConfig());
 		return true;
 	}
 
 	return false;
 }
 
-bool Trigger::StateMachine(bool isDown, bool isActivate)
+bool Trigger::StateMachine(bool isDown,
+	bool isActivate,
+	std::optional<io::UserConfig> cfg)
 {
 	bool changedState = false;
 
@@ -373,12 +375,12 @@ bool Trigger::StateMachine(bool isDown, bool isActivate)
 		{
 			if (isActivate)
 			{
-				StartRecording();
+				StartRecording(cfg);
 				changedState = true;
 			}
 			else
 			{
-				SetDitchDown();
+				SetDitchDown(cfg);
 				changedState = true;
 			}
 		}
@@ -386,49 +388,50 @@ bool Trigger::StateMachine(bool isDown, bool isActivate)
 	case TRIGSTATE_RECORDING:
 		if (isActivate && isDown)
 		{
-			EndRecording();
+				EndRecording(cfg);
+
 			changedState = true;
 		}
 		else if (!isActivate && isDown)
 		{
-			Ditch();
+			Ditch(cfg);
 			changedState = true;
 		}
 		break;
 	case TRIGSTATE_DITCHDOWN:
 		if (isActivate && isDown)
 		{
-			StartOverdub();
+			StartOverdub(cfg);
 			changedState = true;
 		}
 		else if (!isActivate && !isDown)
 		{
-			Ditch();
+			Ditch(cfg);
 			changedState = true;
 		}
 		break;
 	case TRIGSTATE_OVERDUBBING:
 		if (isActivate && isDown)
 		{
-			EndOverdub();
+			EndOverdub(cfg);
 			changedState = true;
 		}
 		else if (!isActivate && isDown)
 		{
-			StartPunchIn();
+			StartPunchIn(cfg);
 			changedState = true;
 		}
 		break;
 	case TRIGSTATE_PUNCHEDIN:
 		if (isActivate && isDown)
 		{
-			DitchOverdub();
+			DitchOverdub(cfg);
 			changedState = true;
 		}
 		if (!isActivate && !isDown)
 		{
 			// End punch-in but maintain overdub mode (release)
-			EndPunchIn();
+			EndPunchIn(cfg);
 			changedState = true;
 		}
 		break;
@@ -437,7 +440,7 @@ bool Trigger::StateMachine(bool isDown, bool isActivate)
 	return changedState;
 }
 
-void Trigger::StartRecording()
+void Trigger::StartRecording(std::optional<io::UserConfig> cfg)
 {
 	_state = TRIGSTATE_RECORDING;
 	_recordSampCount = 0;
@@ -447,14 +450,18 @@ void Trigger::StartRecording()
 		TriggerAction trigAction;
 		trigAction.ActionType = TriggerAction::TRIGGER_REC_START;
 		trigAction.InputChannels = _inputChannels;
-		auto res = _receiver->OnAction(trigAction, std::nullopt);
+
+		if (cfg.has_value())
+			trigAction.SetUserConfig(cfg.value());
+
+		auto res = _receiver->OnAction(trigAction);
 
 		if (res.IsEaten)
 			_targetId = res.Id;
 	}
 }
 
-void Trigger::EndRecording()
+void Trigger::EndRecording(std::optional<io::UserConfig> cfg)
 {
 	_state = TRIGSTATE_DEFAULT;
 
@@ -464,16 +471,20 @@ void Trigger::EndRecording()
 		trigAction.ActionType = TriggerAction::TRIGGER_REC_END;
 		trigAction.TargetId = _targetId;
 		trigAction.SampleCount = _recordSampCount;
-		_receiver->OnAction(trigAction, std::nullopt);
+
+		if (cfg.has_value())
+			trigAction.SetUserConfig(cfg.value());
+
+		_receiver->OnAction(trigAction);
 	}
 }
 
-void Trigger::SetDitchDown()
+void Trigger::SetDitchDown(std::optional<io::UserConfig> cfg)
 {
 	_state = TRIGSTATE_DITCHDOWN;
 }
 
-void Trigger::Ditch()
+void Trigger::Ditch(std::optional<io::UserConfig> cfg)
 {
 	_state = TRIGSTATE_DEFAULT;
 
@@ -483,14 +494,18 @@ void Trigger::Ditch()
 		trigAction.ActionType = TriggerAction::TRIGGER_DITCH;
 		trigAction.TargetId = _targetId;
 		trigAction.SampleCount = _recordSampCount;
-		_receiver->OnAction(trigAction, std::nullopt);
+
+		if (cfg.has_value())
+			trigAction.SetUserConfig(cfg.value());
+
+		_receiver->OnAction(trigAction);
 	}
 
 	_targetId = 0;
 	_overdubTargetId = 0;
 }
 
-void Trigger::StartOverdub()
+void Trigger::StartOverdub(std::optional<io::UserConfig> cfg)
 {
 	_state = TRIGSTATE_OVERDUBBING;
 	_recordSampCount = 0;
@@ -500,14 +515,18 @@ void Trigger::StartOverdub()
 		TriggerAction trigAction;
 		trigAction.ActionType = TriggerAction::TRIGGER_OVERDUB_START;
 		trigAction.SampleCount = _recordSampCount;
-		auto res = _receiver->OnAction(trigAction, std::nullopt);
+
+		if (cfg.has_value())
+			trigAction.SetUserConfig(cfg.value());
+
+		auto res = _receiver->OnAction(trigAction);
 
 		if (res.IsEaten)
 			_overdubTargetId = res.Id;
 	}
 }
 
-void Trigger::EndOverdub()
+void Trigger::EndOverdub(std::optional<io::UserConfig> cfg)
 {
 	_state = TRIGSTATE_DEFAULT;
 
@@ -517,11 +536,15 @@ void Trigger::EndOverdub()
 		trigAction.ActionType = TriggerAction::TRIGGER_OVERDUB_END;
 		trigAction.TargetId = _overdubTargetId;
 		trigAction.SampleCount = _recordSampCount;
-		_receiver->OnAction(trigAction, std::nullopt);
+
+		if (cfg.has_value())
+			trigAction.SetUserConfig(cfg.value());
+
+		_receiver->OnAction(trigAction);
 	}
 }
 
-void Trigger::DitchOverdub()
+void Trigger::DitchOverdub(std::optional<io::UserConfig> cfg)
 {
 	_state = TRIGSTATE_DEFAULT;
 
@@ -531,13 +554,17 @@ void Trigger::DitchOverdub()
 		trigAction.ActionType = TriggerAction::TRIGGER_OVERDUB_DITCH;
 		trigAction.TargetId = _overdubTargetId;
 		trigAction.SampleCount = _recordSampCount;
-		_receiver->OnAction(trigAction, std::nullopt);
+
+		if (cfg.has_value())
+			trigAction.SetUserConfig(cfg.value());
+
+		_receiver->OnAction(trigAction);
 	}
 
 	_overdubTargetId = 0;
 }
 
-void Trigger::StartPunchIn()
+void Trigger::StartPunchIn(std::optional<io::UserConfig> cfg)
 {
 	_state = TRIGSTATE_PUNCHEDIN;
 
@@ -547,11 +574,11 @@ void Trigger::StartPunchIn()
 		trigAction.ActionType = TriggerAction::TRIGGER_PUNCHIN_START;
 		trigAction.TargetId = _overdubTargetId;
 		trigAction.SampleCount = _recordSampCount;
-		_receiver->OnAction(trigAction, std::nullopt);
+		_receiver->OnAction(trigAction);
 	}
 }
 
-void Trigger::EndPunchIn()
+void Trigger::EndPunchIn(std::optional<io::UserConfig> cfg)
 {
 	_state = TRIGSTATE_OVERDUBBING;
 
@@ -561,7 +588,11 @@ void Trigger::EndPunchIn()
 		trigAction.ActionType = TriggerAction::TRIGGER_PUNCHIN_END;
 		trigAction.TargetId = _overdubTargetId;
 		trigAction.SampleCount = _recordSampCount;
-		_receiver->OnAction(trigAction, std::nullopt);
+
+		if (cfg.has_value())
+			trigAction.SetUserConfig(cfg.value());
+
+		_receiver->OnAction(trigAction);
 	}
 }
 

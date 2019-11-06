@@ -73,10 +73,10 @@ namespace graphics
 		void Swap();
 		void Release();
 
-		virtual actions::ActionResult OnAction(actions::WindowAction winAction, std::optional<io::UserConfig> cfg) override;
-		virtual actions::ActionResult OnAction(actions::TouchAction touchAction, std::optional<io::UserConfig> cfg) override;
-		virtual actions::ActionResult OnAction(actions::TouchMoveAction touchAction, std::optional<io::UserConfig> cfg) override;
-		virtual actions::ActionResult OnAction(actions::KeyAction touchAction, std::optional<io::UserConfig> cfg) override;
+		virtual actions::ActionResult OnAction(actions::WindowAction winAction) override;
+		virtual actions::ActionResult OnAction(actions::TouchAction touchAction) override;
+		virtual actions::ActionResult OnAction(actions::TouchMoveAction touchAction) override;
+		virtual actions::ActionResult OnAction(actions::KeyAction touchAction) override;
 
 		static utils::Size2d AdjustSize(utils::Size2d size, DWORD style);
 		static utils::Position2d Center(utils::Size2d size);

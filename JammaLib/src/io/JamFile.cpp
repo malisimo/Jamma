@@ -53,6 +53,13 @@ std::optional<JamFile> JamFile::FromStream(std::stringstream ss)
 		}
 	}
 
+	iter = jamParams.KeyValues.find("timerticks");
+	if (iter != jamParams.KeyValues.end())
+	{
+		if (jamParams.KeyValues["timerticks"].index() == 2)
+			jam.TimerTicks = std::get<unsigned long>(jamParams.KeyValues["timerticks"]);
+	}
+
 	return jam;
 }
 

@@ -44,7 +44,7 @@ void AudioMixer::SetSize(utils::Size2d size)
 	GuiElement::SetSize(size);
 }
 
-ActionResult AudioMixer::OnAction(DoubleAction val, std::optional<io::UserConfig> cfg)
+ActionResult AudioMixer::OnAction(DoubleAction val)
 {
 	_fade->SetTarget(val.Value());
 	return { true, 0UL, ACTIONRESULT_DEFAULT, nullptr };

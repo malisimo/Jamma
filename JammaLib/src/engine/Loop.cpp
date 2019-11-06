@@ -22,7 +22,7 @@ Loop::Loop(LoopParams loopParams,
 	_modelNeedsUpdating(false),
 	_playIndex(0),
 	_pitch(1.0),
-	_length(0),
+	_loopLength(0),
 	_state(STATE_PLAYING),
 	_loopParams(loopParams),
 	_mixer(nullptr),
@@ -80,7 +80,7 @@ std::optional<std::shared_ptr<Loop>> Loop::FromFile(LoopParams loopParams, io::J
 	auto loop = std::make_shared<Loop>(loopParams, mixerParams);
 
 	loop->Load(io::WavReadWriter());
-	loop->Play(loopStruct.MasterLoopCount, loopStruct.Length);
+	loop->Play(loopStruct.MasterLoopCount, loopStruct.Length, 0);
 
 	return loop;
 }
@@ -121,7 +121,7 @@ void Loop::Draw3d(DrawContext& ctx)
 	auto index = STATE_RECORDING == _state ? _writeIndex : _playIndex;
 	index = index > _MaxFadeSamps ? index - _MaxFadeSamps : index;
 
-	auto frac = _length == 0 ? 0.0 : 1.0 - std::max(0.0, std::min(1.0, ((double)(index % _length)) / ((double)_length)));
+	auto frac = _loopLength == 0 ? 0.0 : 1.0 - std::max(0.0, std::min(1.0, ((double)(index % _loopLength)) / ((double)_loopLength)));
 
 	_modelScreenPos = glCtx.ProjectScreen(pos);
 	glCtx.PushMvp(glm::translate(glm::mat4(1.0), glm::vec3(pos.X, pos.Y, pos.Z)));
@@ -144,6 +144,7 @@ int Loop::OnWrite(float samp, int indexOffset)
 int Loop::OnOverwrite(float samp, int indexOffset)
 {
 	if ((STATE_RECORDING != _state) &&
+		(STATE_PLAYINGRECORDING != _state) &&
 		(STATE_OVERDUBBING != _state) &&
 		(STATE_PUNCHEDIN != _state))
 		return indexOffset;
@@ -161,8 +162,6 @@ int Loop::OnOverwrite(float samp, int indexOffset)
 				newBufSize = _MaxBufferSize;
 
 			//_buffer.resize(newBufSize);
-			// buffer must always be larger than _MaxFadeSamps!
-			//_length = newBufSize - _MaxFadeSamps;
 		}
 	}
 	else
@@ -175,6 +174,7 @@ void Loop::EndWrite(unsigned int numSamps, bool updateIndex)
 {
 	// Only update if currently recording
 	if ((STATE_RECORDING != _state) &&
+		(STATE_PLAYINGRECORDING != _state) &&
 		(STATE_OVERDUBBING != _state) &&
 		(STATE_PUNCHEDIN != _state))
 		return;
@@ -183,7 +183,16 @@ void Loop::EndWrite(unsigned int numSamps, bool updateIndex)
 		return;
 
 	_writeIndex += numSamps;
-	_length = _writeIndex > _MaxFadeSamps ? _writeIndex - _MaxFadeSamps : _writeIndex;
+
+	if (STATE_PLAYINGRECORDING == _state)
+	{
+		_endRecordSampCount += numSamps;
+
+		if (_endRecordSampCount > _endRecordSamps)
+			_endRecordingCompleted = true;
+	}
+
+	//_loopLength = _writeIndex > _MaxFadeSamps ? _writeIndex - _MaxFadeSamps : _writeIndex;
 
 	_modelNeedsUpdating = true;
 	_changesMade = true;
@@ -194,40 +203,41 @@ void Loop::OnPlay(const std::shared_ptr<MultiAudioSink> dest,
 {
 	// Mixer will stereo spread the mono wav
 	// and adjust level
-	if (0 == _length)
+	if (0 == _loopLength)
 		return;
 
-	if (STATE_PLAYING != _state)
+	if ((STATE_PLAYING != _state) && (STATE_PLAYINGRECORDING != _state))
 		return;
 
 	auto index = _playIndex;
-	auto bufSize = _length + _MaxFadeSamps;
+	auto bufSize = _loopLength + _MaxFadeSamps;
 	while (index >= bufSize)
-		index -= _length;
+		index -= _loopLength;
 
 	for (auto i = 0u; i < numSamps; i++)
 	{
-		_mixer->OnPlay(dest, _buffer[index], i);
+		if (index < _buffer.size())
+			_mixer->OnPlay(dest, _buffer[index], i);
 
 		index++;
 		if (index >= bufSize)
-			index -= _length;
+			index -= _loopLength;
 	}
 }
 
 void Loop::EndMultiPlay(unsigned int numSamps)
 {
-	if (STATE_PLAYING != _state)
+	if ((STATE_PLAYING != _state) && (STATE_PLAYINGRECORDING != _state))
 		return;
 
-	if (0 == _length)
+	if (0 == _loopLength)
 		return;
 		
 	_playIndex += numSamps;
 
-	auto bufSize = _length + _MaxFadeSamps;
+	auto bufSize = _loopLength + _MaxFadeSamps;
 	while (_playIndex > bufSize)
-		_playIndex -= _length;
+		_playIndex -= _loopLength;
 
 	for (unsigned int chan = 0; chan < NumOutputChannels(); chan++)
 	{
@@ -243,13 +253,13 @@ void Loop::OnPlayRaw(const std::shared_ptr<base::MultiAudioSink> dest,
 {
 	// Mixer will stereo spread the mono wav
 	// and adjust level
-	if (0 == _length)
+	if (0 == _loopLength)
 		return;
 
 	auto index = _playIndex + delaySamps;
-	auto bufSize = _length + _MaxFadeSamps;
+	auto bufSize = _loopLength + _MaxFadeSamps;
 	while (index >= bufSize)
-		index -= _length;
+		index -= _loopLength;
 
 	for (auto i = 0u; i < numSamps; i++)
 	{
@@ -257,7 +267,7 @@ void Loop::OnPlayRaw(const std::shared_ptr<base::MultiAudioSink> dest,
 
 		index++;
 		if (index >= bufSize)
-			index -= _length;
+			index -= _loopLength;
 	}
 }
 
@@ -285,7 +295,7 @@ bool Loop::Load(const io::WavReadWriter& readWriter)
 
 	auto [buffer, sampleRate, bitDepth] = loadOpt.value();
 
-	_length = 0;
+	_loopLength = 0;
 	_buffer.clear();
 
 	auto length = (unsigned long)buffer.size();
@@ -296,7 +306,7 @@ bool Loop::Load(const io::WavReadWriter& readWriter)
 		_buffer[i] = buffer[i];
 	}
 
-	_length = length - _MaxFadeSamps;
+	_loopLength = length - _MaxFadeSamps;
 
 	UpdateLoopModel();
 
@@ -312,7 +322,9 @@ void Loop::Record()
 	_changesMade = true;
 }
 
-void Loop::Play(unsigned long index, unsigned long length)
+void Loop::Play(unsigned long index,
+	unsigned long loopLength,
+	unsigned int endRecordSamps)
 {
 	auto bufSize = (unsigned int)_buffer.size();
 
@@ -323,9 +335,18 @@ void Loop::Play(unsigned long index, unsigned long length)
 	}
 
 	_playIndex = (index + _MaxFadeSamps) >= bufSize ? (bufSize-1) : index + _MaxFadeSamps;
-	_length = (length + _MaxFadeSamps) <= bufSize ? length : bufSize - _MaxFadeSamps;
-	
-	_state = length > 0 ? STATE_PLAYING : STATE_INACTIVE;
+	_loopLength = loopLength;
+	_endRecordSampCount = 0;
+	_endRecordSamps = endRecordSamps;
+
+	auto playState = endRecordSamps > 0 ? STATE_PLAYINGRECORDING : STATE_PLAYING;
+	_state = loopLength > 0 ? playState : STATE_INACTIVE;
+}
+
+void Loop::EndRecording()
+{
+	if (STATE_PLAYINGRECORDING == _state)
+		_state = STATE_PLAYING;
 }
 
 void Loop::Ditch()
@@ -362,14 +383,36 @@ std::vector<JobAction> Loop::_CommitChanges()
 		return { job };
 	}
 
+	if (_endRecordingCompleted)
+	{
+		_endRecordingCompleted = false;
+
+		JobAction job;
+		job.JobActionType = JobAction::JOB_ENDRECORDING;
+		job.SourceId = Id();
+		job.Receiver = ActionReceiver::shared_from_this();
+		return { job };
+	}
+
 	return {};
 }
 
-ActionResult Loop::OnAction(JobAction action, std::optional<io::UserConfig> cfg)
+ActionResult Loop::OnAction(JobAction action)
 {
 	if (JobAction::JOB_RENDERWAVE == action.JobActionType)
 	{
 		UpdateLoopModel();
+		ActionResult res;
+		res.IsEaten = true;
+		res.ResultType = actions::ACTIONRESULT_DEFAULT;
+
+		return res;
+	}
+
+	if (JobAction::JOB_ENDRECORDING == action.JobActionType)
+	{
+		EndRecording();
+
 		ActionResult res;
 		res.IsEaten = true;
 		res.ResultType = actions::ACTIONRESULT_DEFAULT;
@@ -384,9 +427,17 @@ void Loop::Reset()
 {
 	_writeIndex = 0;
 	_playIndex = 0;
-	_length = 0;
+	_loopLength = 0;
 	_state = STATE_INACTIVE;
 	_changesMade = true;
+}
+
+unsigned long Loop::LoopIndex() const
+{
+	if (_MaxFadeSamps > _playIndex)
+		return 0;
+
+	return _playIndex - _MaxFadeSamps;
 }
 
 void Loop::UpdateLoopModel()
@@ -427,7 +478,7 @@ double Loop::CalcDrawRadius()
 {
 	auto minRadius = 100.0;
 	auto maxRadius = 400.0;
-	auto radius = 70.0 * log(_length) - 600;
+	auto radius = 70.0 * log(_loopLength) - 600;
 
 	return std::clamp(radius, minRadius, maxRadius);
 }

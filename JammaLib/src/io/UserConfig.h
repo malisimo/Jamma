@@ -63,7 +63,7 @@ namespace io
 		}
 
 		// How long to continue recording after trigger to end loop recording, in samples
-		unsigned int DelayRecordingSamps(int error) const {
+		unsigned int EndRecordingSamps(int error) const {
 			if (error < 0)
 			{
 				if (-error > (int)IntroSamps())

@@ -90,8 +90,8 @@ namespace gui
 		virtual	void SetSize(utils::Size2d size) override;
 		virtual bool HitTest(utils::Position2d pos) override;
 		virtual void Draw(base::DrawContext& ctx) override;
-		virtual actions::ActionResult OnAction(actions::TouchAction action, std::optional<io::UserConfig> cfg) override;
-		virtual actions::ActionResult OnAction(actions::TouchMoveAction action, std::optional<io::UserConfig> cfg) override;
+		virtual actions::ActionResult OnAction(actions::TouchAction action) override;
+		virtual actions::ActionResult OnAction(actions::TouchMoveAction action) override;
 		virtual bool Undo(std::shared_ptr<base::ActionUndo> undo) override;
 		virtual bool Redo(std::shared_ptr<base::ActionUndo> undo) override;
 

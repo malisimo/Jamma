@@ -92,7 +92,9 @@ namespace engine
 		void AddLoop(std::shared_ptr<Loop> loop);
 
 		void Record(std::vector<unsigned int> channels);
-		void Play(unsigned long index, unsigned long length);
+		void Play(unsigned long index,
+			unsigned long loopLength,
+			unsigned int endRecordSamps);
 		void Ditch();
 
 	protected:

@@ -37,7 +37,8 @@ namespace engine
 			OverdubTexture(""),
 			PunchTexture(""),
 			Id(0),
-			TakeId(0)
+			TakeId(0),
+			FadeSamps(800u)
 		{
 		}
 
@@ -50,7 +51,8 @@ namespace engine
 			OverdubTexture(""),
 			PunchTexture(""),
 			Id(0),
-			TakeId(0)
+			TakeId(0),
+			FadeSamps(800u)
 		{
 		}
 
@@ -62,6 +64,7 @@ namespace engine
 		std::string PunchTexture;
 		unsigned long Id;
 		unsigned long TakeId;
+		unsigned int FadeSamps;
 	};
 
 	class Loop :
@@ -73,8 +76,9 @@ namespace engine
 		enum LoopVisualState
 		{
 			STATE_INACTIVE,
-			STATE_PLAYING,
 			STATE_RECORDING,
+			STATE_PLAYINGRECORDING,
+			STATE_PLAYING,
 			STATE_OVERDUBBING,
 			STATE_PUNCHEDIN
 		};
@@ -92,8 +96,9 @@ namespace engine
 		Loop(Loop&& other) :
 			GuiElement(other._guiParams),
 			_modelNeedsUpdating(other._modelNeedsUpdating),
+			_endRecordingCompleted(other._endRecordingCompleted),
 			_pitch(other._pitch),
-			_length(other._length),
+			_loopLength(other._loopLength),
 			_state(other._state),
 			_playIndex(other._playIndex),
 			_loopParams{other._loopParams},
@@ -113,8 +118,9 @@ namespace engine
 			{
 				ReleaseResources();
 				std::swap(_modelNeedsUpdating, other._modelNeedsUpdating);
+				std::swap(_endRecordingCompleted, other._endRecordingCompleted);
 				std::swap(_pitch, other._pitch);
-				std::swap(_length, other._length);
+				std::swap(_loopLength, other._loopLength);
 				std::swap(_state, other._state);
 				std::swap(_guiParams, other._guiParams);
 				std::swap(_writeIndex, other._writeIndex);
@@ -145,7 +151,7 @@ namespace engine
 		inline virtual int OnWrite(float samp, int indexOffset) override;
 		inline virtual int OnOverwrite(float samp, int indexOffset) override;
 		virtual void EndWrite(unsigned int numSamps, bool updateIndex) override;
-		virtual actions::ActionResult OnAction(actions::JobAction action, std::optional<io::UserConfig> cfg) override;
+		virtual actions::ActionResult OnAction(actions::JobAction action) override;
 
 		void OnPlayRaw(const std::shared_ptr<base::MultiAudioSink> dest,
 			unsigned int channel,
@@ -157,7 +163,10 @@ namespace engine
 
 		bool Load(const io::WavReadWriter& readWriter);
 		void Record();
-		void Play(unsigned long index, unsigned long length);
+		void Play(unsigned long index,
+			unsigned long loopLength,
+			unsigned int endRecordSamps);
+		void EndRecording();
 		void Ditch();
 		void Overdub();
 		void PunchIn();
@@ -167,6 +176,7 @@ namespace engine
 		virtual std::vector<actions::JobAction> _CommitChanges() override;
 
 		void Reset();
+		unsigned long LoopIndex() const;
 		void UpdateLoopModel();
 		double CalcDrawRadius();
 		std::tuple<std::vector<float>, std::vector<float>, float, float>
@@ -177,15 +187,18 @@ namespace engine
 			float radius);
 
 	protected:
-		static const unsigned int _MaxFadeSamps = 30000;
+		static const unsigned int _MaxFadeSamps = 70000;
 		static const unsigned int _InitBufferSize = 1000000;
 		static const unsigned int _MaxBufferSize = 40000000;
 		static const unsigned int _GrainSamps = 1100;
 
 		bool _modelNeedsUpdating;
+		bool _endRecordingCompleted;
 		unsigned long _playIndex;
 		double _pitch;
-		unsigned long _length;
+		unsigned long _loopLength;
+		unsigned int _endRecordSampCount;
+		unsigned int _endRecordSamps;
 		LoopVisualState _state;
 		LoopParams _loopParams;
 		std::shared_ptr<audio::AudioMixer> _mixer;

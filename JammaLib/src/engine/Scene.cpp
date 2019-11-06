@@ -152,9 +152,11 @@ void Scene::_ReleaseResources()
 	Drawable::_ReleaseResources();
 }
 
-ActionResult Scene::OnAction(TouchAction action, std::optional<io::UserConfig> cfg)
+ActionResult Scene::OnAction(TouchAction action)
 {
 	action.SetActionTime(Timer::GetTime());
+	action.SetUserConfig(_userConfig);
+
 	std::cout << "Touch action " << action.Touch << " [" << action.State << "] " << action.Index << std::endl;
 
 	if (TouchAction::TouchState::TOUCH_UP == action.State)
@@ -163,7 +165,7 @@ ActionResult Scene::OnAction(TouchAction action, std::optional<io::UserConfig> c
 
 		if (activeElement)
 		{
-			auto res = activeElement->OnAction(activeElement->GlobalToLocal(action), _userConfig);
+			auto res = activeElement->OnAction(activeElement->GlobalToLocal(action));
 
 			if (res.IsEaten)
 			{
@@ -181,7 +183,7 @@ ActionResult Scene::OnAction(TouchAction action, std::optional<io::UserConfig> c
 
 	for (auto& station : _stations)
 	{
-		auto res = station->OnAction(station->ParentToLocal(action), _userConfig);
+		auto res = station->OnAction(station->ParentToLocal(action));
 
 		if (res.IsEaten)
 		{
@@ -208,14 +210,15 @@ ActionResult Scene::OnAction(TouchAction action, std::optional<io::UserConfig> c
 	return res;
 }
 
-ActionResult Scene::OnAction(TouchMoveAction action, std::optional<io::UserConfig> cfg)
+ActionResult Scene::OnAction(TouchMoveAction action)
 {
 	action.SetActionTime(Timer::GetTime());
+	action.SetUserConfig(_userConfig);
 	
 	auto activeElement = _touchDownElement.lock();
 
 	if (activeElement)
-		return activeElement->OnAction(activeElement->GlobalToLocal(action), _userConfig);
+		return activeElement->OnAction(activeElement->GlobalToLocal(action));
 	else if (_isSceneTouching)
 	{
 		auto dPos = action.Position - _initTouchDownPosition;
@@ -226,9 +229,10 @@ ActionResult Scene::OnAction(TouchMoveAction action, std::optional<io::UserConfi
 	return { false, ACTIONRESULT_DEFAULT };
 }
 
-ActionResult Scene::OnAction(KeyAction action, std::optional<io::UserConfig> cfg)
+ActionResult Scene::OnAction(KeyAction action)
 {
 	action.SetActionTime(Timer::GetTime());
+	action.SetUserConfig(_userConfig);
 	std::cout << "Key action " << action.KeyActionType << " [" << action.KeyChar << "] IsSytem:" << action.IsSystem << ", Modifiers:" << action.Modifiers << "]" << std::endl;
 
 	if ((90 == action.KeyChar) && (actions::KeyAction::KEY_UP == action.KeyActionType) && (actions::MODIFIER_CTRL == action.Modifiers))
@@ -242,7 +246,7 @@ ActionResult Scene::OnAction(KeyAction action, std::optional<io::UserConfig> cfg
 
 	for (auto& station : _stations)
 	{
-		auto res = station->OnAction(action, _userConfig);
+		auto res = station->OnAction(action);
 
 		if (res.IsEaten)
 		{
@@ -260,17 +264,19 @@ ActionResult Scene::OnAction(KeyAction action, std::optional<io::UserConfig> cfg
 	return { false, ACTIONRESULT_DEFAULT };
 }
 
-void Scene::OnTick(Time curTime, unsigned int samps)
+void Scene::OnTick(Time curTime, unsigned int samps, std::optional<io::UserConfig> cfg)
 {
 	for (auto& station : _stations)
 	{
-		station->OnTick(curTime, samps);
+		station->OnTick(curTime, samps, _userConfig);
 	}
 }
 
 void Scene::OnJobTick(Time curTime)
 {
 	actions::JobAction job;
+	job.SetActionTime(Timer::GetTime());
+	job.SetUserConfig(_userConfig);
 
 	{
 		std::shared_lock lock(_jobMutex);
@@ -294,7 +300,7 @@ void Scene::OnJobTick(Time curTime)
 
 	auto receiver = job.Receiver.lock();
 	if (receiver)
-		receiver->OnAction(job, _userConfig);
+		receiver->OnAction(job);
 }
 
 void Scene::InitAudio()
@@ -313,7 +319,7 @@ void Scene::InitAudio()
 		auto outParams = _audioDevice->GetOutputStreamInfo();
 		
 		_channelMixer->SetParams(ChannelMixerParams({
-				ChannelMixer::DefaultBufferSize,
+				_userConfig.AdcBufferDelay(),
 				ChannelMixer::DefaultBufferSize,
 				inParams.inputChannels,
 				outParams.outputChannels}));
@@ -415,7 +421,7 @@ void Scene::OnAudio(float* inBuf, float* outBuf, unsigned int numSamps)
 	
 	_channelMixer->Sink()->EndMultiWrite(numSamps, true);
 
-	OnTick(Timer::GetTime(), numSamps);
+	OnTick(Timer::GetTime(), numSamps, _userConfig);
 }
 
 bool Scene::OnUndo(std::shared_ptr<base::ActionUndo> undo)
