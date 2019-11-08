@@ -15,7 +15,7 @@
 #include <iostream>
 #include <sstream>
 #include "Json.h"
-#include "Constants.h"
+#include "../include/Constants.h"
 #include "../utils/MathUtils.h"
 
 namespace io
@@ -52,14 +52,14 @@ namespace io
 
 		// How much to (further) delay input signal from ADC, in samples
 		unsigned int AdcBufferDelay() const {
-			return Trigger.PreDelay - (constants::MaxLoopFadeSamps - Audio.Latency);
+			return Trigger.PreDelay + constants::MaxLoopFadeSamps - Audio.Latency;
 		}
 
 		// How long to continue recording after trigger to end loop recording, in samples
 		unsigned int EndRecordingSamps(int error) const {
-			if (error < 0)
+			if (error > 0)
 			{
-				if (-error > (int)constants::MaxLoopFadeSamps)
+				if (error > (int)constants::MaxLoopFadeSamps)
 					return 0;
 			}
 
@@ -73,7 +73,7 @@ namespace io
 				((long)Trigger.PreDelay) - (long)(constants::MaxLoopFadeSamps - Audio.Latency),
 				loopLength);
 
-			return constants::MaxLoopFadeSamps + loopSamp;
+			return loopSamp;
 		}
 
 		AudioSettings Audio;

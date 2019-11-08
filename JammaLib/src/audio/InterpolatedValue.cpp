@@ -12,6 +12,11 @@ double InterpolatedValue::Next()
 	return _target;
 }
 
+double InterpolatedValue::Current() const
+{
+	return _target;
+}
+
 void InterpolatedValue::SetTarget(double target)
 {
 	_target = target;
@@ -55,6 +60,11 @@ double InterpolatedValueLinear::Next()
 	return _lastVal;
 }
 
+double InterpolatedValueLinear::Current() const
+{
+	return _lastVal;
+}
+
 void InterpolatedValueLinear::SetTarget(double target)
 {
 	if (_endVal != target)
@@ -83,5 +93,10 @@ double InterpolatedValueExp::Next()
 	auto currentVal = _lastVal;
 	_lastVal = currentVal + ((_target - currentVal) / _params.Damping);
 
+	return _lastVal;
+}
+
+double InterpolatedValueExp::Current() const
+{
 	return _lastVal;
 }

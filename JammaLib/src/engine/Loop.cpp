@@ -125,8 +125,8 @@ void Loop::Draw3d(DrawContext& ctx)
 
 	_modelScreenPos = glCtx.ProjectScreen(pos);
 	glCtx.PushMvp(glm::translate(glm::mat4(1.0), glm::vec3(pos.X, pos.Y, pos.Z)));
-	glCtx.PushMvp(glm::scale(glm::mat4(1.0), glm::vec3(scale, scale, scale)));
-	glCtx.PushMvp(glm::rotate(glm::mat4(1.0), (float)(TWOPI * (frac + 0.7)), glm::vec3(0.0f, 1.0f, 0.0f)));
+	glCtx.PushMvp(glm::scale(glm::mat4(1.0), glm::vec3(scale, scale + _mixer->Level(), scale)));
+	glCtx.PushMvp(glm::rotate(glm::mat4(1.0), (float)(TWOPI * (frac + 0.0)), glm::vec3(0.0f, 1.0f, 0.0f)));
 
 	for (auto& child : _children)
 		child->Draw3d(ctx);
@@ -445,10 +445,9 @@ void Loop::UpdateLoopModel()
 	std::vector<float> verts;
 	std::vector<float> uvs;
 
-	auto numSamps = (unsigned int)_buffer.size();
 	auto lastYMin = -10.0f;
 	auto lastYMax = 10.0f;
-	auto numGrains = (unsigned int)ceil((double)numSamps / (double)constants::GrainSamps);
+	auto numGrains = (unsigned int)ceil((double)_loopLength / (double)constants::GrainSamps);
 	auto radius = (float)CalcDrawRadius();
 
 	for (auto grain = 1u; grain < numGrains; grain++)
@@ -502,8 +501,8 @@ std::tuple<std::vector<float>, std::vector<float>, float, float>
 
 	auto angle1 = ((float)TWOPI) * ((float)(grain - 1) / (float)numGrains);
 	auto angle2 = ((float)TWOPI) * ((float)grain / (float)numGrains);
-	auto i1 = (grain - 1) * constants::GrainSamps;
-	auto i2 = grain * constants::GrainSamps;
+	auto i1 = constants::MaxLoopFadeSamps + (grain - 1) * constants::GrainSamps;
+	auto i2 = constants::MaxLoopFadeSamps + grain * constants::GrainSamps;
 	auto gMin = utils::ArraySubMin(_buffer, i1, i2);
 	auto gMax = utils::ArraySubMax(_buffer, i1, i2);
 

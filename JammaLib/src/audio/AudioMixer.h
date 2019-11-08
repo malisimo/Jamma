@@ -125,6 +125,7 @@ namespace audio
 		virtual void InitReceivers() override;
 		virtual void SetSize(utils::Size2d size) override;
 
+		double Level() const;
 		void OnPlay(const std::shared_ptr<base::MultiAudioSink> dest,
 			float samp,
 			unsigned int index);

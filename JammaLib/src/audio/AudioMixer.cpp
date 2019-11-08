@@ -50,6 +50,11 @@ ActionResult AudioMixer::OnAction(DoubleAction val)
 	return { true, 0UL, ACTIONRESULT_DEFAULT, nullptr };
 }
 
+double AudioMixer::Level() const
+{
+	return _fade->Current();
+}
+
 void AudioMixer::OnPlay(const std::shared_ptr<MultiAudioSink> dest,
 	float samp,
 	unsigned int index)
