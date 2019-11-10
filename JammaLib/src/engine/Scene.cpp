@@ -352,7 +352,7 @@ void Scene::CommitChanges()
 
 	if (!jobList.empty())
 	{
-		std::scoped_lock lock(_jobMutex); // Deadlock!!
+		std::scoped_lock lock(_jobMutex);
 		_jobList.insert(_jobList.end(), jobList.begin(), jobList.end());
 	}
 }

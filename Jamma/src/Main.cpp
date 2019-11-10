@@ -40,7 +40,7 @@ std::optional<io::InitFile> LoadIni()
 	io::TextReadWriter txtFile;
 	auto res = txtFile.Read(initPath, MAX_JSON_CHARS);
 
-	std::string iniTxt = "{\"rig\":\"\",\"jam\":\"default.jam\",\"jamload\":1,\"rigload\":0,\"win\":[-0,0,1400,1000]}";
+	std::string iniTxt = InitFile::DefaultJson;
 	if (!res.has_value())
 		txtFile.Write(initPath, iniTxt, (unsigned int)iniTxt.size(), 0);
 	else
@@ -57,7 +57,7 @@ std::optional<io::JamFile> LoadJam(io::InitFile& ini)
 {
 	io::TextReadWriter txtFile;
 
-	std::string jamJson = "{\"name\":\"default\",\"stations\":[{\"name\":\"Mic1\",\"stationtype\":0,\"takes\":[{\"name\":\"Take1\",\"loops\":[{\"name\":\"Loop1.wav\",\"length\":155822,\"mix\":{\"type\":\"pan\",\"chans\":[0.5,0.5]}}]}]}";
+	std::string jamJson = JamFile::DefaultJson;
 	auto res = txtFile.Read(ini.Jam, MAX_JSON_CHARS);
 	if (!res.has_value())
 	{
@@ -81,7 +81,7 @@ std::optional<io::RigFile> LoadRig(io::InitFile& ini)
 {
 	io::TextReadWriter txtFile;
 
-	std::string rigJson = "{\"name\":\"default\",\"user\":{\"audio\":{\"name\":\"default\",\"bufsize\":512,\"numchannelsin\":2,\"numchannelsout\":2},\"loop\":{\"fadeTime\":400},\"trigger\":{\"preDelay\":400,\"debounceSamps\":280}},\"triggers\":[{\"name\":\"Trig1\",\"stationtype\":0,\"pairs\":[{\"activatedown\":49,\"activateup\":49,\"ditchdown\":50,\"ditchup\":50}],\"input\":[0,1]}";
+	std::string rigJson = RigFile::DefaultJson;
 	auto res = txtFile.Read(ini.Rig, MAX_JSON_CHARS);
 	if (!res.has_value())
 	{

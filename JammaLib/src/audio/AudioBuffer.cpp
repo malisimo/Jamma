@@ -6,7 +6,7 @@ AudioBuffer::AudioBuffer() :
 	AudioSource({}),
 	_playIndex(0),
 	_length(0),
-	_buffer(std::vector<float>(0, 0.0f))
+	_buffer(std::vector<float>(constants::MaxBlockSize, 0.0f))
 {
 }
 
@@ -14,7 +14,7 @@ AudioBuffer::AudioBuffer(unsigned int size) :
 	AudioSource({}),
 	_playIndex(0),
 	_length(0),
-	_buffer(std::vector<float>(size, 0.0f))
+	_buffer(std::vector<float>(size < constants::MaxBlockSize ? constants::MaxBlockSize : size, 0.0f))
 {
 }
 
@@ -25,7 +25,7 @@ AudioBuffer::~AudioBuffer()
 void AudioBuffer::OnPlay(const std::shared_ptr<base::AudioSink> dest,
 	unsigned int numSamps)
 {
-	if (_length == 0)
+	if (0 == _length)
 		return;
 
 	auto index = _playIndex;
@@ -49,6 +49,13 @@ void AudioBuffer::EndPlay(unsigned int numSamps)
 	auto bufSize = (unsigned int)_buffer.size();
 	_playIndex += numSamps;
 
+	if (0 == bufSize)
+	{
+		_playIndex = 0;
+		_length = 0;
+		return;
+	}
+
 	while (bufSize <= _playIndex)
 		_playIndex -= bufSize;
 
@@ -61,6 +68,9 @@ inline int AudioBuffer::OnWrite(float samp, int indexOffset)
 {
 	auto bufSize = (unsigned int)_buffer.size();
 
+	if (bufSize == 0)
+		return 0;
+
 	while (bufSize <= _writeIndex + indexOffset)
 		indexOffset -= (int)_buffer.size();
 
@@ -72,6 +82,9 @@ inline int AudioBuffer::OnWrite(float samp, int indexOffset)
 inline int AudioBuffer::OnOverwrite(float samp, int indexOffset)
 {
 	auto bufSize = (unsigned int)_buffer.size();
+
+	if (bufSize == 0)
+		return 0;
 
 	while (bufSize <= _writeIndex + indexOffset)
 		indexOffset -= (int)_buffer.size();
@@ -97,7 +110,7 @@ void AudioBuffer::EndWrite(unsigned int numSamps, bool updateIndex)
 
 void AudioBuffer::SetSize(unsigned int size)
 {
-	_buffer.resize(size);
+	_buffer.resize(size < constants::MaxBlockSize ? constants::MaxBlockSize : size);
 }
 
 void AudioBuffer::_SetWriteIndex(unsigned int index)

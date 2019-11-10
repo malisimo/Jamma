@@ -52,7 +52,9 @@ namespace io
 
 		// How much to (further) delay input signal from ADC, in samples
 		unsigned int AdcBufferDelay() const {
-			return Trigger.PreDelay + constants::MaxLoopFadeSamps - Audio.Latency;
+			return Audio.Latency > Trigger.PreDelay + constants::MaxLoopFadeSamps ?
+				0 :
+				Trigger.PreDelay + constants::MaxLoopFadeSamps - Audio.Latency;
 		}
 
 		// How long to continue recording after trigger to end loop recording, in samples

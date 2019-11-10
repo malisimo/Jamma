@@ -10,6 +10,8 @@
 using namespace io;
 using audio::BehaviourParams;
 
+const std::string JamFile::DefaultJson = "{\"name\":\"default\",\"stations\":[{\"name\":\"Mic1\",\"stationtype\":0,\"takes\":[{\"name\":\"Take1\",\"loops\":[{\"name\":\"Loop1.wav\",\"length\":155822,\"mix\":{\"type\":\"pan\",\"chans\":[0.5,0.5]}}]}]}";
+
 std::optional<JamFile> JamFile::FromStream(std::stringstream ss)
 {
 	auto root = Json::FromStream(std::move(ss));

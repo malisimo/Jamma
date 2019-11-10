@@ -10,6 +10,8 @@
 using namespace io;
 using audio::BehaviourParams;
 
+const std::string InitFile::DefaultJson = "{\"rig\":\"\",\"jam\":\"default.jam\",\"jamload\":1,\"rigload\":0,\"win\":[-0,0,1400,1000]}";
+
 std::optional<InitFile> InitFile::FromStream(std::stringstream ss)
 {
 	auto root = Json::FromStream(std::move(ss));
