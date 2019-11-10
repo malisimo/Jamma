@@ -67,3 +67,25 @@ std::wstring utils::DecodeUtf8(const std::string& str)
 
 	return wStr;
 }
+
+std::string utils::GetGuid()
+{
+	std::string str = "";
+
+	UUID uuid;
+	RPC_STATUS ret_val = UuidCreate(&uuid);
+
+	if (RPC_S_OK == ret_val)
+	{
+		char* buf = nullptr;
+		UuidToStringA(&uuid, (RPC_CSTR*)&buf);
+
+		if (buf)
+		{
+			str = std::string(buf);
+			RpcStringFreeA((RPC_CSTR*)&buf);
+		}
+	}
+
+	return str;
+}

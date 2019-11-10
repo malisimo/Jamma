@@ -181,7 +181,20 @@ ActionResult Station::OnAction(TriggerAction action)
 	}
 	case TriggerAction::TRIGGER_DITCH:
 		if (loopTake.has_value())
+		{
 			loopTake.value()->Ditch();
+
+			auto id = loopTake.value()->Id();
+			auto match = std::find_if(_backLoopTakes.begin(),
+				_backLoopTakes.end(),
+				[&id](const std::shared_ptr<LoopTake>& arg) { return arg->Id() == id; });
+
+			if (match != _backLoopTakes.end())
+			{
+				_backLoopTakes.erase(match);
+				_changesMade = true;
+			}
+		}
 
 		res.IsEaten = true;
 		break;
@@ -200,15 +213,8 @@ void Station::OnTick(Time curTime, unsigned int samps, std::optional<io::UserCon
 
 std::shared_ptr<LoopTake> Station::AddTake()
 {
-	unsigned long highestTakeIndex = 0;
-	for (auto& take : _loopTakes)
-	{
-		if (take->Id() > highestTakeIndex)
-			highestTakeIndex = take->Id();
-	}
-
 	LoopTakeParams takeParams;
-	takeParams.Id = highestTakeIndex + 1;
+	takeParams.Id = "TK-" + utils::GetGuid();
 
 	auto take = std::make_shared<LoopTake>(takeParams);
 	AddTake(take);
@@ -219,7 +225,6 @@ std::shared_ptr<LoopTake> Station::AddTake()
 void Station::AddTake(std::shared_ptr<LoopTake> take)
 {
 	_backLoopTakes.push_back(take);
-	_children.push_back(take);
 	Init();
 
 	ArrangeTakes();
@@ -270,6 +275,27 @@ unsigned int Station::CalcTakeHeight(unsigned int stationHeight, unsigned int nu
 
 std::vector<JobAction> Station::_CommitChanges()
 {
+	// Remove and add any children
+	// (difference between back and front LoopTake buffer)
+	std::vector<std::shared_ptr<LoopTake>> toAdd;
+	std::vector<std::shared_ptr<LoopTake>> toRemove;
+	std::copy_if(_backLoopTakes.begin(), _backLoopTakes.end(), std::back_inserter(toAdd), [&](const std::shared_ptr<LoopTake>& take) { return (std::find(_loopTakes.begin(), _loopTakes.end(), take) == _loopTakes.end()); });
+	std::copy_if(_loopTakes.begin(), _loopTakes.end(), std::back_inserter(toRemove), [&](const std::shared_ptr<LoopTake>& take) { return (std::find(_backLoopTakes.begin(), _backLoopTakes.end(), take) == _backLoopTakes.end()); });
+	
+	for (auto& take : toAdd)
+	{
+		take->SetParent(GuiElement::shared_from_this());
+		take->Init();
+		_children.push_back(take);
+	}
+
+	for (auto& take : toRemove)
+	{
+		auto child = std::find(_children.begin(), _children.end(), take);
+		if (_children.end() != child)
+			_children.erase(child);
+	}
+	
 	_loopTakes = _backLoopTakes; // TODO: Undo?
 	return {};
 }
@@ -294,7 +320,7 @@ void Station::ArrangeTakes()
 	}
 }
 
-std::optional<std::shared_ptr<LoopTake>> Station::TryGetTake(unsigned long id)
+std::optional<std::shared_ptr<LoopTake>> Station::TryGetTake(std::string id)
 {
 	for (auto& take : _loopTakes)
 	{

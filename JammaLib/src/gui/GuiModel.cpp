@@ -82,7 +82,7 @@ void GuiModel::_InitResources(ResourceLib& resourceLib, bool forceInit)
 		validated = InitVertexArray(_modelParams.Verts, _modelParams.Uvs);
 	}
 
-	GlUtils::CheckError("GuiModel::Init()");
+	GlUtils::CheckError("GuiModel::_InitResources()");
 }
 
 void GuiModel::_ReleaseResources()

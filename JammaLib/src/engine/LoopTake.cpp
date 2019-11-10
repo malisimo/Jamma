@@ -21,6 +21,8 @@ LoopTake::LoopTake(LoopTakeParams params) :
 	GuiElement(params),
 	MultiAudioSource(),
 	_id(params.Id),
+	_sourceId(""),
+	_sourceType(SOURCE_LOOPTAKE),
 	_recordedSampCount(0),
 	_loops({}),
 	_backLoops({})
@@ -111,12 +113,12 @@ void LoopTake::OnPlayRaw(const std::shared_ptr<MultiAudioSink> dest,
 	}
 }
 
-unsigned long LoopTake::Id() const
+std::string LoopTake::Id() const
 {
 	return _id;
 }
 
-unsigned long LoopTake::SourceId() const
+std::string LoopTake::SourceId() const
 {
 	return _sourceId;
 }
@@ -136,21 +138,9 @@ std::shared_ptr<Loop> LoopTake::AddLoop(unsigned int chan)
 	wire.Channels = { chan };
 	auto mixerParams = Loop::GetMixerParams({ 110, loopHeight }, wire);
 	
-	unsigned long highestLoopIndex = 0;
-	for (auto& loop : _loops)
-	{
-		if (loop->Id() > highestLoopIndex)
-			highestLoopIndex = loop->Id();
-	}
-	for (auto& loop : _backLoops)
-	{
-		if (loop->Id() > highestLoopIndex)
-			highestLoopIndex = loop->Id();
-	}
-
 	LoopParams loopParams;
 	loopParams.Wav = "hh";
-	loopParams.Id = highestLoopIndex + 1;
+	loopParams.Id = "LP-" + utils::GetGuid();
 	loopParams.TakeId = _id;
 	auto loop = std::make_shared<Loop>(loopParams, mixerParams);
 	AddLoop(loop);
@@ -233,7 +223,29 @@ void LoopTake::_InitResources(ResourceLib& resourceLib, bool forceInit)
 
 std::vector<JobAction> LoopTake::_CommitChanges()
 {
+	// Remove and add any children
+	// (difference between back and front LoopTake buffer)
+	std::vector<std::shared_ptr<Loop>> toAdd;
+	std::vector<std::shared_ptr<Loop>> toRemove;
+	std::copy_if(_backLoops.begin(), _backLoops.end(), std::back_inserter(toAdd), [&](const std::shared_ptr<Loop>& loop) { return (std::find(_loops.begin(), _loops.end(), loop) == _loops.end()); });
+	std::copy_if(_loops.begin(), _loops.end(), std::back_inserter(toRemove), [&](const std::shared_ptr<Loop>& loop) { return (std::find(_backLoops.begin(), _backLoops.end(), loop) == _backLoops.end()); });
+
+	for (auto& loop : toAdd)
+	{
+		loop->SetParent(GuiElement::shared_from_this());
+		loop->Init();
+		_children.push_back(loop);
+	}
+
+	for (auto& loop : toRemove)
+	{
+		auto child = std::find(_children.begin(), _children.end(), loop);
+		if (_children.end() != child)
+			_children.erase(child);
+	}
+
 	_loops = _backLoops; // TODO: Undo?
+
 	return {};
 }
 

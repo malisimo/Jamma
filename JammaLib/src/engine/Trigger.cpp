@@ -25,6 +25,9 @@ Trigger::Trigger(TriggerParams trigParams) :
 	_isLastDitchDown(false),
 	_isLastActivateDownRaw(false),
 	_isLastDitchDownRaw(false),
+	_targetId(""),
+	_overdubTargetId(""),
+	_recordSampCount(0),
 	_textureRecording(ImageParams(DrawableParams{ trigParams.TextureRecording }, SizeableParams{ trigParams.Size,trigParams.MinSize }, "texture")),
 	_textureDitchDown(ImageParams(DrawableParams{ trigParams.TextureDitchDown }, SizeableParams{ trigParams.Size,trigParams.MinSize }, "texture")),
 	_textureOverdubbing(ImageParams(DrawableParams{ trigParams.TextureOverdubbing }, SizeableParams{ trigParams.Size,trigParams.MinSize }, "texture")),
@@ -237,8 +240,8 @@ void Trigger::Reset()
 		b.Reset();
 
 	_state = TriggerState::TRIGSTATE_DEFAULT;
-	_targetId = 0;
-	_overdubTargetId = 0;
+	_targetId = "";
+	_overdubTargetId = "";
 	_recordSampCount = 0;
 }
 
@@ -501,8 +504,8 @@ void Trigger::Ditch(std::optional<io::UserConfig> cfg)
 		_receiver->OnAction(trigAction);
 	}
 
-	_targetId = 0;
-	_overdubTargetId = 0;
+	_targetId = "";
+	_overdubTargetId = "";
 }
 
 void Trigger::StartOverdub(std::optional<io::UserConfig> cfg)
@@ -561,7 +564,7 @@ void Trigger::DitchOverdub(std::optional<io::UserConfig> cfg)
 		_receiver->OnAction(trigAction);
 	}
 
-	_overdubTargetId = 0;
+	_overdubTargetId = "";
 }
 
 void Trigger::StartPunchIn(std::optional<io::UserConfig> cfg)

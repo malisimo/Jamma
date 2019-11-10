@@ -114,7 +114,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>dsound.lib;comsuppw.lib</AdditionalDependencies>
+      <AdditionalDependencies>dsound.lib;comsuppw.lib;Rpcrt4.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(WindowsSdkDir)Lib\10.0.16299.0\um\x86</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
@@ -142,7 +142,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>dsound.lib;comsuppw.lib</AdditionalDependencies>
+      <AdditionalDependencies>dsound.lib;comsuppw.lib;Rpcrt4.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(WindowsSdkDir)Lib\10.0.16299.0\um\x86</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
@@ -170,7 +170,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>dsound.lib;comsuppw.lib</AdditionalDependencies>
+      <AdditionalDependencies>dsound.lib;comsuppw.lib;Rpcrt4.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(WindowsSdkDir)Lib\10.0.16299.0\um\x64</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
@@ -202,7 +202,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>dsound.lib;comsuppw.lib</AdditionalDependencies>
+      <AdditionalDependencies>dsound.lib;comsuppw.lib;Rpcrt4.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(WindowsSdkDir)Lib\10.0.16299.0\um\x64</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>

@@ -118,7 +118,9 @@ void Loop::Draw3d(DrawContext& ctx)
 	auto pos = ModelPosition();
 	auto scale = ModelScale();
 
-	auto index = STATE_RECORDING == _state ? _writeIndex : _playIndex;
+	auto index = STATE_RECORDING == _state ?
+		_writeIndex :
+		_playIndex;
 	index = index > constants::MaxLoopFadeSamps ? index - constants::MaxLoopFadeSamps : index;
 
 	auto frac = _loopLength == 0 ? 0.0 : 1.0 - std::max(0.0, std::min(1.0, ((double)(index % _loopLength)) / ((double)_loopLength)));
@@ -281,7 +283,7 @@ void Loop::SetInputChannel(unsigned int channel)
 	_mixer->SetInputChannel(channel);
 }
 
-unsigned long Loop::Id() const
+std::string Loop::Id() const
 {
 	return _loopParams.Id;
 }
@@ -420,7 +422,7 @@ ActionResult Loop::OnAction(JobAction action)
 		return res;
 	}
 
-	return { false, actions::ACTIONRESULT_DEFAULT };
+	return { false, "", actions::ACTIONRESULT_DEFAULT };
 }
 
 void Loop::Reset()
@@ -444,10 +446,11 @@ void Loop::UpdateLoopModel()
 {
 	std::vector<float> verts;
 	std::vector<float> uvs;
-
+	
 	auto lastYMin = -10.0f;
 	auto lastYMax = 10.0f;
-	auto numGrains = (unsigned int)ceil((double)_loopLength / (double)constants::GrainSamps);
+	auto length = STATE_RECORDING == _state ? _writeIndex : _loopLength;
+	auto numGrains = (unsigned int)ceil((double)length / (double)constants::GrainSamps);
 	auto radius = (float)CalcDrawRadius();
 
 	for (auto grain = 1u; grain < numGrains; grain++)

@@ -9,6 +9,7 @@
 
 #include <string>
 #include <windows.h>
+#include <Rpc.h>
 
 namespace utils
 {
@@ -17,4 +18,6 @@ namespace utils
 
 	std::string EncodeUtf8(const std::wstring& wStr);
 	std::wstring DecodeUtf8(const std::string& str);
+
+	std::string GetGuid();
 }

@@ -17,7 +17,7 @@ namespace actions
 	struct ActionResult
 	{
 		bool IsEaten;
-		unsigned long Id;
+		std::string Id;
 		ActionResultType ResultType;
 		std::shared_ptr<base::ActionUndo> Undo;
 		std::weak_ptr<base::GuiElement> ActiveElement;

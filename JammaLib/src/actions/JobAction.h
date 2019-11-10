@@ -29,7 +29,7 @@ namespace actions
 		};
 
 		JobType JobActionType;
-		unsigned long SourceId;
+		std::string SourceId;
 		std::weak_ptr<base::ActionReceiver> Receiver;
 	};
 }

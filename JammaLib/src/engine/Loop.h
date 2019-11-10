@@ -31,13 +31,13 @@ namespace engine
 				"",
 				"",
 				{}),
+			Id(""),
+			TakeId(""),
 			Wav(""),
 			PlayTexture(""),
 			RecordTexture(""),
 			OverdubTexture(""),
 			PunchTexture(""),
-			Id(0),
-			TakeId(0),
 			FadeSamps(800u)
 		{
 		}
@@ -45,25 +45,25 @@ namespace engine
 		LoopParams(base::GuiElementParams params,
 			std::string wav) :
 			base::GuiElementParams(params),
+			Id(""),
+			TakeId(""),
 			Wav(wav),
 			PlayTexture(""),
 			RecordTexture(""),
 			OverdubTexture(""),
 			PunchTexture(""),
-			Id(0),
-			TakeId(0),
 			FadeSamps(800u)
 		{
 		}
 
 	public:
+		std::string Id;
+		std::string TakeId;
 		std::string Wav;
 		std::string PlayTexture;
 		std::string RecordTexture;
 		std::string OverdubTexture;
 		std::string PunchTexture;
-		unsigned long Id;
-		unsigned long TakeId;
 		unsigned int FadeSamps;
 	};
 
@@ -159,7 +159,7 @@ namespace engine
 			unsigned int numSamps);
 		unsigned int InputChannel() const;
 		void SetInputChannel(unsigned int channel);
-		unsigned long Id() const;
+		std::string Id() const;
 
 		bool Load(const io::WavReadWriter& readWriter);
 		void Record();

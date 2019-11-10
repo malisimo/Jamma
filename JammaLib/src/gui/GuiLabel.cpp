@@ -48,7 +48,7 @@ void GuiLabel::_InitResources(ResourceLib& resourceLib, bool forceInit)
 
 	auto validated = InitVertexArray();
 
-	utils::GlUtils::CheckError("GuiLabel::Init()");
+	utils::GlUtils::CheckError("GuiLabel::_InitResources()");
 }
 
 void GuiLabel::_ReleaseResources()

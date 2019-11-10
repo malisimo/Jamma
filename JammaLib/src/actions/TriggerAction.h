@@ -28,8 +28,8 @@ namespace actions
 
 	public:
 		TriggerActionType ActionType;
-		unsigned long TargetId;
-		unsigned long OverbudTargetId;
+		std::string TargetId;
+		std::string OverbudTargetId;
 		unsigned long SampleCount;
 		std::vector<unsigned int> InputChannels;
 	};

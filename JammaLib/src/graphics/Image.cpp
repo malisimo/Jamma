@@ -70,7 +70,7 @@ void Image::_InitResources(ResourceLib& resourceLib, bool forceInit)
 	if (validated)
 		validated = InitVertexArray();
 
-	GlUtils::CheckError("Image::Init()");
+	GlUtils::CheckError("Image::_InitResources()");
 }
 
 void Image::_ReleaseResources()

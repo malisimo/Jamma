@@ -178,7 +178,7 @@ ActionResult Scene::OnAction(TouchAction action)
 
 		_touchDownElement.reset();
 
-		return { false, ACTIONRESULT_DEFAULT };
+		return { false, "", ACTIONRESULT_DEFAULT };
 	}
 
 	for (auto& station : _stations)
@@ -203,7 +203,7 @@ ActionResult Scene::OnAction(TouchAction action)
 
 	ActionResult res;
 	res.IsEaten = true;
-	res.Id = 0;
+	res.Id = "";
 	res.ResultType = ACTIONRESULT_ID;
 	res.Undo = std::shared_ptr<ActionUndo>();
 	res.ActiveElement = std::weak_ptr<GuiElement>();
@@ -226,7 +226,7 @@ ActionResult Scene::OnAction(TouchMoveAction action)
 		SetSize(_sizeParams.Size);
 	}
 
-	return { false, ACTIONRESULT_DEFAULT };
+	return { false, "", ACTIONRESULT_DEFAULT };
 }
 
 ActionResult Scene::OnAction(KeyAction action)
@@ -261,7 +261,7 @@ ActionResult Scene::OnAction(KeyAction action)
 		}
 	}
 
-	return { false, ACTIONRESULT_DEFAULT };
+	return { false, "", ACTIONRESULT_DEFAULT };
 }
 
 void Scene::OnTick(Time curTime, unsigned int samps, std::optional<io::UserConfig> cfg)

@@ -271,8 +271,8 @@ namespace engine
 		std::vector<DualBinding> _ditchBindings;
 		std::vector<unsigned int> _inputChannels;
 		TriggerState _state;
-		unsigned long _targetId;
-		unsigned long _overdubTargetId;
+		std::string _targetId;
+		std::string _overdubTargetId;
 		unsigned long _recordSampCount;
 		Time _lastActivateTime;
 		Time _lastDitchTime;

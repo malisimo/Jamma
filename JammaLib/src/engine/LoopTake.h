@@ -24,6 +24,7 @@ namespace engine
 				"",
 				"",
 				{}),
+			Id(""),
 			Loops({})
 		{
 		}
@@ -31,12 +32,13 @@ namespace engine
 		LoopTakeParams(base::GuiElementParams params,
 			std::vector<LoopParams> loops) :
 			base::GuiElementParams(params),
+			Id(""),
 			Loops(loops)
 		{
 		}
 
 	public:
-		unsigned long Id;
+		std::string Id;
 		std::vector<LoopParams> Loops;
 	};
 
@@ -84,8 +86,8 @@ namespace engine
 		void OnPlayRaw(const std::shared_ptr<MultiAudioSink> dest,
 			unsigned int delaySamps,
 			unsigned int numSamps);		
-		unsigned long Id() const;
-		unsigned long SourceId() const;
+		std::string Id() const;
+		std::string SourceId() const;
 		LoopTakeSource SourceType() const;
 		unsigned long NumRecordedSamps() const;
 		std::shared_ptr<Loop> AddLoop(unsigned int chan);
@@ -107,8 +109,8 @@ namespace engine
 	protected:
 		static const utils::Size2d _Gap;
 
-		unsigned long _id;
-		unsigned int _sourceId;
+		std::string _id;
+		std::string _sourceId;
 		LoopTakeSource _sourceType;
 		unsigned long _recordedSampCount;
 		std::vector<std::shared_ptr<Loop>> _loops;

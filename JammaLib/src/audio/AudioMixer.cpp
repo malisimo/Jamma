@@ -47,7 +47,7 @@ void AudioMixer::SetSize(utils::Size2d size)
 ActionResult AudioMixer::OnAction(DoubleAction val)
 {
 	_fade->SetTarget(val.Value());
-	return { true, 0UL, ACTIONRESULT_DEFAULT, nullptr };
+	return { true, "", ACTIONRESULT_DEFAULT, nullptr };
 }
 
 double AudioMixer::Level() const

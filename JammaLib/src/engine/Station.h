@@ -73,7 +73,7 @@ namespace engine
 
 		virtual std::vector<actions::JobAction> _CommitChanges() override;
 		void ArrangeTakes();
-		std::optional<std::shared_ptr<LoopTake>> TryGetTake(unsigned long id);
+		std::optional<std::shared_ptr<LoopTake>> TryGetTake(std::string id);
 
 	protected:
 		static const utils::Size2d _Gap;
