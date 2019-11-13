@@ -2,6 +2,7 @@
 
 in vec2 UV;
 in float LedAlpha;
+in vec3 Rgb;
 
 out vec4 ColorOUT;
 
@@ -9,7 +10,7 @@ uniform sampler2D TextureSampler;
 
 void main()
 {
-    ColorOUT = texture(TextureSampler, UV);
+    //ColorOUT = texture(TextureSampler, UV);
+	ColorOUT.rgb = Rgb;
 	ColorOUT.a = LedAlpha;
-	//ColorOUT = vec4(1.0, 0.3, 0.3, 1.0);
 }

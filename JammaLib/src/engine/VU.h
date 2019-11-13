@@ -13,18 +13,21 @@ namespace engine
 	public:
 		VuParams() :
 			gui::GuiModelParams(),
-			LedHeight(10.0)
+			LedHeight(10.0f),
+			FallRate(0.00003)
 		{
 		}
 
 		VuParams(gui::GuiModelParams params) :
 			gui::GuiModelParams(params),
-			LedHeight(10.0)
+			LedHeight(10.0f),
+			FallRate(0.00003)
 		{
 		}
 
 	public:
-		double LedHeight;
+		float LedHeight;
+		double FallRate;
 	};
 
 	class VU :
@@ -42,7 +45,7 @@ namespace engine
 		void Draw3d(base::DrawContext& ctx) override;
 
 		double Value() const;
-		void SetValue(double value);
+		void SetValue(double value, unsigned int numUpdates);
 		void UpdateModel(float radius);
 
 	protected:
@@ -51,10 +54,10 @@ namespace engine
 			CalcLedGeometry(unsigned int led,
 				float radius,
 				unsigned int height,
-				double ledHeight);
+				float ledHeight);
 
 	protected:
-		static const utils::Size2d _LedGap;
+		static const float _LedGap;
 
 		audio::FallingValue _value;
 		VuParams _vuParams;

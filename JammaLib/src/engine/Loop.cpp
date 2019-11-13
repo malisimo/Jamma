@@ -45,7 +45,7 @@ Loop::Loop(LoopParams loopParams,
 	vuParams.ModelScale = 1.0f;
 	vuParams.ModelTexture = "blue";
 	vuParams.ModelShader = "vu"; // TODO: define vu shader
-	vuParams.LedHeight = 5.0;
+	vuParams.LedHeight = 1.5f;
 	_vu = std::make_shared<VU>(vuParams);
 
 	_children.push_back(_mixer);
@@ -135,7 +135,6 @@ void Loop::Draw3d(DrawContext& ctx)
 
 	auto frac = _loopLength == 0 ? 0.0 : 1.0 - std::max(0.0, std::min(1.0, ((double)(index % _loopLength)) / ((double)_loopLength)));
 	_model->SetLoopIndexFrac(frac);
-	_vu->SetValue(_lastPeak);
 
 	_modelScreenPos = glCtx.ProjectScreen(pos);
 	glCtx.PushMvp(glm::translate(glm::mat4(1.0), glm::vec3(pos.X, pos.Y, pos.Z)));
@@ -272,6 +271,8 @@ void Loop::EndMultiPlay(unsigned int numSamps)
 		auto channel = OutputChannel(chan);
 		channel->EndPlay(numSamps);
 	}
+
+	_vu->SetValue(_lastPeak, numSamps);
 }
 
 void Loop::OnPlayRaw(const std::shared_ptr<base::MultiAudioSink> dest,
