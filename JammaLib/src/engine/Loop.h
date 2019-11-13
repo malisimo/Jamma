@@ -7,7 +7,8 @@
 #include "ResourceUser.h"
 #include "GuiElement.h"
 #include "GlUtils.h"
-#include "../utils/ArrayUtils.h"
+#include "VU.h"
+#include "LoopModel.h"
 #include "../gui/GuiModel.h"
 #include "../io/FileReadWriter.h"
 #include "../io/JamFile.h"
@@ -17,8 +18,6 @@
 
 namespace engine
 {
-	constexpr auto TWOPI = 6.283185307179586476925286766559;
-
 	class LoopParams :
 		public base::GuiElementParams
 	{
@@ -97,6 +96,7 @@ namespace engine
 			GuiElement(other._guiParams),
 			_modelNeedsUpdating(other._modelNeedsUpdating),
 			_endRecordingCompleted(other._endRecordingCompleted),
+			_lastPeak(other._lastPeak),
 			_pitch(other._pitch),
 			_loopLength(other._loopLength),
 			_state(other._state),
@@ -104,6 +104,7 @@ namespace engine
 			_loopParams{other._loopParams},
 			_mixer(std::move(other._mixer)),
 			_model(std::move(other._model)),
+			_vu(std::move(other._vu)),
 			_buffer(std::move(other._buffer)),
 			_backBuffer(std::move(other._backBuffer))
 		{
@@ -119,6 +120,7 @@ namespace engine
 				ReleaseResources();
 				std::swap(_modelNeedsUpdating, other._modelNeedsUpdating);
 				std::swap(_endRecordingCompleted, other._endRecordingCompleted);
+				std::swap(_lastPeak, other._lastPeak);
 				std::swap(_pitch, other._pitch);
 				std::swap(_loopLength, other._loopLength);
 				std::swap(_state, other._state);
@@ -128,6 +130,7 @@ namespace engine
 				std::swap(_loopParams, other._loopParams);
 				_mixer.swap(other._mixer);
 				_model.swap(other._model);
+				_vu.swap(other._vu);
 				_buffer.swap(other._buffer);
 				_backBuffer.swap(other._backBuffer);
 			}
@@ -177,14 +180,8 @@ namespace engine
 
 		void Reset();
 		unsigned long LoopIndex() const;
+		static double CalcDrawRadius(unsigned long loopLength);
 		void UpdateLoopModel();
-		double CalcDrawRadius();
-		std::tuple<std::vector<float>, std::vector<float>, float, float>
-			CalcGrainGeometry(unsigned int grain,
-			unsigned int numGrains,
-			float lastYMin,
-			float lastYMax,
-			float radius);
 
 	protected:
 		static const unsigned int _InitBufferSize = 1000000;
@@ -192,6 +189,7 @@ namespace engine
 		bool _modelNeedsUpdating;
 		bool _endRecordingCompleted;
 		unsigned long _playIndex;
+		float _lastPeak;
 		double _pitch;
 		unsigned long _loopLength;
 		unsigned int _endRecordSampCount;
@@ -199,7 +197,8 @@ namespace engine
 		LoopVisualState _state;
 		LoopParams _loopParams;
 		std::shared_ptr<audio::AudioMixer> _mixer;
-		std::shared_ptr<gui::GuiModel> _model;
+		std::shared_ptr<LoopModel> _model;
+		std::shared_ptr<VU> _vu;
 		std::vector<float> _buffer;
 		std::vector<float> _backBuffer;
 	};

@@ -15,7 +15,7 @@ using audio::AudioMixer;
 using audio::AudioMixerParams;
 using utils::Size2d;
 
-const utils::Size2d LoopTake::_Gap = { 6, 6 };
+const Size2d LoopTake::_Gap = { 6, 6 };
 
 LoopTake::LoopTake(LoopTakeParams params) :
 	GuiElement(params),

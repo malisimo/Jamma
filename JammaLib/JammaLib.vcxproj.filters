@@ -350,6 +350,15 @@
     <ClInclude Include="include\Constants.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\VU.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\LoopModel.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\audio\FallingValue.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lib\glew\glew.c">
@@ -518,6 +527,15 @@
       <Filter>src\io</Filter>
     </ClCompile>
     <ClCompile Include="src\utils\MathUtils.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\VU.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\LoopModel.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\audio\FallingValue.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

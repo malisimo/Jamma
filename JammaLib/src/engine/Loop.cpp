@@ -21,6 +21,7 @@ Loop::Loop(LoopParams loopParams,
 	AudioSink(),
 	_modelNeedsUpdating(false),
 	_playIndex(0),
+	_lastPeak(0.0f),
 	_pitch(1.0),
 	_loopLength(0),
 	_state(STATE_PLAYING),
@@ -32,15 +33,24 @@ Loop::Loop(LoopParams loopParams,
 {
 	_mixer = std::make_unique<AudioMixer>(mixerParams);
 
-	GuiModelParams modelParams;
+	LoopModelParams modelParams;
 	modelParams.Size = { 12, 14 };
 	modelParams.ModelScale = 1.0f;
 	modelParams.ModelTexture = "grid";
 	modelParams.ModelShader = "texture_shaded";
-	_model = std::make_shared<GuiModel>(modelParams);
+	_model = std::make_shared<LoopModel>(modelParams);
+
+	VuParams vuParams;
+	vuParams.Size = { 12, 24 };
+	vuParams.ModelScale = 1.0f;
+	vuParams.ModelTexture = "blue";
+	vuParams.ModelShader = "vu"; // TODO: define vu shader
+	vuParams.LedHeight = 5.0;
+	_vu = std::make_shared<VU>(vuParams);
 
 	_children.push_back(_mixer);
 	_children.push_back(_model);
+	_children.push_back(_vu);
 }
 
 std::optional<std::shared_ptr<Loop>> Loop::FromFile(LoopParams loopParams, io::JamFile::Loop loopStruct, std::wstring dir)
@@ -124,16 +134,16 @@ void Loop::Draw3d(DrawContext& ctx)
 	index = index > constants::MaxLoopFadeSamps ? index - constants::MaxLoopFadeSamps : index;
 
 	auto frac = _loopLength == 0 ? 0.0 : 1.0 - std::max(0.0, std::min(1.0, ((double)(index % _loopLength)) / ((double)_loopLength)));
+	_model->SetLoopIndexFrac(frac);
+	_vu->SetValue(_lastPeak);
 
 	_modelScreenPos = glCtx.ProjectScreen(pos);
 	glCtx.PushMvp(glm::translate(glm::mat4(1.0), glm::vec3(pos.X, pos.Y, pos.Z)));
 	glCtx.PushMvp(glm::scale(glm::mat4(1.0), glm::vec3(scale, scale + _mixer->Level(), scale)));
-	glCtx.PushMvp(glm::rotate(glm::mat4(1.0), (float)(TWOPI * (frac + 0.0)), glm::vec3(0.0f, 1.0f, 0.0f)));
-
+	
 	for (auto& child : _children)
 		child->Draw3d(ctx);
 
-	glCtx.PopMvp();
 	glCtx.PopMvp();
 	glCtx.PopMvp();
 }
@@ -150,6 +160,13 @@ int Loop::OnOverwrite(float samp, int indexOffset)
 		(STATE_OVERDUBBING != _state) &&
 		(STATE_PUNCHEDIN != _state))
 		return indexOffset;
+
+	auto peak = std::abs(samp);
+	if (STATE_RECORDING == _state)
+	{
+		if (peak > _lastPeak)
+			_lastPeak = peak;
+	}
 
 	auto bufSize = (unsigned long)_buffer.size();
 
@@ -216,15 +233,24 @@ void Loop::OnPlay(const std::shared_ptr<MultiAudioSink> dest,
 	while (index >= bufSize)
 		index -= _loopLength;
 
+	auto peak = 0.0f;
+
 	for (auto i = 0u; i < numSamps; i++)
 	{
 		if (index < _buffer.size())
+		{
 			_mixer->OnPlay(dest, _buffer[index], i);
+
+			if (std::abs(_buffer[index]) > peak)
+				peak = std::abs(_buffer[index]);
+		}
 
 		index++;
 		if (index >= bufSize)
 			index -= _loopLength;
 	}
+
+	_lastPeak = peak;
 }
 
 void Loop::EndMultiPlay(unsigned int numSamps)
@@ -442,146 +468,22 @@ unsigned long Loop::LoopIndex() const
 	return _playIndex - constants::MaxLoopFadeSamps;
 }
 
-void Loop::UpdateLoopModel()
-{
-	std::vector<float> verts;
-	std::vector<float> uvs;
-	
-	auto lastYMin = -10.0f;
-	auto lastYMax = 10.0f;
-	auto length = STATE_RECORDING == _state ? _writeIndex : _loopLength;
-	auto numGrains = (unsigned int)ceil((double)length / (double)constants::GrainSamps);
-	auto radius = (float)CalcDrawRadius();
-
-	for (auto grain = 1u; grain < numGrains; grain++)
-	{
-		auto [grainVerts, grainUvs,	nextYMin, nextYMax] =
-			CalcGrainGeometry(grain,
-			numGrains,
-			lastYMin,
-			lastYMax,
-			radius);
-
-		for (auto vert : grainVerts)
-			verts.push_back(vert);
-
-		for (auto uv : grainUvs)
-			uvs.push_back(uv);
-
-		lastYMin = nextYMin;
-		lastYMax = nextYMax;
-	}
-
-	_model->SetGeometry(verts, uvs);
-	_modelNeedsUpdating = false;
-}
-
-double Loop::CalcDrawRadius()
+double Loop::CalcDrawRadius(unsigned long loopLength)
 {
 	auto minRadius = 100.0;
 	auto maxRadius = 400.0;
-	auto radius = 70.0 * log(_loopLength) - 600;
+	auto radius = 70.0 * log(loopLength) - 600;
 
 	return std::clamp(radius, minRadius, maxRadius);
 }
 
-std::tuple<std::vector<float>, std::vector<float>, float, float>
-	Loop::CalcGrainGeometry(unsigned int grain,
-	unsigned int numGrains,
-	float lastYMin,
-	float lastYMax,
-	float radius)
+void Loop::UpdateLoopModel()
 {
-	const float minHeight = 4.0;
-	const float radialThickness = radius / 20.0f;
-	const float heightScale = 50.0f;
+	auto length = STATE_RECORDING == _state ? _writeIndex : _loopLength;
 
-	auto yToUv = [minHeight, heightScale](float y) {
-		auto scale = 1.0f / ((minHeight * 2) + (heightScale * 2));
-		auto offset = 0.5f;
-		return scale * y + offset;
-	};
+	auto radius = (float)CalcDrawRadius(length);
+	_model->UpdateModel(_buffer, length, radius);
+	_vu->UpdateModel(radius);
 
-	auto angle1 = ((float)TWOPI) * ((float)(grain - 1) / (float)numGrains);
-	auto angle2 = ((float)TWOPI) * ((float)grain / (float)numGrains);
-	auto i1 = constants::MaxLoopFadeSamps + (grain - 1) * constants::GrainSamps;
-	auto i2 = constants::MaxLoopFadeSamps + grain * constants::GrainSamps;
-	auto gMin = utils::ArraySubMin(_buffer, i1, i2);
-	auto gMax = utils::ArraySubMax(_buffer, i1, i2);
-
-	auto xInner1 = sin(angle1) * (radius - radialThickness);
-	auto xInner2 = sin(angle2) * (radius - radialThickness);
-	auto xOuter1 = sin(angle1) * (radius + radialThickness);
-	auto xOuter2 = sin(angle2) * (radius + radialThickness);
-	auto yMin = (heightScale * gMin) - minHeight;
-	auto yMax = (heightScale * gMax) + minHeight;
-	auto zInner1 = cos(angle1) * (radius - radialThickness);
-	auto zInner2 = cos(angle2) * (radius - radialThickness);
-	auto zOuter1 = cos(angle1) * (radius + radialThickness);
-	auto zOuter2 = cos(angle2) * (radius + radialThickness);
-
-	std::vector<float> verts;
-	std::vector<float> uvs;
-
-	// Front
-	verts.push_back(xOuter1); verts.push_back(lastYMin); verts.push_back(zOuter1);
-	verts.push_back(xOuter2); verts.push_back(yMax); verts.push_back(zOuter2);
-	verts.push_back(xOuter1); verts.push_back(lastYMax); verts.push_back(zOuter1);
-	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMin));
-	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMax));
-	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMax));
-
-	verts.push_back(xOuter1); verts.push_back(lastYMin); verts.push_back(zOuter1);
-	verts.push_back(xOuter2); verts.push_back(yMin); verts.push_back(zOuter2);
-	verts.push_back(xOuter2); verts.push_back(yMax); verts.push_back(zOuter2);
-	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMin));
-	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMin));
-	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMax));
-
-	// Top
-	verts.push_back(xOuter1); verts.push_back(lastYMax); verts.push_back(zOuter1);
-	verts.push_back(xInner2); verts.push_back(yMax); verts.push_back(zInner2);
-	verts.push_back(xInner1); verts.push_back(lastYMax); verts.push_back(zInner1);
-	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMax));
-	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMax));
-	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMax));
-
-	verts.push_back(xOuter1); verts.push_back(lastYMax); verts.push_back(zOuter1);
-	verts.push_back(xOuter2); verts.push_back(yMax); verts.push_back(zOuter2);
-	verts.push_back(xInner2); verts.push_back(yMax); verts.push_back(zInner2);
-	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMax));
-	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMax));
-	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMax));
-
-	// Back
-	verts.push_back(xInner1); verts.push_back(lastYMin); verts.push_back(zInner1);
-	verts.push_back(xInner1); verts.push_back(lastYMax); verts.push_back(zInner1);
-	verts.push_back(xInner2); verts.push_back(yMax); verts.push_back(zInner2);
-	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMin));
-	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMax));
-	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMax));
-
-	verts.push_back(xInner1); verts.push_back(lastYMin); verts.push_back(zInner1);
-	verts.push_back(xInner2); verts.push_back(yMax); verts.push_back(zInner2);
-	verts.push_back(xInner2); verts.push_back(yMin); verts.push_back(zInner2);
-	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMin));
-	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMax));
-	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMin));
-
-	// Bottom
-	verts.push_back(xOuter1); verts.push_back(lastYMin); verts.push_back(zOuter1);
-	verts.push_back(xInner1); verts.push_back(lastYMin); verts.push_back(zInner1);
-	verts.push_back(xInner2); verts.push_back(yMin); verts.push_back(zInner2);
-	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMin));
-	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMin));
-	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMin));
-
-	verts.push_back(xOuter1); verts.push_back(lastYMin); verts.push_back(zOuter1);
-	verts.push_back(xInner2); verts.push_back(yMin); verts.push_back(zInner2);
-	verts.push_back(xOuter2); verts.push_back(yMin); verts.push_back(zOuter2);
-	uvs.push_back(angle1 / (float)TWOPI); uvs.push_back(yToUv(lastYMin));
-	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMin));
-	uvs.push_back(angle2 / (float)TWOPI); uvs.push_back(yToUv(yMin));
-
-	return std::make_tuple(verts, uvs, yMin, yMax);
+	_modelNeedsUpdating = false;
 }
