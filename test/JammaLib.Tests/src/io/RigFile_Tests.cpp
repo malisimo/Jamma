@@ -14,7 +14,7 @@ TEST(RigFile, ParsesAudioSettings) {
 	auto str = "{\"name\":\"Soundblaster\",\"bufsize\":12,\"latency\":212,\"numchannelsin\":6,\"numchannelsout\":8}";
 	auto testStream = std::stringstream(str);
 	auto json = std::get<Json::JsonPart>(Json::FromStream(std::move(testStream)).value());
-	auto audio = RigFile::AudioSettings::FromJson(json);
+	auto audio = io::UserConfig::AudioSettings::FromJson(json);
 
 	ASSERT_TRUE(audio.has_value());
 	ASSERT_EQ(0, audio.value().Name.compare("Soundblaster"));
@@ -74,7 +74,7 @@ TEST(RigFile, ParsesFile) {
 	auto pair3 = std::regex_replace(std::regex_replace(TriggerPairString, std::regex("%ADOWN%"), "5"), std::regex("%DDOWN%"), "6");
 	auto trig2 = "{\"name\":\"trig2\",\"stationtype\":32,\"pairs\":[" + pair3 + "]}";
 		
-	auto str = "{\"name\":\"rig\",\"audio\":" + audio + ",\"triggers\":[" + trig1 + "," + trig2 + "]}";
+	auto str = "{\"name\":\"rig\",\"user\":{\"audio\":" + audio + "},\"triggers\":[" + trig1 + "," + trig2 + "]}";
 	auto testStream = std::stringstream(str);
 	auto rig = RigFile::FromStream(std::move(testStream));
 
@@ -82,11 +82,11 @@ TEST(RigFile, ParsesFile) {
 	ASSERT_EQ(RigFile::VERSION_V, rig.value().Version);
 	ASSERT_EQ(0, rig.value().Name.compare("rig"));
 	
-	ASSERT_EQ(0, rig.value().Audio.Name.compare("HDMI"));
-	ASSERT_EQ(255, rig.value().Audio.BufSize);
-	ASSERT_EQ(414, rig.value().Audio.Latency);
-	ASSERT_EQ(0, rig.value().Audio.NumChannelsIn);
-	ASSERT_EQ(10, rig.value().Audio.NumChannelsOut);
+	ASSERT_EQ(0, rig.value().User.Audio.Name.compare("HDMI"));
+	ASSERT_EQ(255, rig.value().User.Audio.BufSize);
+	ASSERT_EQ(414, rig.value().User.Audio.Latency);
+	ASSERT_EQ(0, rig.value().User.Audio.NumChannelsIn);
+	ASSERT_EQ(10, rig.value().User.Audio.NumChannelsOut);
 
 	ASSERT_EQ(2, rig.value().Triggers.size());
 

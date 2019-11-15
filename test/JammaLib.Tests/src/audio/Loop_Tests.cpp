@@ -31,18 +31,18 @@ public:
 public:
 	inline virtual int OnWrite(float samp, int indexOffset)
 	{
-		if ((_index + indexOffset) < Samples.size())
-			Samples[_index + indexOffset] = samp;
+		if ((_writeIndex + indexOffset) < Samples.size())
+			Samples[_writeIndex + indexOffset] = samp;
 
 		return indexOffset + 1;
 	};
 	virtual void EndWrite(unsigned int numSamps, bool updateIndex)
 	{
 		if (updateIndex)
-			_index += numSamps;
+			_writeIndex += numSamps;
 	}
 
-	bool IsFilled() { return _index >= Samples.size(); }
+	bool IsFilled() { return _writeIndex >= Samples.size(); }
 
 	std::vector<float> Samples;
 };

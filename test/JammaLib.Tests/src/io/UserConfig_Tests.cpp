@@ -54,7 +54,6 @@ TEST(UserConfig, ParsesFile) {
 	auto cfg = UserConfig::FromJson(json);
 
 	ASSERT_TRUE(cfg.has_value());
-	ASSERT_EQ(0, cfg.value().Name.compare("user"));
 
 	ASSERT_EQ(0, cfg.value().Audio.Name.compare("HDMI"));
 	ASSERT_EQ(255, cfg.value().Audio.BufSize);

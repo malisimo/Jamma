@@ -12,7 +12,8 @@ using engine::SceneParams;
 TEST(Window, IsInitiallyWindowed) {
 	auto sceneParams = SceneParams(base::DrawableParams(),
 		base::SizeableParams());
-	auto scene = Scene(sceneParams);
+	io::UserConfig userConfig = {};
+	auto scene = Scene(sceneParams, userConfig);
 
 	ResourceLib resourceLib;
 	auto win = Window(scene, resourceLib);

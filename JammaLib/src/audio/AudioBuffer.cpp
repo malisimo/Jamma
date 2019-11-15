@@ -49,27 +49,33 @@ void AudioBuffer::EndPlay(unsigned int numSamps)
 	auto bufSize = (unsigned int)_buffer.size();
 	_playIndex += numSamps;
 
-	if (0 == bufSize)
+	if (0 == _length)
 	{
 		_playIndex = 0;
-		_length = 0;
+		return;
+	}
+
+	if (_length < bufSize)
+	{
+		if (_playIndex > _writeIndex)
+			_playIndex = _writeIndex;
+
 		return;
 	}
 
 	while (bufSize <= _playIndex)
 		_playIndex -= bufSize;
-
-	_length += numSamps;
-	if (_length > bufSize)
-		_length = bufSize;
 }
 
 inline int AudioBuffer::OnWrite(float samp, int indexOffset)
 {
 	auto bufSize = (unsigned int)_buffer.size();
 
-	if (bufSize == 0)
+	if (0 == bufSize)
+	{
+		_writeIndex = 0;
 		return 0;
+	}
 
 	while (bufSize <= _writeIndex + indexOffset)
 		indexOffset -= (int)_buffer.size();
@@ -83,8 +89,11 @@ inline int AudioBuffer::OnOverwrite(float samp, int indexOffset)
 {
 	auto bufSize = (unsigned int)_buffer.size();
 
-	if (bufSize == 0)
+	if (0 == bufSize)
+	{
+		_writeIndex = 0;
 		return 0;
+	}
 
 	while (bufSize <= _writeIndex + indexOffset)
 		indexOffset -= (int)_buffer.size();
@@ -96,10 +105,6 @@ inline int AudioBuffer::OnOverwrite(float samp, int indexOffset)
 
 void AudioBuffer::EndWrite(unsigned int numSamps, bool updateIndex)
 {
-	// Skip - EndPlay() will do the offset as
-	// we are using the same buffers for IO
-	//		SetIndex(_index + numSamps);
-
 	_length += numSamps;
 	if (_length > _buffer.size())
 		_length = (unsigned int)_buffer.size();
@@ -151,15 +156,13 @@ std::vector<float>::iterator AudioBuffer::End()
 
 std::vector<float>::iterator AudioBuffer::Delay(unsigned int sampsDelay)
 {
-	auto bufSize = (unsigned int)_buffer.size();
-
-	if (0 == bufSize)
+	if (0 == _length)
 	{
 		_playIndex = 0;
 		return _buffer.begin();
 	}
 
-	auto sampsBehind = sampsDelay >= bufSize ? bufSize - 1 : sampsDelay;
-	_playIndex = sampsBehind > _writeIndex ? (_writeIndex + bufSize) - sampsBehind : _writeIndex - sampsBehind;
+	auto sampsBehind = sampsDelay > _length ? _length : sampsDelay;
+	_playIndex = sampsBehind > _writeIndex ? (_writeIndex + _length) - sampsBehind : _writeIndex - sampsBehind;
 	return (_buffer.begin() + _playIndex);
 }

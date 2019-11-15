@@ -28,7 +28,7 @@ void VU::Draw3d(DrawContext& ctx)
 	auto val = _value.Current();
 	glCtx.SetUniform("Value",(float)val);
 
-	glCtx.PushMvp(glm::scale(glm::mat4(1.0), glm::vec3(1.0f, 2.0f + 0.2f * val, 1.0f)));
+	glCtx.PushMvp(glm::scale(glm::mat4(1.0), glm::vec3(1.0f, 4.0f + 0.2f * val, 1.0f)));
 
 	GuiModel::Draw3d(glCtx);
 

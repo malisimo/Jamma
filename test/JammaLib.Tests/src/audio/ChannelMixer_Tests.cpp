@@ -30,18 +30,18 @@ public:
 public:
 	inline virtual int OnWrite(float samp, int indexOffset)
 	{
-		if ((_index + indexOffset) < Samples.size())
-			Samples[_index + indexOffset] = samp;
+		if ((_writeIndex + indexOffset) < Samples.size())
+			Samples[_writeIndex + indexOffset] = samp;
 
 		return indexOffset + 1;
 	};
 	virtual void EndWrite(unsigned int numSamps, bool updateIndex)
 	{
 		if (updateIndex)
-			_index += numSamps;
+			_writeIndex += numSamps;
 	}
 
-	bool IsFilled() { return _index >= Samples.size(); }
+	bool IsFilled() { return _writeIndex >= Samples.size(); }
 	bool MatchesBuffer(const std::vector<float>& buf)
 	{
 		auto numSamps = buf.size();
@@ -95,7 +95,7 @@ class MockedSource :
 public:
 	MockedSource(unsigned int bufSize,
 		AudioSourceParams params) :
-		_index(0),
+		_writeIndex(0),
 		Samples({}),
 		AudioSource(params)
 	{
@@ -111,7 +111,7 @@ public:
 	virtual void OnPlay(const std::shared_ptr<base::AudioSink> dest,
 		unsigned int numSamps)
 	{
-		auto index = _index;
+		auto index = _writeIndex;
 
 		for (auto i = 0u; i < numSamps; i++)
 		{
@@ -123,9 +123,9 @@ public:
 	}
 	virtual void EndPlay(unsigned int numSamps)
 	{
-		_index += numSamps;
+		_writeIndex += numSamps;
 	}
-	bool WasPlayed() { return _index >= Samples.size(); }
+	bool WasPlayed() { return _writeIndex >= Samples.size(); }
 	bool MatchesSink(const std::shared_ptr<MockedSink> buf)
 	{
 		auto numSamps = buf->Samples.size();
@@ -160,7 +160,7 @@ public:
 	}
 
 private:
-	unsigned int _index;
+	unsigned int _writeIndex;
 	std::vector<float> Samples;
 };
 

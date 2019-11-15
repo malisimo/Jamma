@@ -27,18 +27,18 @@ public:
 public:
 	inline virtual int OnWrite(float samp, int indexOffset)
 	{
-		if ((_index + indexOffset) < Samples.size())
-			Samples[_index + indexOffset] = samp;
+		if ((_writeIndex + indexOffset) < Samples.size())
+			Samples[_writeIndex + indexOffset] = samp;
 
 		return indexOffset + 1;
 	};
 	virtual void EndWrite(unsigned int numSamps, bool updateIndex)
 	{
 		if (updateIndex)
-			_index += numSamps;
+			_writeIndex += numSamps;
 	}
 
-	bool IsFilled() { return _index >= Samples.size(); }
+	bool IsFilled() { return _writeIndex >= Samples.size(); }
 
 	std::vector<float> Samples;
 };
@@ -80,7 +80,7 @@ public:
 		_index += numSamps;
 	}
 	bool WasPlayed() { return _index >= Samples.size(); }
-	bool MatchesSink(const std::shared_ptr<MockedSink> buf)
+	bool MatchesSink(const std::shared_ptr<MockedSink> buf, unsigned int expectedDelay)
 	{
 		auto numSamps = buf->Samples.size();
 		for (auto samp = 0u; samp < numSamps; samp++)
@@ -88,10 +88,15 @@ public:
 			if (samp >= Samples.size())
 				return false;
 
-			std::cout << "Comparing index " << samp << ": " << buf->Samples[samp] << " = " << Samples[samp] << "?" << std::endl;
+			if ((samp + expectedDelay) < buf->Samples.size())
+			{
+				unsigned int sinkIndex = samp + expectedDelay;
 
-			if (buf->Samples[samp] != Samples[samp])
-				return false;
+				std::cout << "Comparing index " << sinkIndex << "/" << samp << ": " << buf->Samples[sinkIndex] << " = " << Samples[samp] << "?" << std::endl;
+
+				if (buf->Samples[sinkIndex] != Samples[samp])
+					return false;
+			}
 		}
 
 		return true;
@@ -161,7 +166,7 @@ TEST(AudioBuffer, WriteMatchesRead) {
 		// Play source to buffer
 		source->OnPlay(audioBuf, blockSize);
 		source->EndPlay(blockSize);
-		audioBuf->EndWrite(blockSize, false);
+		audioBuf->EndWrite(blockSize, true);
 
 		// Play buffer to mocked sink
 		audioBuf->OnPlay(sink, blockSize);
@@ -169,5 +174,95 @@ TEST(AudioBuffer, WriteMatchesRead) {
 		sink->EndWrite(blockSize, true);
 	}
 	
-	ASSERT_TRUE(source->MatchesSink(sink));
+	ASSERT_TRUE(source->MatchesSink(sink, 0));
+}
+
+TEST(AudioBuffer, IsCorrectlyDelayed) {
+	auto bufSize = 100;
+	auto blockSize = 11;
+	auto delaySamps = 42u;
+
+	auto audioBuf = std::make_shared<AudioBuffer>(bufSize);
+	AudioSourceParams params;
+	auto source = std::make_shared<MockedSource>(bufSize, params);
+	auto sink = std::make_shared<MockedSink>(bufSize);
+
+	audioBuf->Zero(bufSize);
+
+	auto numBlocks = (bufSize / blockSize) + 1;
+	for (int i = 0; i < numBlocks; i++)
+	{
+		// Play source to buffer
+		source->OnPlay(audioBuf, blockSize);
+		source->EndPlay(blockSize);
+		audioBuf->EndWrite(blockSize, true);
+
+		// Play buffer to mocked sink
+		audioBuf->Delay(delaySamps + blockSize);
+		audioBuf->OnPlay(sink, blockSize);
+		audioBuf->EndPlay(blockSize);
+		sink->EndWrite(blockSize, true);
+	}
+
+	ASSERT_TRUE(source->MatchesSink(sink, delaySamps));
+}
+
+TEST(AudioBuffer, ClampsToMaxBufSize) {
+	auto bufSize = 100;
+	auto blockSize = 11;
+	auto delaySamps = bufSize + 10;
+
+	auto audioBuf = std::make_shared<AudioBuffer>(bufSize);
+	AudioSourceParams params;
+	auto source = std::make_shared<MockedSource>(bufSize, params);
+	auto sink = std::make_shared<MockedSink>(bufSize);
+
+	audioBuf->Zero(bufSize);
+
+	auto numBlocks = (bufSize / blockSize) + 1;
+	for (int i = 0; i < numBlocks; i++)
+	{
+		// Play source to buffer
+		source->OnPlay(audioBuf, blockSize);
+		source->EndPlay(blockSize);
+		audioBuf->EndWrite(blockSize, true);
+
+		// Play buffer to mocked sink
+		audioBuf->Delay(delaySamps + blockSize);
+		audioBuf->OnPlay(sink, blockSize);
+		audioBuf->EndPlay(blockSize);
+		sink->EndWrite(blockSize, true);
+	}
+
+	ASSERT_TRUE(source->MatchesSink(sink, bufSize));
+}
+
+TEST(AudioBuffer, ExcessiveDelayPlaysNicely) {
+	auto bufSize = (int)constants::MaxBlockSize + 10;
+	auto blockSize = 11;
+	auto delaySamps = bufSize;
+
+	auto audioBuf = std::make_shared<AudioBuffer>(constants::MaxBlockSize);
+	AudioSourceParams params;
+	auto source = std::make_shared<MockedSource>(blockSize, params);
+	auto sink = std::make_shared<MockedSink>(blockSize);
+
+	audioBuf->Zero(bufSize);
+
+	auto numBlocks = 1;
+	for (int i = 0; i < numBlocks; i++)
+	{
+		// Play source to buffer
+		source->OnPlay(audioBuf, blockSize);
+		source->EndPlay(blockSize);
+		audioBuf->EndWrite(blockSize, true);
+
+		// Play buffer to mocked sink
+		audioBuf->Delay(delaySamps + blockSize);
+		audioBuf->OnPlay(sink, blockSize);
+		audioBuf->EndPlay(blockSize);
+		sink->EndWrite(blockSize, true);
+	}
+
+	ASSERT_TRUE(source->MatchesSink(sink, 0));
 }
