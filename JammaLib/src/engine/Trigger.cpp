@@ -25,13 +25,12 @@ Trigger::Trigger(TriggerParams trigParams) :
 	_isLastDitchDown(false),
 	_isLastActivateDownRaw(false),
 	_isLastDitchDownRaw(false),
-	_targetId(""),
-	_overdubTargetId(""),
 	_recordSampCount(0),
 	_textureRecording(ImageParams(DrawableParams{ trigParams.TextureRecording }, SizeableParams{ trigParams.Size,trigParams.MinSize }, "texture")),
 	_textureDitchDown(ImageParams(DrawableParams{ trigParams.TextureDitchDown }, SizeableParams{ trigParams.Size,trigParams.MinSize }, "texture")),
 	_textureOverdubbing(ImageParams(DrawableParams{ trigParams.TextureOverdubbing }, SizeableParams{ trigParams.Size,trigParams.MinSize }, "texture")),
-	_texturePunchedIn(ImageParams(DrawableParams{ trigParams.TexturePunchedIn }, SizeableParams{ trigParams.Size,trigParams.MinSize }, "texture"))
+	_texturePunchedIn(ImageParams(DrawableParams{ trigParams.TexturePunchedIn }, SizeableParams{ trigParams.Size,trigParams.MinSize }, "texture")),
+	_lastLoopTakes({})
 {
 }
 
@@ -240,9 +239,8 @@ void Trigger::Reset()
 		b.Reset();
 
 	_state = TriggerState::TRIGSTATE_DEFAULT;
-	_targetId = "";
-	_overdubTargetId = "";
 	_recordSampCount = 0;
+	_lastLoopTakes.clear();
 }
 
 bool Trigger::IgnoreRepeats(bool isActivate, DualBinding::TestResult trigResult)
@@ -459,8 +457,13 @@ void Trigger::StartRecording(std::optional<io::UserConfig> cfg)
 
 		auto res = _receiver->OnAction(trigAction);
 
+		// TODO: History for undo
+
 		if (res.IsEaten)
-			_targetId = res.Id;
+		{
+			TriggerTake newTake = { TriggerTake::SOURCE_ADC, res.Id };
+			_lastLoopTakes.push_back(newTake);
+		}
 	}
 }
 
@@ -468,15 +471,19 @@ void Trigger::EndRecording(std::optional<io::UserConfig> cfg)
 {
 	_state = TRIGSTATE_DEFAULT;
 
-	if (_receiver)
+	if ((_receiver) && !_lastLoopTakes.empty())
 	{
+		auto lastTake = _lastLoopTakes.back();
+
 		TriggerAction trigAction;
 		trigAction.ActionType = TriggerAction::TRIGGER_REC_END;
-		trigAction.TargetId = _targetId;
+		trigAction.TargetId = lastTake.TakeId;
 		trigAction.SampleCount = _recordSampCount;
 
 		if (cfg.has_value())
 			trigAction.SetUserConfig(cfg.value());
+
+		// TODO: History for undo
 
 		_receiver->OnAction(trigAction);
 	}
@@ -490,12 +497,15 @@ void Trigger::SetDitchDown(std::optional<io::UserConfig> cfg)
 void Trigger::Ditch(std::optional<io::UserConfig> cfg)
 {
 	_state = TRIGSTATE_DEFAULT;
+	auto popBack = !_lastLoopTakes.empty();
 
-	if (_receiver)
+	if ((_receiver) && popBack)
 	{
+		auto lastTake = _lastLoopTakes.back();
+
 		TriggerAction trigAction;
 		trigAction.ActionType = TriggerAction::TRIGGER_DITCH;
-		trigAction.TargetId = _targetId;
+		trigAction.TargetId = lastTake.TakeId;
 		trigAction.SampleCount = _recordSampCount;
 
 		if (cfg.has_value())
@@ -504,8 +514,8 @@ void Trigger::Ditch(std::optional<io::UserConfig> cfg)
 		_receiver->OnAction(trigAction);
 	}
 
-	_targetId = "";
-	_overdubTargetId = "";
+	if (popBack)
+		_lastLoopTakes.pop_back();
 }
 
 void Trigger::StartOverdub(std::optional<io::UserConfig> cfg)
@@ -525,7 +535,10 @@ void Trigger::StartOverdub(std::optional<io::UserConfig> cfg)
 		auto res = _receiver->OnAction(trigAction);
 
 		if (res.IsEaten)
-			_overdubTargetId = res.Id;
+		{
+			TriggerTake newTake = { TriggerTake::SOURCE_ADC, res.Id };
+			_lastLoopTakes.push_back(newTake);
+		}
 	}
 }
 
@@ -533,11 +546,13 @@ void Trigger::EndOverdub(std::optional<io::UserConfig> cfg)
 {
 	_state = TRIGSTATE_DEFAULT;
 
-	if (_receiver)
+	if ((_receiver) && !_lastLoopTakes.empty())
 	{
+		auto lastTake = _lastLoopTakes.back();
+
 		TriggerAction trigAction;
 		trigAction.ActionType = TriggerAction::TRIGGER_OVERDUB_END;
-		trigAction.TargetId = _overdubTargetId;
+		trigAction.TargetId = lastTake.TakeId;
 		trigAction.SampleCount = _recordSampCount;
 
 		if (cfg.has_value())
@@ -551,11 +566,14 @@ void Trigger::DitchOverdub(std::optional<io::UserConfig> cfg)
 {
 	_state = TRIGSTATE_DEFAULT;
 
-	if (_receiver)
+	auto popBack = !_lastLoopTakes.empty();
+
+	if ((_receiver) && popBack)
 	{
+		auto lastTake = _lastLoopTakes.back();
 		TriggerAction trigAction;
 		trigAction.ActionType = TriggerAction::TRIGGER_OVERDUB_DITCH;
-		trigAction.TargetId = _overdubTargetId;
+		trigAction.TargetId = lastTake.TakeId;
 		trigAction.SampleCount = _recordSampCount;
 
 		if (cfg.has_value())
@@ -564,18 +582,21 @@ void Trigger::DitchOverdub(std::optional<io::UserConfig> cfg)
 		_receiver->OnAction(trigAction);
 	}
 
-	_overdubTargetId = "";
+	if (popBack)
+		_lastLoopTakes.pop_back();
 }
 
 void Trigger::StartPunchIn(std::optional<io::UserConfig> cfg)
 {
 	_state = TRIGSTATE_PUNCHEDIN;
 
-	if (_receiver)
+	if ((_receiver) && !_lastLoopTakes.empty())
 	{
+		auto lastTake = _lastLoopTakes.back();
+
 		TriggerAction trigAction;
 		trigAction.ActionType = TriggerAction::TRIGGER_PUNCHIN_START;
-		trigAction.TargetId = _overdubTargetId;
+		trigAction.TargetId = lastTake.TakeId;
 		trigAction.SampleCount = _recordSampCount;
 		_receiver->OnAction(trigAction);
 	}
@@ -585,11 +606,13 @@ void Trigger::EndPunchIn(std::optional<io::UserConfig> cfg)
 {
 	_state = TRIGSTATE_OVERDUBBING;
 
-	if (_receiver)
+	if ((_receiver) && !_lastLoopTakes.empty())
 	{
+		auto lastTake = _lastLoopTakes.back();
+
 		TriggerAction trigAction;
 		trigAction.ActionType = TriggerAction::TRIGGER_PUNCHIN_END;
-		trigAction.TargetId = _overdubTargetId;
+		trigAction.TargetId = lastTake.TakeId;
 		trigAction.SampleCount = _recordSampCount;
 
 		if (cfg.has_value())

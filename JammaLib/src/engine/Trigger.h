@@ -13,10 +13,16 @@
 
 namespace engine
 {
-	struct TriggerWire
+	struct TriggerTake
 	{
-		unsigned int InputChannel;
-		unsigned int OutputChannel;
+		enum SourceType
+		{
+			SOURCE_ADC,
+			SOURCE_LOOPTAKE,
+			SOURCE_STATION
+		};
+		SourceType SourceType;
+		std::string TakeId;
 	};
 
 	enum TriggerSource
@@ -271,8 +277,7 @@ namespace engine
 		std::vector<DualBinding> _ditchBindings;
 		std::vector<unsigned int> _inputChannels;
 		TriggerState _state;
-		std::string _targetId;
-		std::string _overdubTargetId;
+		std::string _overdubSourceId;
 		unsigned long _recordSampCount;
 		Time _lastActivateTime;
 		Time _lastDitchTime;
@@ -284,5 +289,6 @@ namespace engine
 		graphics::Image _textureDitchDown;
 		graphics::Image _textureOverdubbing;
 		graphics::Image _texturePunchedIn;
+		std::vector<TriggerTake> _lastLoopTakes;
 	};
 }
