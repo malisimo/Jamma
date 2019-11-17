@@ -19,13 +19,9 @@ namespace engine
 				"",
 				"",
 				"",
-				{}),
-			GlobalClock(std::shared_ptr<Timer>())
+				{})
 		{
 		}
-
-	public:
-		std::shared_ptr<Timer> GlobalClock;
 	};
 	
 	class Station :
@@ -67,6 +63,7 @@ namespace engine
 		void AddTake(std::shared_ptr<LoopTake> take);
 		void AddTrigger(std::shared_ptr<Trigger> trigger);
 		void Reset();
+		void SetClock(std::shared_ptr<Timer> clock);
 
 	protected:
 		static unsigned int CalcTakeHeight(unsigned int stationHeight, unsigned int numTakes);
@@ -78,7 +75,7 @@ namespace engine
 	protected:
 		static const utils::Size2d _Gap;
 
-		std::shared_ptr<Timer> _globalClock;
+		std::shared_ptr<Timer> _clock;
 		std::vector<std::shared_ptr<LoopTake>> _loopTakes;
 		std::vector<std::shared_ptr<Trigger>> _triggers;
 

@@ -10,6 +10,14 @@ namespace engine
 	class Timer
 	{
 	public:
+		enum QuantisationType
+		{
+			QUANTISE_OFF,
+			QUANTISE_MULTIPLE,
+			QUANTISE_POWER
+		};
+
+	public:
 		Timer();
 		~Timer();
 
@@ -18,14 +26,15 @@ namespace engine
 		static double GetElapsedSeconds(Time t1, Time t2);
 
 		void Tick(unsigned int sampsIncrement, unsigned int loopCountIncrement);
-		bool IsMasterLengthSet() const { return 0 != _masterLength; }
-		void SetMasterLength(unsigned long length) { _masterLength = length; }
+		bool IsQuantisable() const;
+		void SetQuantisation(unsigned int quantiseSamps, QuantisationType quantisation);
 		std::tuple<unsigned long, int> QuantiseLength(unsigned long length);
 
 	private:
 		unsigned long _loopCount;
 		unsigned int sampOffset;
-		unsigned long _masterLength;
+		unsigned int _quantiseSamps;
+		QuantisationType _quantisation;
 	};
 }
 

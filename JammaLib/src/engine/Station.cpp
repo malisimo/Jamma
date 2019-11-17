@@ -22,7 +22,7 @@ const utils::Size2d Station::_Gap = { 5, 5 };
 Station::Station(StationParams params) :
 	GuiElement(params),
 	MultiAudioSource(),
-	_globalClock(params.GlobalClock),
+	_clock(std::shared_ptr<Timer>()),
 	_loopTakes(),
 	_triggers({})
 {
@@ -156,14 +156,17 @@ ActionResult Station::OnAction(TriggerAction action)
 		auto loopLength = action.SampleCount;
 		auto errorSamps = 0;
 
-		if (_globalClock->IsMasterLengthSet())
+		if (_clock)
 		{
-			auto [quantisedLength, err] = _globalClock->QuantiseLength(action.SampleCount);
-			loopLength = quantisedLength;
-			errorSamps = err;
+			if (_clock->IsQuantisable())
+			{
+				auto [quantisedLength, err] = _clock->QuantiseLength(action.SampleCount);
+				loopLength = quantisedLength;
+				errorSamps = err;
+			}
+			else
+				_clock->SetQuantisation(action.SampleCount / 4, Timer::QUANTISE_MULTIPLE);
 		}
-		else
-			_globalClock->SetMasterLength(action.SampleCount);
 
 		auto cfg = action.GetUserConfig();
 		auto playPos = cfg.has_value() ?
@@ -256,6 +259,11 @@ void Station::Reset()
 			_children.erase(child);
 	}
 	_triggers.clear();
+}
+
+void Station::SetClock(std::shared_ptr<Timer> clock)
+{
+	_clock = clock;
 }
 
 unsigned int Station::CalcTakeHeight(unsigned int stationHeight, unsigned int numTakes)

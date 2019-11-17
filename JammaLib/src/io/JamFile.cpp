@@ -10,7 +10,7 @@
 using namespace io;
 using audio::BehaviourParams;
 
-const std::string JamFile::DefaultJson = "{\"name\":\"default\",\"stations\":[{\"name\":\"Mic1\",\"stationtype\":0,\"takes\":[{\"name\":\"Take1\",\"loops\":[{\"name\":\"Loop1.wav\",\"length\":155822,\"mix\":{\"type\":\"pan\",\"chans\":[0.5,0.5]}}]}]}";
+const std::string JamFile::DefaultJson = "{\"name\":\"default\",\"stations\":[{\"name\":\"HiHat\",\"stationtype\":0,\"takes\":[{\"name\":\"Take1\",\"loops\":[{\"name\":\"Loop1.wav\",\"length\":155822,\"mix\":{\"type\":\"pan\",\"chans\":[0.5,0.5]}}]}],\"quantisesamps\":77911,\"quantisation\":\"multiple\"}";
 
 std::optional<JamFile> JamFile::FromStream(std::stringstream ss)
 {
@@ -61,6 +61,26 @@ std::optional<JamFile> JamFile::FromStream(std::stringstream ss)
 		if (jamParams.KeyValues["timerticks"].index() == 2)
 			jam.TimerTicks = std::get<unsigned long>(jamParams.KeyValues["timerticks"]);
 	}
+
+	iter = jamParams.KeyValues.find("quantisesamps");
+	if (iter != jamParams.KeyValues.end())
+	{
+		if (jamParams.KeyValues["quantisesamps"].index() == 2)
+			jam.QuantiseSamps = std::get<unsigned long>(jamParams.KeyValues["quantisesamps"]);
+	}
+
+	std::string quantiseStr;
+	iter = jamParams.KeyValues.find("quantisation");
+	if (iter != jamParams.KeyValues.end())
+	{
+		if (jamParams.KeyValues["quantisation"].index() == 4)
+			quantiseStr = std::get<std::string>(jamParams.KeyValues["quantisation"]);
+	}
+
+	if (quantiseStr.compare("multiple") == 0)
+		jam.Quantisation = engine::Timer::QUANTISE_MULTIPLE;
+	else if (quantiseStr.compare("power") == 0)
+		jam.Quantisation = engine::Timer::QUANTISE_POWER;
 
 	return jam;
 }

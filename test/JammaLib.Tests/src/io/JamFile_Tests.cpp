@@ -120,7 +120,8 @@ TEST(JamFile, ParsesFile) {
 
 	auto station2 = "{\"name\":\"station2\",\"takes\":[" + take3 + "," + take4 + "," + take5 + "]}";
 
-	auto str = "{\"name\":\"jam\",\"stations\":[" + station1 + "," + station2 + "]}";
+	auto quant = "\"quantisesamps\":4321,\"quantisation\":\"power\"";
+	auto str = "{\"name\":\"jam\",\"stations\":[" + station1 + "," + station2 + "]," + quant + "}";
 	auto testStream = std::stringstream(str);
 	auto jam = JamFile::FromStream(std::move(testStream));
 
@@ -179,4 +180,7 @@ TEST(JamFile, ParsesFile) {
 	ASSERT_EQ(0, jam.value().Stations[1].LoopTakes[2].Loops[0].Name.compare("loop7"));
 	ASSERT_EQ(7, jam.value().Stations[1].LoopTakes[2].Loops[0].Index);
 	ASSERT_EQ(1.2, jam.value().Stations[1].LoopTakes[2].Loops[0].Speed);
+
+	ASSERT_EQ(4321, jam.value().QuantiseSamps);
+	ASSERT_EQ(engine::Timer::QUANTISE_POWER, jam.value().Quantisation);
 }

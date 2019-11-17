@@ -15,6 +15,7 @@
 #include <iostream>
 #include <sstream>
 #include "Json.h"
+#include "../engine/Timer.h"
 #include "../audio/AudioMixer.h"
 
 namespace io
@@ -82,5 +83,7 @@ namespace io
 		std::string Name;
 		std::vector<Station> Stations;
 		unsigned long TimerTicks;
+		unsigned int QuantiseSamps;
+		engine::Timer::QuantisationType Quantisation;
 	};
 }

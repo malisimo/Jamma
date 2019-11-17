@@ -34,7 +34,8 @@ Scene::Scene(SceneParams params,
 			1.0),
 		0)),
 	_audioMutex(std::mutex()),
-	_userConfig(user)
+	_userConfig(user),
+	_clock(std::make_shared<Timer>())
 {
 	GuiLabelParams labelParams(GuiElementParams(
 		DrawableParams{ "" },
@@ -56,7 +57,6 @@ std::optional<std::shared_ptr<Scene>> Scene::FromFile(SceneParams sceneParams,
 	io::RigFile rigStruct,
 	std::wstring dir)
 {
-	auto globalClock = std::make_shared<Timer>();
 	auto scene = std::make_shared<Scene>(sceneParams, rigStruct.User);
 
 	TriggerParams trigParams;
@@ -73,7 +73,6 @@ std::optional<std::shared_ptr<Scene>> Scene::FromFile(SceneParams sceneParams,
 	stationParams.Position = { 20, 20 };
 	stationParams.ModelPosition = { -50, -20 };
 	stationParams.Size = { 140, 300 };
-	stationParams.GlobalClock = globalClock;
 
 	for (auto stationStruct : jamStruct.Stations)
 	{
@@ -94,6 +93,8 @@ std::optional<std::shared_ptr<Scene>> Scene::FromFile(SceneParams sceneParams,
 		stationParams.Position += { 0, 90 };
 		stationParams.ModelPosition += { 0, 90 };
 	}
+
+	scene->SetQuantisation(jamStruct.QuantiseSamps, jamStruct.Quantisation);
 
 	return scene;
 }
@@ -376,7 +377,9 @@ int Scene::AudioCallback(void* outBuffer,
 	return 0;
 }
 
-void Scene::OnAudio(float* inBuf, float* outBuf, unsigned int numSamps)
+void Scene::OnAudio(float* inBuf,
+	float* outBuf,
+	unsigned int numSamps)
 {
 	if (nullptr != inBuf)
 	{
@@ -474,7 +477,14 @@ glm::mat4 Scene::View()
 void Scene::AddStation(std::shared_ptr<Station> station)
 {
 	_stations.push_back(station);
+
+	station->SetClock(_clock);
 	station->Init();
+}
+
+void Scene::SetQuantisation(unsigned int quantiseSamps, Timer::QuantisationType quantisation)
+{
+	_clock->SetQuantisation(quantiseSamps, quantisation);
 }
 
 void Scene::JobLoop()

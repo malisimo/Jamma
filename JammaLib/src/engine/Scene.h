@@ -148,14 +148,22 @@ namespace engine
 		virtual void _InitResources(resources::ResourceLib& resourceLib, bool forceInit) override;
 		virtual void _ReleaseResources() override;
 
-		static int AudioCallback(void* outBuffer, void* inBuffer, unsigned int numSamps, double streamTime, RtAudioStreamStatus status, void* userData);
-		void OnAudio(float* inBuffer, float* outBuffer, unsigned int numSamps);
+		static int AudioCallback(void* outBuffer,
+			void* inBuffer,
+			unsigned int numSamps,
+			double streamTime,
+			RtAudioStreamStatus status,
+			void* userData);
+		void OnAudio(float* inBuffer,
+			float* outBuffer,
+			unsigned int numSamps);
 		bool OnUndo(std::shared_ptr<base::ActionUndo> undo);
 		void JobLoop();
 		void InitSize();
 		glm::mat4 View();
 
 		void AddStation(std::shared_ptr<Station> station);
+		void SetQuantisation(unsigned int quantiseSamps, Timer::QuantisationType quantisation);
 
 	protected:
 		bool _isSceneTouching;
@@ -178,5 +186,6 @@ namespace engine
 		std::list<actions::JobAction> _jobList;
 		std::mutex _audioMutex;
 		io::UserConfig _userConfig;
+		std::shared_ptr<Timer> _clock;
 	};
 }
