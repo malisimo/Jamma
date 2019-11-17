@@ -30,7 +30,7 @@ namespace audio
 		virtual void EndWrite(unsigned int numSamps, bool updateIndex) override;
 
 		void SetSize(unsigned int size);
-		unsigned int NumSamps() const;
+		unsigned int SampsRecorded() const;
 		unsigned int BufSize() const;
 
 		std::vector<float>::iterator Start();
@@ -41,7 +41,7 @@ namespace audio
 		void _SetWriteIndex(unsigned int index);
 
 	protected:
-		unsigned int _length;
+		unsigned int _sampsRecorded;
 		unsigned long _playIndex;
 		std::vector<float> _buffer;
 	};

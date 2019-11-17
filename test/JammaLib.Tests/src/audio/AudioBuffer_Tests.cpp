@@ -39,6 +39,16 @@ public:
 	}
 
 	bool IsFilled() { return _writeIndex >= Samples.size(); }
+	bool IsZero()
+	{
+		for (auto f : Samples)
+		{
+			if (f != 0.f)
+				return false;
+		}
+
+		return true;
+	}
 
 	std::vector<float> Samples;
 };
@@ -249,7 +259,7 @@ TEST(AudioBuffer, ExcessiveDelayPlaysNicely) {
 
 	audioBuf->Zero(bufSize);
 
-	auto numBlocks = 1;
+	auto numBlocks = 2;
 	for (int i = 0; i < numBlocks; i++)
 	{
 		// Play source to buffer
@@ -264,5 +274,5 @@ TEST(AudioBuffer, ExcessiveDelayPlaysNicely) {
 		sink->EndWrite(blockSize, true);
 	}
 
-	ASSERT_TRUE(source->MatchesSink(sink, 0));
+	ASSERT_TRUE(sink->IsZero());
 }
