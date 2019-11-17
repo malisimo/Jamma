@@ -87,7 +87,7 @@ TEST(GuiSlider, ReceiverGetsValue) {
 
 	auto sliderParams = GuiSliderParams();
 	sliderParams.Position = { 0, 0 };
-	sliderParams.Size = { (unsigned int)(dragLength + dragSize), (unsigned int)dragSize };
+	sliderParams.Size = { (unsigned int)(dragLength + dragSize + (2 * dragGap)), (unsigned int)dragSize };
 	sliderParams.DragGap = { (unsigned int)dragGap, (unsigned int)dragGap };
 	sliderParams.DragControlSize = { (unsigned int)dragSize, (unsigned int)dragSize };
 	sliderParams.DragControlOffset = { 0, 0 };
