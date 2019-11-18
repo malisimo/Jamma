@@ -11,6 +11,8 @@
 #include <windows.h>
 #include <Rpc.h>
 
+#pragma comment(lib,"Rpcrt4.lib")
+
 namespace utils
 {
 	LPCWSTR CharsToUnicodeString(const char* str);
