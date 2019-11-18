@@ -22,6 +22,7 @@
 #include "Action.h"
 #include "ActionReceiver.h"
 #include "CommonTypes.h"
+#include "../include/Constants.h"
 #include "../resources/Resource.h"
 #include "../resources/ResourceLib.h"
 #include "../actions/KeyAction.h"

@@ -263,9 +263,15 @@ int Window::Create(HINSTANCE hInstance, int nCmdShow)
 	size_t versionStrSize = strlen(glVersion) + 1;
 	wchar_t* glVersionStr = new wchar_t[versionStrSize];
 
+	std::stringstream titleStringStream;
+	titleStringStream << "Jamma (v" << LIB_VERSION << ")";
+	auto titleStr = titleStringStream.str();
+	wchar_t* titleChars = new wchar_t[titleStr.size() + 1];
+
 	size_t outSize;
-	mbstowcs_s(&outSize, glVersionStr, versionStrSize, glVersion, versionStrSize - 1);
-	SetWindowText(_wnd, glVersionStr);
+	mbstowcs_s(&outSize, titleChars, titleStr.size() + 1, titleStr.c_str(), titleStr.size());
+	//mbstowcs_s(&outSize, glVersionStr, versionStrSize, glVersion, versionStrSize - 1);
+	SetWindowText(_wnd, titleChars);
 	ShowWindow(_wnd, nCmdShow);
 
 	return 0;

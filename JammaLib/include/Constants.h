@@ -7,6 +7,14 @@
 
 #pragma once
 
+#define MAJOR_VERSION       5
+#define MINOR_VERSION       0
+#define PATCH_VERSION       2
+
+#define QUOTE_(x) #x
+#define QUOTE(x) QUOTE_(x)
+#define LIB_VERSION			QUOTE(MAJOR_VERSION.MINOR_VERSION.PATCH_VERSION)
+
 namespace constants
 {
 	constexpr auto TWOPI = 6.283185307179586476925286766559;
