@@ -33,6 +33,11 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "documentation", "doc\", "{2
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JammaLib.Tests", "test\JammaLib.Tests\JammaLib.Tests.vcxproj", "{E6B8BEEF-9241-48AD-9655-36E81C25D576}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{22C8AA3E-38FC-439C-A71B-2FD294F47A2C}"
+	ProjectSection(SolutionItems) = preProject
+		ReadMe.md = ReadMe.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64

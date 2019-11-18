@@ -4,6 +4,10 @@
 
 Multichannel loopsampling software for recording and live performance.
 
+![JammaV_Screenshot](https://user-images.githubusercontent.com/24556021/69101042-76834100-0a56-11ea-9340-a9e192fb5430.gif)
+
+Current Version: v5.0.2
+
 ## Features
 
 * Multichannel recording and playback
@@ -18,5 +22,3 @@ Multichannel loopsampling software for recording and live performance.
 
 * Windows (support for other operating systems planned after beta)
 * A soundcard, ideally with more than 2 channels in/out
-
-
