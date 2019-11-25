@@ -4,6 +4,7 @@
 #include <memory>
 #include "../include/Constants.h"
 #include "../utils/ArrayUtils.h"
+#include "../audio/BufferBank.h"
 #include "../gui/GuiModel.h"
 
 namespace engine
@@ -43,7 +44,7 @@ namespace engine
 		void Draw3d(base::DrawContext& ctx) override;
 		double LoopIndexFrac() const;
 		void SetLoopIndexFrac(double frac);
-		void UpdateModel(const std::vector<float>& buffer,
+		void UpdateModel(const audio::BufferBank& buffer,
 			unsigned long loopLength,
 			float radius);
 
@@ -52,7 +53,7 @@ namespace engine
 		static unsigned int CurrentNumLeds(unsigned int vuHeight, unsigned int ledHeight, double value);
 
 		std::tuple<std::vector<float>, std::vector<float>, float, float>
-			CalcGrainGeometry(const std::vector<float>& buffer,
+			CalcGrainGeometry(const audio::BufferBank& buffer,
 				unsigned int grain,
 				unsigned int numGrains,
 				float lastYMin,

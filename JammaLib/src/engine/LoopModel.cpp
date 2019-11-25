@@ -5,6 +5,7 @@ using base::DrawContext;
 using base::Drawable;
 using base::DrawableParams;
 using graphics::GlDrawContext;
+using audio::BufferBank;
 using gui::GuiModel;
 using utils::Size2d;
 
@@ -59,7 +60,7 @@ unsigned int LoopModel::CurrentNumLeds(unsigned int vuHeight,
 	return (unsigned int)std::ceil(value * numLeds);
 }
 
-void LoopModel::UpdateModel(const std::vector<float>& buffer,
+void LoopModel::UpdateModel(const BufferBank& buffer,
 	unsigned long loopLength,
 	float radius)
 {
@@ -94,7 +95,7 @@ void LoopModel::UpdateModel(const std::vector<float>& buffer,
 }
 
 std::tuple<std::vector<float>, std::vector<float>, float, float>
-LoopModel::CalcGrainGeometry(const std::vector<float>& buffer,
+LoopModel::CalcGrainGeometry(const BufferBank& buffer,
 	unsigned int grain,
 	unsigned int numGrains,
 	float lastYMin,
@@ -115,8 +116,8 @@ LoopModel::CalcGrainGeometry(const std::vector<float>& buffer,
 	auto angle2 = ((float)constants::TWOPI) * ((float)grain / (float)numGrains);
 	auto i1 = constants::MaxLoopFadeSamps + (grain - 1) * constants::GrainSamps;
 	auto i2 = constants::MaxLoopFadeSamps + grain * constants::GrainSamps;
-	auto gMin = utils::ArraySubMin(buffer, i1, i2);
-	auto gMax = utils::ArraySubMax(buffer, i1, i2);
+	auto gMin = buffer.SubMin(i1, i2);
+	auto gMax = buffer.SubMin(i1, i2);
 
 	auto xInner1 = sin(angle1) * (radius - radialThickness);
 	auto xInner2 = sin(angle2) * (radius - radialThickness);

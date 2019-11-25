@@ -5,6 +5,7 @@ using namespace engine;
 using namespace resources;
 using base::AudioSink;
 using base::MultiAudioSource;
+using audio::BufferBank;
 using audio::AudioMixer;
 using audio::AudioMixerParams;
 using audio::PanMixBehaviour;
@@ -28,8 +29,7 @@ Loop::Loop(LoopParams loopParams,
 	_loopParams(loopParams),
 	_mixer(nullptr),
 	_model(nullptr),
-	_buffer({}),
-	_backBuffer({})
+	_bufferBank(BufferBank())
 {
 	_mixer = std::make_unique<AudioMixer>(mixerParams);
 
@@ -167,23 +167,10 @@ int Loop::OnOverwrite(float samp, int indexOffset)
 			_lastPeak = peak;
 	}
 
-	auto bufSize = (unsigned long)_buffer.size();
+	auto bufSize = (unsigned long)_bufferBank.Capacity();
 
-	if (bufSize <= (_writeIndex + indexOffset))
-	{
-		if (bufSize >= constants::MaxLoopBufferSize)
-			return indexOffset;
-		else
-		{
-			auto newBufSize = bufSize * 2;
-			if (newBufSize > constants::MaxLoopBufferSize)
-				newBufSize = constants::MaxLoopBufferSize;
-
-			//_buffer.resize(newBufSize);
-		}
-	}
-	else
-		_buffer[_writeIndex + indexOffset] = samp;
+	if (bufSize > (_writeIndex + indexOffset))
+		_bufferBank[_writeIndex + indexOffset] = samp;
 
 	return indexOffset + 1;
 }
@@ -210,9 +197,8 @@ void Loop::EndWrite(unsigned int numSamps, bool updateIndex)
 			_endRecordingCompleted = true;
 	}
 
-	//_loopLength = _writeIndex > constants::MaxLoopFadeSamps ? _writeIndex - constants::MaxLoopFadeSamps : _writeIndex;
-
 	_modelNeedsUpdating = true;
+	_bankNeedsResizing = true;
 	_changesMade = true;
 }
 
@@ -234,14 +220,17 @@ void Loop::OnPlay(const std::shared_ptr<MultiAudioSink> dest,
 
 	auto peak = 0.0f;
 
+	auto bufBankSize = _bufferBank.Length();
+
 	for (auto i = 0u; i < numSamps; i++)
 	{
-		if (index < _buffer.size())
+		if (index < bufBankSize)
 		{
-			_mixer->OnPlay(dest, _buffer[index], i);
+			auto samp = _bufferBank[index];
+			_mixer->OnPlay(dest, samp, i);
 
-			if (std::abs(_buffer[index]) > peak)
-				peak = std::abs(_buffer[index]);
+			if (std::abs(samp) > peak)
+				peak = std::abs(samp);
 		}
 
 		index++;
@@ -292,7 +281,7 @@ void Loop::OnPlayRaw(const std::shared_ptr<base::MultiAudioSink> dest,
 
 	for (auto i = 0u; i < numSamps; i++)
 	{
-		dest->OnWriteChannel(channel, _buffer[index], i);
+		dest->OnWriteChannel(channel, _bufferBank[index], i);
 
 		index++;
 		if (index >= bufSize)
@@ -325,14 +314,14 @@ bool Loop::Load(const io::WavReadWriter& readWriter)
 	auto [buffer, sampleRate, bitDepth] = loadOpt.value();
 
 	_loopLength = 0;
-	_buffer.clear();
+	_bufferBank.Init();
 
 	auto length = (unsigned long)buffer.size();
-	_buffer = std::vector<float>(length);
+	_bufferBank.SetLength(length, true);
 
 	for (auto i = 0u; i < length; i++)
 	{
-		_buffer[i] = buffer[i];
+		_bufferBank[i] = buffer[i];
 	}
 
 	_loopLength = length - constants::MaxLoopFadeSamps;
@@ -346,7 +335,7 @@ void Loop::Record()
 {
 	Reset();
 	_state = STATE_RECORDING;
-	_buffer = std::vector<float>(constants::MaxLoopFadeSamps+90000);
+	_bufferBank.SetLength(constants::MaxLoopFadeSamps, true);
 
 	_changesMade = true;
 }
@@ -355,7 +344,7 @@ void Loop::Play(unsigned long index,
 	unsigned long loopLength,
 	unsigned int endRecordSamps)
 {
-	auto bufSize = (unsigned int)_buffer.size();
+	auto bufSize = _bufferBank.Length();
 
 	if (0 == bufSize)
 	{
@@ -381,7 +370,7 @@ void Loop::EndRecording()
 void Loop::Ditch()
 {
 	Reset();
-	_buffer = std::vector<float>(constants::MaxLoopFadeSamps); // TODO: backbuffer?
+	_bufferBank.SetLength(constants::MaxLoopFadeSamps, true);
 }
 
 void Loop::Overdub()
@@ -423,30 +412,60 @@ std::vector<JobAction> Loop::_CommitChanges()
 		return { job };
 	}
 
+	if (_bankNeedsResizing)
+	{
+		_bankNeedsResizing = false;
+
+		JobAction job;
+		job.JobActionType = JobAction::JOB_LOOPRESIZE;
+		job.SourceId = Id();
+		job.Receiver = ActionReceiver::shared_from_this();
+		return { job };
+	}
+
 	return {};
 }
 
 ActionResult Loop::OnAction(JobAction action)
 {
-	if (JobAction::JOB_RENDERWAVE == action.JobActionType)
+	switch (action.JobActionType)
 	{
-		UpdateLoopModel();
-		ActionResult res;
-		res.IsEaten = true;
-		res.ResultType = actions::ACTIONRESULT_DEFAULT;
+		case JobAction::JOB_RENDERWAVE:
+		{
+			UpdateLoopModel();
 
-		return res;
-	}
+			ActionResult res;
+			res.IsEaten = true;
+			res.ResultType = actions::ACTIONRESULT_DEFAULT;
 
-	if (JobAction::JOB_ENDRECORDING == action.JobActionType)
-	{
-		EndRecording();
+			return res;
+		}
+		break;
+		case JobAction::JOB_ENDRECORDING:
+		{
+			EndRecording();
 
-		ActionResult res;
-		res.IsEaten = true;
-		res.ResultType = actions::ACTIONRESULT_DEFAULT;
+			ActionResult res;
+			res.IsEaten = true;
+			res.ResultType = actions::ACTIONRESULT_DEFAULT;
 
-		return res;
+			return res;
+		}
+		break;
+		case JobAction::JOB_LOOPRESIZE:
+		{
+			if (STATE_RECORDING == _state)
+				_bufferBank.SetLength(_writeIndex, true);
+			else
+				_bufferBank.SetLength(_loopLength + constants::MaxLoopFadeSamps, true);
+			
+			ActionResult res;
+			res.IsEaten = true;
+			res.ResultType = actions::ACTIONRESULT_DEFAULT;
+
+			return res;
+		}
+		break;
 	}
 
 	return { false, "", actions::ACTIONRESULT_DEFAULT };
@@ -483,7 +502,7 @@ void Loop::UpdateLoopModel()
 	auto length = STATE_RECORDING == _state ? _writeIndex : _loopLength;
 
 	auto radius = (float)CalcDrawRadius(length);
-	_model->UpdateModel(_buffer, length, radius);
+	_model->UpdateModel(_bufferBank, length, radius);
 	_vu->UpdateModel(radius);
 
 	_modelNeedsUpdating = false;

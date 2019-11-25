@@ -212,6 +212,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\actions\ActionResult.h" />
+    <ClInclude Include="src\audio\BufferBank.h" />
     <ClInclude Include="src\actions\JobAction.h" />
     <ClInclude Include="src\audio\FallingValue.h" />
     <ClInclude Include="src\engine\LoopModel.h" />
@@ -314,6 +315,7 @@
     <ClInclude Include="lib\rtaudio\RtAudio.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\audio\BufferBank.cpp" />
     <ClCompile Include="src\audio\ChannelMixer.cpp" />
     <ClCompile Include="src\actions\DoubleAction.cpp" />
     <ClCompile Include="src\actions\TriggerAction.cpp" />

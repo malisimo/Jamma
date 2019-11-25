@@ -12,6 +12,7 @@
 #include "../gui/GuiModel.h"
 #include "../io/FileReadWriter.h"
 #include "../io/JamFile.h"
+#include "../audio/BufferBank.h"
 #include "../audio/AudioMixer.h"
 #include "../graphics/GlDrawContext.h"
 #include "../resources/WavResource.h"
@@ -96,6 +97,7 @@ namespace engine
 			GuiElement(other._guiParams),
 			_modelNeedsUpdating(other._modelNeedsUpdating),
 			_endRecordingCompleted(other._endRecordingCompleted),
+			_bankNeedsResizing(other._bankNeedsResizing),
 			_lastPeak(other._lastPeak),
 			_pitch(other._pitch),
 			_loopLength(other._loopLength),
@@ -105,8 +107,7 @@ namespace engine
 			_mixer(std::move(other._mixer)),
 			_model(std::move(other._model)),
 			_vu(std::move(other._vu)),
-			_buffer(std::move(other._buffer)),
-			_backBuffer(std::move(other._backBuffer))
+			_bufferBank(std::move(other._bufferBank))
 		{
 			other._writeIndex = 0;
 			other._loopParams = LoopParams();
@@ -120,6 +121,7 @@ namespace engine
 				ReleaseResources();
 				std::swap(_modelNeedsUpdating, other._modelNeedsUpdating);
 				std::swap(_endRecordingCompleted, other._endRecordingCompleted);
+				std::swap(_bankNeedsResizing, other._bankNeedsResizing);
 				std::swap(_lastPeak, other._lastPeak);
 				std::swap(_pitch, other._pitch);
 				std::swap(_loopLength, other._loopLength);
@@ -131,8 +133,7 @@ namespace engine
 				_mixer.swap(other._mixer);
 				_model.swap(other._model);
 				_vu.swap(other._vu);
-				_buffer.swap(other._buffer);
-				_backBuffer.swap(other._backBuffer);
+				std::swap(_bufferBank, other._bufferBank);
 			}
 
 			return *this;
@@ -184,10 +185,9 @@ namespace engine
 		void UpdateLoopModel();
 
 	protected:
-		static const unsigned int _InitBufferSize = 1000000;
-
 		bool _modelNeedsUpdating;
 		bool _endRecordingCompleted;
+		bool _bankNeedsResizing;
 		unsigned long _playIndex;
 		float _lastPeak;
 		double _pitch;
@@ -199,7 +199,6 @@ namespace engine
 		std::shared_ptr<audio::AudioMixer> _mixer;
 		std::shared_ptr<LoopModel> _model;
 		std::shared_ptr<VU> _vu;
-		std::vector<float> _buffer;
-		std::vector<float> _backBuffer;
+		audio::BufferBank _bufferBank;
 	};
 }

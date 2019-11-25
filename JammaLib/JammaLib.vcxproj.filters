@@ -359,6 +359,9 @@
     <ClInclude Include="src\audio\FallingValue.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="src\audio\BufferBank.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lib\glew\glew.c">
@@ -536,6 +539,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\audio\FallingValue.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\audio\BufferBank.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
