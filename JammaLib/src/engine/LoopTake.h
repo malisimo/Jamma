@@ -58,7 +58,11 @@ namespace engine
 		enum LoopTakeState
 		{
 			STATE_DEFAULT,
-			STATE_RECORDING
+			STATE_RECORDING,
+			STATE_PLAYINGRECORDING,
+			STATE_PLAYING,
+			STATE_OVERDUBBING,
+			STATE_PUNCHEDIN
 		};
 
 	public:
@@ -98,7 +102,11 @@ namespace engine
 		void Play(unsigned long index,
 			unsigned long loopLength,
 			unsigned int endRecordSamps);
+		void EndRecording();
 		void Ditch();
+		void Overdub();
+		void PunchIn();
+		void PunchOut();
 
 	protected:
 		static unsigned int CalcLoopHeight(unsigned int takeHeight, unsigned int numLoops);
@@ -106,6 +114,7 @@ namespace engine
 		virtual void _InitResources(resources::ResourceLib& resourceLib, bool forceInit) override;
 		virtual std::vector<actions::JobAction> _CommitChanges() override;
 		void ArrangeLoops();
+		void UpdateLoops();
 
 	protected:
 		static const utils::Size2d _Gap;
@@ -113,6 +122,7 @@ namespace engine
 		bool _flipLoopBuffer;
 		bool _loopsNeedUpdating;
 		bool _endRecordingCompleted;
+		LoopTakeState _state;
 		std::string _id;
 		std::string _sourceId;
 		LoopTakeSource _sourceType;

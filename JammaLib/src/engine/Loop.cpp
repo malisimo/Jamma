@@ -89,7 +89,7 @@ std::optional<std::shared_ptr<Loop>> Loop::FromFile(LoopParams loopParams, io::J
 	auto loop = std::make_shared<Loop>(loopParams, mixerParams);
 
 	loop->Load(io::WavReadWriter());
-	loop->Play(loopStruct.MasterLoopCount, loopStruct.Length);
+	loop->Play(loopStruct.MasterLoopCount, loopStruct.Length, false);
 
 	return loop;
 }
@@ -187,20 +187,6 @@ void Loop::EndWrite(unsigned int numSamps, bool updateIndex)
 		return;
 
 	_writeIndex += numSamps;
-
-	bool endRecordingCompleted = false;
-
-	if (STATE_PLAYINGRECORDING == _state)
-	{
-		//_endRecordSampCount += numSamps;
-
-		//if (_endRecordSampCount > _endRecordSamps)
-		//	endRecordingCompleted = true;
-	}
-
-	_changesMade = true;
-
-	//return endRecordingCompleted;
 }
 
 void Loop::OnPlay(const std::shared_ptr<MultiAudioSink> dest,
@@ -347,12 +333,11 @@ void Loop::Record()
 	Reset();
 	_state = STATE_RECORDING;
 	_bufferBank.SetLength(constants::MaxLoopFadeSamps, true);
-
-	_changesMade = true;
 }
 
 void Loop::Play(unsigned long index,
-	unsigned long loopLength)
+	unsigned long loopLength,
+	bool continueRecording)
 {
 	auto bufSize = _bufferBank.Length();
 
@@ -365,7 +350,7 @@ void Loop::Play(unsigned long index,
 	_playIndex = (index + constants::MaxLoopFadeSamps) >= bufSize ? (bufSize-1) : index + constants::MaxLoopFadeSamps;
 	_loopLength = loopLength;
 
-	auto playState = STATE_PLAYINGRECORDING;
+	auto playState = continueRecording ? STATE_PLAYINGRECORDING : STATE_PLAYING;
 	_state = loopLength > 0 ? playState : STATE_INACTIVE;
 }
 
@@ -398,11 +383,11 @@ void Loop::PunchOut()
 
 void Loop::Reset()
 {
+	_state = STATE_INACTIVE;
+
 	_writeIndex = 0;
 	_playIndex = 0;
 	_loopLength = 0;
-	_state = STATE_INACTIVE;
-	_changesMade = true;
 }
 
 unsigned long Loop::LoopIndex() const

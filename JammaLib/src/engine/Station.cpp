@@ -195,6 +195,7 @@ ActionResult Station::OnAction(TriggerAction action)
 			if (match != _backLoopTakes.end())
 			{
 				_backLoopTakes.erase(match);
+				ArrangeTakes();
 				_changesMade = true;
 			}
 		}

@@ -23,6 +23,7 @@ LoopTake::LoopTake(LoopTakeParams params) :
 	_flipLoopBuffer(false),
 	_loopsNeedUpdating(false),
 	_endRecordingCompleted(false),
+	_state(STATE_DEFAULT),
 	_id(params.Id),
 	_sourceId(""),
 	_sourceType(SOURCE_LOOPTAKE),
@@ -103,13 +104,48 @@ void LoopTake::EndMultiWrite(unsigned int numSamps, bool updateIndex)
 	for (auto& loop : _loops)
 		 loop->EndWrite(numSamps, updateIndex);
 
-	_endRecordSampCount+= numSamps;
-	if (_endRecordSampCount > _endRecordSamps)
-		_endRecordingCompleted = true;
-	
-	_recordedSampCount += numSamps;
-	_loopsNeedUpdating = true;
-	_changesMade = true;
+	if ((STATE_RECORDING == _state) ||
+		(STATE_PLAYINGRECORDING == _state))
+	{
+		_endRecordSampCount += numSamps;
+		if (_endRecordSampCount > _endRecordSamps)
+			_endRecordingCompleted = true;
+
+		_recordedSampCount += numSamps;
+		_loopsNeedUpdating = true;
+		_changesMade = true;
+	}
+}
+
+ActionResult LoopTake::OnAction(JobAction action)
+{
+	switch (action.JobActionType)
+	{
+	case JobAction::JOB_UPDATELOOPS:
+	{
+		UpdateLoops();
+
+		ActionResult res;
+		res.IsEaten = true;
+		res.ResultType = actions::ACTIONRESULT_DEFAULT;
+
+		return res;
+	}
+	break;
+	case JobAction::JOB_ENDRECORDING:
+	{
+		EndRecording();
+
+		ActionResult res;
+		res.IsEaten = true;
+		res.ResultType = actions::ACTIONRESULT_DEFAULT;
+
+		return res;
+	}
+	break;
+	}
+
+	return { false, "", actions::ACTIONRESULT_DEFAULT };
 }
 
 void LoopTake::OnPlayRaw(const std::shared_ptr<MultiAudioSink> dest,
@@ -173,7 +209,11 @@ void LoopTake::AddLoop(std::shared_ptr<Loop> loop)
 
 void LoopTake::Record(std::vector<unsigned int> channels)
 {
+	_state = STATE_RECORDING;
+
 	_recordedSampCount = 0;
+	_endRecordSampCount = 0;
+	_endRecordSamps = 0;
 	_backLoops.clear();
 
 	for (auto chan : channels)
@@ -182,7 +222,8 @@ void LoopTake::Record(std::vector<unsigned int> channels)
 		loop->Record();
 	}
 
-	_flipLoopBuffer = true;
+	//_flipLoopBuffer = true;
+	_loopsNeedUpdating = true;
 	_changesMade = true;
 }
 
@@ -200,7 +241,21 @@ void LoopTake::Play(unsigned long index,
 
 	for (auto& loop : _loops)
 	{
-		loop->Play(index, loopLength);
+		loop->Play(index, loopLength, endRecordSamps > 0);
+	}
+
+	auto playState = endRecordSamps > 0 ? STATE_PLAYINGRECORDING : STATE_PLAYING;
+	_state = loopLength > 0 ? playState : STATE_DEFAULT;
+}
+
+void LoopTake::EndRecording()
+{
+	if (STATE_PLAYINGRECORDING == _state)
+		_state = STATE_PLAYING;
+
+	for (auto& loop : _loops)
+	{
+		loop->EndRecording();
 	}
 }
 
@@ -216,6 +271,36 @@ void LoopTake::Ditch()
 	}
 
 	_loops.clear();
+}
+
+void LoopTake::Overdub()
+{
+	_state = STATE_OVERDUBBING;
+
+	for (auto& loop : _loops)
+	{
+		loop->Overdub();
+	}
+}
+
+void LoopTake::PunchIn()
+{
+	_state = STATE_PUNCHEDIN;
+
+	for (auto& loop : _loops)
+	{
+		loop->PunchIn();
+	}
+}
+
+void LoopTake::PunchOut()
+{
+	_state = STATE_OVERDUBBING;
+
+	for (auto& loop : _loops)
+	{
+		loop->PunchOut();
+	}
 }
 
 unsigned int LoopTake::CalcLoopHeight(unsigned int takeHeight, unsigned int numLoops)
@@ -326,39 +411,10 @@ void LoopTake::ArrangeLoops()
 	}
 }
 
-ActionResult LoopTake::OnAction(JobAction action)
+void LoopTake::UpdateLoops()
 {
-	switch (action.JobActionType)
+	for (auto& loop : _loops)
 	{
-	case JobAction::JOB_UPDATELOOPS:
-	{
-		for (auto& loop : _loops)
-		{
-			loop->Update();
-		}
-
-		ActionResult res;
-		res.IsEaten = true;
-		res.ResultType = actions::ACTIONRESULT_DEFAULT;
-
-		return res;
+		loop->Update();
 	}
-	break;
-	case JobAction::JOB_ENDRECORDING:
-	{
-		for (auto& loop : _loops)
-		{
-			loop->EndRecording();
-		}
-
-		ActionResult res;
-		res.IsEaten = true;
-		res.ResultType = actions::ACTIONRESULT_DEFAULT;
-
-		return res;
-	}
-	break;
-	}
-
-	return { false, "", actions::ACTIONRESULT_DEFAULT };
 }

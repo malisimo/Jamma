@@ -162,7 +162,8 @@ namespace engine
 		bool Load(const io::WavReadWriter& readWriter);
 		void Record();
 		void Play(unsigned long index,
-			unsigned long loopLength);
+			unsigned long loopLength,
+			bool continueRecording);
 		void EndRecording();
 		void Ditch();
 		void Overdub();
