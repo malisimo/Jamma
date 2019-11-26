@@ -95,9 +95,6 @@ namespace engine
 		// Move
 		Loop(Loop&& other) :
 			GuiElement(other._guiParams),
-			_modelNeedsUpdating(other._modelNeedsUpdating),
-			_endRecordingCompleted(other._endRecordingCompleted),
-			_bankNeedsResizing(other._bankNeedsResizing),
 			_lastPeak(other._lastPeak),
 			_pitch(other._pitch),
 			_loopLength(other._loopLength),
@@ -119,9 +116,6 @@ namespace engine
 			if (this != &other)
 			{
 				ReleaseResources();
-				std::swap(_modelNeedsUpdating, other._modelNeedsUpdating);
-				std::swap(_endRecordingCompleted, other._endRecordingCompleted);
-				std::swap(_bankNeedsResizing, other._bankNeedsResizing);
 				std::swap(_lastPeak, other._lastPeak);
 				std::swap(_pitch, other._pitch);
 				std::swap(_loopLength, other._loopLength);
@@ -155,7 +149,6 @@ namespace engine
 		inline virtual int OnWrite(float samp, int indexOffset) override;
 		inline virtual int OnOverwrite(float samp, int indexOffset) override;
 		virtual void EndWrite(unsigned int numSamps, bool updateIndex) override;
-		virtual actions::ActionResult OnAction(actions::JobAction action) override;
 
 		void OnPlayRaw(const std::shared_ptr<base::MultiAudioSink> dest,
 			unsigned int channel,
@@ -165,11 +158,11 @@ namespace engine
 		void SetInputChannel(unsigned int channel);
 		std::string Id() const;
 
+		void Update();
 		bool Load(const io::WavReadWriter& readWriter);
 		void Record();
 		void Play(unsigned long index,
-			unsigned long loopLength,
-			unsigned int endRecordSamps);
+			unsigned long loopLength);
 		void EndRecording();
 		void Ditch();
 		void Overdub();
@@ -177,23 +170,16 @@ namespace engine
 		void PunchOut();
 
 	protected:
-		virtual std::vector<actions::JobAction> _CommitChanges() override;
-
 		void Reset();
 		unsigned long LoopIndex() const;
 		static double CalcDrawRadius(unsigned long loopLength);
 		void UpdateLoopModel();
 
 	protected:
-		bool _modelNeedsUpdating;
-		bool _endRecordingCompleted;
-		bool _bankNeedsResizing;
 		unsigned long _playIndex;
 		float _lastPeak;
 		double _pitch;
 		unsigned long _loopLength;
-		unsigned int _endRecordSampCount;
-		unsigned int _endRecordSamps;
 		LoopVisualState _state;
 		LoopParams _loopParams;
 		std::shared_ptr<audio::AudioMixer> _mixer;

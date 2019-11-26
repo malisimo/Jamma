@@ -82,6 +82,7 @@ namespace engine
 			const std::shared_ptr<base::AudioSource> src,
 			unsigned int numSamps);
 		virtual void EndMultiWrite(unsigned int numSamps, bool updateIndex) override;
+		virtual actions::ActionResult OnAction(actions::JobAction action) override;
 
 		void OnPlayRaw(const std::shared_ptr<MultiAudioSink> dest,
 			unsigned int delaySamps,
@@ -109,10 +110,15 @@ namespace engine
 	protected:
 		static const utils::Size2d _Gap;
 
+		bool _flipLoopBuffer;
+		bool _loopsNeedUpdating;
+		bool _endRecordingCompleted;
 		std::string _id;
 		std::string _sourceId;
 		LoopTakeSource _sourceType;
 		unsigned long _recordedSampCount;
+		unsigned int _endRecordSampCount;
+		unsigned int _endRecordSamps;
 		std::vector<std::shared_ptr<Loop>> _loops;
 		std::vector<std::shared_ptr<Loop>> _backLoops;
 	};

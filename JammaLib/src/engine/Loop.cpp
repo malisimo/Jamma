@@ -20,7 +20,6 @@ Loop::Loop(LoopParams loopParams,
 	audio::AudioMixerParams mixerParams) :
 	GuiElement(loopParams),
 	AudioSink(),
-	_modelNeedsUpdating(false),
 	_playIndex(0),
 	_lastPeak(0.0f),
 	_pitch(1.0),
@@ -48,9 +47,9 @@ Loop::Loop(LoopParams loopParams,
 	vuParams.LedHeight = 1.5f;
 	_vu = std::make_shared<VU>(vuParams);
 
-	_children.push_back(_mixer);
 	_children.push_back(_model);
 	_children.push_back(_vu);
+	_children.push_back(_mixer);
 }
 
 std::optional<std::shared_ptr<Loop>> Loop::FromFile(LoopParams loopParams, io::JamFile::Loop loopStruct, std::wstring dir)
@@ -90,7 +89,7 @@ std::optional<std::shared_ptr<Loop>> Loop::FromFile(LoopParams loopParams, io::J
 	auto loop = std::make_shared<Loop>(loopParams, mixerParams);
 
 	loop->Load(io::WavReadWriter());
-	loop->Play(loopStruct.MasterLoopCount, loopStruct.Length, 0);
+	loop->Play(loopStruct.MasterLoopCount, loopStruct.Length);
 
 	return loop;
 }
@@ -189,17 +188,19 @@ void Loop::EndWrite(unsigned int numSamps, bool updateIndex)
 
 	_writeIndex += numSamps;
 
+	bool endRecordingCompleted = false;
+
 	if (STATE_PLAYINGRECORDING == _state)
 	{
-		_endRecordSampCount += numSamps;
+		//_endRecordSampCount += numSamps;
 
-		if (_endRecordSampCount > _endRecordSamps)
-			_endRecordingCompleted = true;
+		//if (_endRecordSampCount > _endRecordSamps)
+		//	endRecordingCompleted = true;
 	}
 
-	_modelNeedsUpdating = true;
-	_bankNeedsResizing = true;
 	_changesMade = true;
+
+	//return endRecordingCompleted;
 }
 
 void Loop::OnPlay(const std::shared_ptr<MultiAudioSink> dest,
@@ -304,6 +305,16 @@ std::string Loop::Id() const
 	return _loopParams.Id;
 }
 
+void Loop::Update()
+{
+	UpdateLoopModel();
+
+	if (STATE_RECORDING == _state)
+		_bufferBank.SetLength(_writeIndex, true);
+	else
+		_bufferBank.SetLength(_loopLength + constants::MaxLoopFadeSamps, true);
+}
+
 bool Loop::Load(const io::WavReadWriter& readWriter)
 {
 	auto loadOpt = readWriter.Read(utils::DecodeUtf8(_loopParams.Wav), constants::MaxLoopBufferSize);
@@ -341,8 +352,7 @@ void Loop::Record()
 }
 
 void Loop::Play(unsigned long index,
-	unsigned long loopLength,
-	unsigned int endRecordSamps)
+	unsigned long loopLength)
 {
 	auto bufSize = _bufferBank.Length();
 
@@ -354,10 +364,8 @@ void Loop::Play(unsigned long index,
 
 	_playIndex = (index + constants::MaxLoopFadeSamps) >= bufSize ? (bufSize-1) : index + constants::MaxLoopFadeSamps;
 	_loopLength = loopLength;
-	_endRecordSampCount = 0;
-	_endRecordSamps = endRecordSamps;
 
-	auto playState = endRecordSamps > 0 ? STATE_PLAYINGRECORDING : STATE_PLAYING;
+	auto playState = STATE_PLAYINGRECORDING;
 	_state = loopLength > 0 ? playState : STATE_INACTIVE;
 }
 
@@ -386,89 +394,6 @@ void Loop::PunchIn()
 void Loop::PunchOut()
 {
 	_state = STATE_OVERDUBBING;
-}
-
-std::vector<JobAction> Loop::_CommitChanges()
-{
-	if (_modelNeedsUpdating)
-	{
-		_modelNeedsUpdating = false;
-
-		JobAction job;
-		job.JobActionType = JobAction::JOB_RENDERWAVE;
-		job.SourceId = Id();
-		job.Receiver = ActionReceiver::shared_from_this();
-		return { job };
-	}
-
-	if (_endRecordingCompleted)
-	{
-		_endRecordingCompleted = false;
-
-		JobAction job;
-		job.JobActionType = JobAction::JOB_ENDRECORDING;
-		job.SourceId = Id();
-		job.Receiver = ActionReceiver::shared_from_this();
-		return { job };
-	}
-
-	if (_bankNeedsResizing)
-	{
-		_bankNeedsResizing = false;
-
-		JobAction job;
-		job.JobActionType = JobAction::JOB_LOOPRESIZE;
-		job.SourceId = Id();
-		job.Receiver = ActionReceiver::shared_from_this();
-		return { job };
-	}
-
-	return {};
-}
-
-ActionResult Loop::OnAction(JobAction action)
-{
-	switch (action.JobActionType)
-	{
-		case JobAction::JOB_RENDERWAVE:
-		{
-			UpdateLoopModel();
-
-			ActionResult res;
-			res.IsEaten = true;
-			res.ResultType = actions::ACTIONRESULT_DEFAULT;
-
-			return res;
-		}
-		break;
-		case JobAction::JOB_ENDRECORDING:
-		{
-			EndRecording();
-
-			ActionResult res;
-			res.IsEaten = true;
-			res.ResultType = actions::ACTIONRESULT_DEFAULT;
-
-			return res;
-		}
-		break;
-		case JobAction::JOB_LOOPRESIZE:
-		{
-			if (STATE_RECORDING == _state)
-				_bufferBank.SetLength(_writeIndex, true);
-			else
-				_bufferBank.SetLength(_loopLength + constants::MaxLoopFadeSamps, true);
-			
-			ActionResult res;
-			res.IsEaten = true;
-			res.ResultType = actions::ACTIONRESULT_DEFAULT;
-
-			return res;
-		}
-		break;
-	}
-
-	return { false, "", actions::ACTIONRESULT_DEFAULT };
 }
 
 void Loop::Reset()
@@ -504,6 +429,4 @@ void Loop::UpdateLoopModel()
 	auto radius = (float)CalcDrawRadius(length);
 	_model->UpdateModel(_bufferBank, length, radius);
 	_vu->UpdateModel(radius);
-
-	_modelNeedsUpdating = false;
 }

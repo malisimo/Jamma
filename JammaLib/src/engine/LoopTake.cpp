@@ -20,10 +20,15 @@ const Size2d LoopTake::_Gap = { 6, 6 };
 LoopTake::LoopTake(LoopTakeParams params) :
 	GuiElement(params),
 	MultiAudioSource(),
+	_flipLoopBuffer(false),
+	_loopsNeedUpdating(false),
+	_endRecordingCompleted(false),
 	_id(params.Id),
 	_sourceId(""),
 	_sourceType(SOURCE_LOOPTAKE),
 	_recordedSampCount(0),
+	_endRecordSampCount(0),
+	_endRecordSamps(0),
 	_loops({}),
 	_backLoops({})
 {
@@ -80,8 +85,6 @@ void LoopTake::OnWrite(const std::shared_ptr<MultiAudioSource> src,
 		auto inChan = loop->InputChannel();
 		src->OnPlayChannel(inChan, loop, numSamps);
 	}
-
-	_recordedSampCount += numSamps;
 }
 
 void LoopTake::OnWriteChannel(unsigned int channel,
@@ -98,7 +101,15 @@ void LoopTake::OnWriteChannel(unsigned int channel,
 void LoopTake::EndMultiWrite(unsigned int numSamps, bool updateIndex)
 {
 	for (auto& loop : _loops)
-		loop->EndWrite(numSamps, updateIndex);
+		 loop->EndWrite(numSamps, updateIndex);
+
+	_endRecordSampCount+= numSamps;
+	if (_endRecordSampCount > _endRecordSamps)
+		_endRecordingCompleted = true;
+	
+	_recordedSampCount += numSamps;
+	_loopsNeedUpdating = true;
+	_changesMade = true;
 }
 
 void LoopTake::OnPlayRaw(const std::shared_ptr<MultiAudioSink> dest,
@@ -155,6 +166,8 @@ void LoopTake::AddLoop(std::shared_ptr<Loop> loop)
 	Init();
 
 	ArrangeLoops();
+
+	_flipLoopBuffer = true;
 	_changesMade = true;
 }
 
@@ -169,6 +182,7 @@ void LoopTake::Record(std::vector<unsigned int> channels)
 		loop->Record();
 	}
 
+	_flipLoopBuffer = true;
 	_changesMade = true;
 }
 
@@ -181,15 +195,20 @@ void LoopTake::Play(unsigned long index,
 	unsigned long loopLength,
 	unsigned int endRecordSamps)
 {
+	_endRecordSampCount = 0;
+	_endRecordSamps = endRecordSamps;
+
 	for (auto& loop : _loops)
 	{
-		loop->Play(index, loopLength, endRecordSamps);
+		loop->Play(index, loopLength);
 	}
 }
 
 void LoopTake::Ditch()
 {
 	_recordedSampCount = 0;
+	_endRecordSampCount = 0;
+	_endRecordSamps = 0;
 
 	for (auto& loop : _loops)
 	{
@@ -223,28 +242,59 @@ void LoopTake::_InitResources(ResourceLib& resourceLib, bool forceInit)
 
 std::vector<JobAction> LoopTake::_CommitChanges()
 {
-	// Remove and add any children
-	// (difference between back and front LoopTake buffer)
-	std::vector<std::shared_ptr<Loop>> toAdd;
-	std::vector<std::shared_ptr<Loop>> toRemove;
-	std::copy_if(_backLoops.begin(), _backLoops.end(), std::back_inserter(toAdd), [&](const std::shared_ptr<Loop>& loop) { return (std::find(_loops.begin(), _loops.end(), loop) == _loops.end()); });
-	std::copy_if(_loops.begin(), _loops.end(), std::back_inserter(toRemove), [&](const std::shared_ptr<Loop>& loop) { return (std::find(_backLoops.begin(), _backLoops.end(), loop) == _backLoops.end()); });
-
-	for (auto& loop : toAdd)
+	if (_flipLoopBuffer)
 	{
-		loop->SetParent(GuiElement::shared_from_this());
-		loop->Init();
-		_children.push_back(loop);
+		_flipLoopBuffer = false;
+
+		// Remove and add any children
+		// (difference between back and front LoopTake buffer)
+		std::vector<std::shared_ptr<Loop>> toAdd;
+		std::vector<std::shared_ptr<Loop>> toRemove;
+		std::copy_if(_backLoops.begin(), _backLoops.end(), std::back_inserter(toAdd), [&](const std::shared_ptr<Loop>& loop) { return (std::find(_loops.begin(), _loops.end(), loop) == _loops.end()); });
+		std::copy_if(_loops.begin(), _loops.end(), std::back_inserter(toRemove), [&](const std::shared_ptr<Loop>& loop) { return (std::find(_backLoops.begin(), _backLoops.end(), loop) == _backLoops.end()); });
+
+		for (auto& loop : toAdd)
+		{
+			loop->SetParent(GuiElement::shared_from_this());
+			loop->Init();
+			_children.push_back(loop);
+		}
+
+		for (auto& loop : toRemove)
+		{
+			auto child = std::find(_children.begin(), _children.end(), loop);
+			if (_children.end() != child)
+				_children.erase(child);
+		}
+
+		_loops = _backLoops; // TODO: Undo?
+
+	}
+	std::vector<JobAction> jobs;
+
+	if (_loopsNeedUpdating)
+	{
+		_loopsNeedUpdating = false;
+
+		JobAction job;
+		job.JobActionType = JobAction::JOB_UPDATELOOPS;
+		job.SourceId = Id();
+		job.Receiver = ActionReceiver::shared_from_this();
+		jobs.push_back(job);
 	}
 
-	for (auto& loop : toRemove)
+	if (_endRecordingCompleted)
 	{
-		auto child = std::find(_children.begin(), _children.end(), loop);
-		if (_children.end() != child)
-			_children.erase(child);
+		_endRecordingCompleted = false;
+
+		JobAction job;
+		job.JobActionType = JobAction::JOB_ENDRECORDING;
+		job.SourceId = Id();
+		job.Receiver = _parent;
+		jobs.push_back(job);
 	}
 
-	_loops = _backLoops; // TODO: Undo?
+	return jobs;
 
 	return {};
 }
@@ -274,4 +324,41 @@ void LoopTake::ArrangeLoops()
 
 		loopCount++;
 	}
+}
+
+ActionResult LoopTake::OnAction(JobAction action)
+{
+	switch (action.JobActionType)
+	{
+	case JobAction::JOB_UPDATELOOPS:
+	{
+		for (auto& loop : _loops)
+		{
+			loop->Update();
+		}
+
+		ActionResult res;
+		res.IsEaten = true;
+		res.ResultType = actions::ACTIONRESULT_DEFAULT;
+
+		return res;
+	}
+	break;
+	case JobAction::JOB_ENDRECORDING:
+	{
+		for (auto& loop : _loops)
+		{
+			loop->EndRecording();
+		}
+
+		ActionResult res;
+		res.IsEaten = true;
+		res.ResultType = actions::ACTIONRESULT_DEFAULT;
+
+		return res;
+	}
+	break;
+	}
+
+	return { false, "", actions::ACTIONRESULT_DEFAULT };
 }

@@ -10,6 +10,9 @@ using gui::GuiModel;
 using utils::Size2d;
 
 const Size2d LoopModel::_LedGap = { 6, 6 };
+const float LoopModel::_MinHeight = 4.0f;
+const float LoopModel::_RadialThicknessFrac = 1.0f / 20.0f;
+const float LoopModel::_HeightScale = 50.0f;
 
 LoopModel::LoopModel(LoopModelParams params) :
 	GuiModel(params),
@@ -67,8 +70,8 @@ void LoopModel::UpdateModel(const BufferBank& buffer,
 	std::vector<float> verts;
 	std::vector<float> uvs;
 
-	auto lastYMin = -10.0f;
-	auto lastYMax = 10.0f;
+	auto lastYMin = -_MinHeight;
+	auto lastYMax = _MinHeight;
 	auto numGrains = (unsigned int)ceil((double)loopLength / (double)constants::GrainSamps);
 
 	for (auto grain = 1u; grain < numGrains; grain++)
@@ -91,6 +94,20 @@ void LoopModel::UpdateModel(const BufferBank& buffer,
 		lastYMax = nextYMax;
 	}
 
+	auto [grainVerts, grainUvs, nextYMin, nextYMax] =
+		CalcGrainGeometry(buffer,
+			numGrains,
+			numGrains,
+			lastYMin,
+			lastYMax,
+			radius);
+
+	for (auto vert : grainVerts)
+		verts.push_back(vert);
+
+	for (auto uv : grainUvs)
+		uvs.push_back(uv);
+
 	SetGeometry(verts, uvs);
 }
 
@@ -102,12 +119,10 @@ LoopModel::CalcGrainGeometry(const BufferBank& buffer,
 	float lastYMax,
 	float radius)
 {
-	const float minHeight = 4.0;
-	const float radialThickness = radius / 20.0f;
-	const float heightScale = 50.0f;
+	const float radialThickness = radius * _RadialThicknessFrac;
 
-	auto yToUv = [minHeight, heightScale](float y) {
-		auto scale = 1.0f / ((minHeight * 2) + (heightScale * 2));
+	auto yToUv = [](float y) {
+		auto scale = 1.0f / ((_MinHeight * 2) + (_HeightScale * 2));
 		auto offset = 0.5f;
 		return scale * y + offset;
 	};
@@ -117,14 +132,14 @@ LoopModel::CalcGrainGeometry(const BufferBank& buffer,
 	auto i1 = constants::MaxLoopFadeSamps + (grain - 1) * constants::GrainSamps;
 	auto i2 = constants::MaxLoopFadeSamps + grain * constants::GrainSamps;
 	auto gMin = buffer.SubMin(i1, i2);
-	auto gMax = buffer.SubMin(i1, i2);
+	auto gMax = buffer.SubMax(i1, i2);
 
 	auto xInner1 = sin(angle1) * (radius - radialThickness);
 	auto xInner2 = sin(angle2) * (radius - radialThickness);
 	auto xOuter1 = sin(angle1) * (radius + radialThickness);
 	auto xOuter2 = sin(angle2) * (radius + radialThickness);
-	auto yMin = (heightScale * gMin) - minHeight;
-	auto yMax = (heightScale * gMax) + minHeight;
+	auto yMin = (_HeightScale * gMin) - _MinHeight;
+	auto yMax = (_HeightScale * gMax) + _MinHeight;
 	auto zInner1 = cos(angle1) * (radius - radialThickness);
 	auto zInner2 = cos(angle2) * (radius - radialThickness);
 	auto zOuter1 = cos(angle1) * (radius + radialThickness);

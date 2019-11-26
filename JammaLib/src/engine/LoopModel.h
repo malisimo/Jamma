@@ -62,6 +62,9 @@ namespace engine
 
 	protected:
 		static const utils::Size2d _LedGap;
+		static const float _MinHeight;
+		static const float _RadialThicknessFrac;
+		static const float _HeightScale;
 
 		double _loopIndexFrac;
 	};

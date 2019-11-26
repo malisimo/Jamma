@@ -24,9 +24,8 @@ namespace actions
 	public:
 		enum JobType
 		{
-			JOB_RENDERWAVE,
-			JOB_ENDRECORDING,
-			JOB_LOOPRESIZE
+			JOB_UPDATELOOPS,
+			JOB_ENDRECORDING
 		};
 
 		JobType JobActionType;
