@@ -104,13 +104,16 @@ void LoopTake::EndMultiWrite(unsigned int numSamps, bool updateIndex)
 	for (auto& loop : _loops)
 		 loop->EndWrite(numSamps, updateIndex);
 
-	if ((STATE_RECORDING == _state) ||
-		(STATE_PLAYINGRECORDING == _state))
+	if (STATE_PLAYINGRECORDING == _state)
 	{
 		_endRecordSampCount += numSamps;
 		if (_endRecordSampCount > _endRecordSamps)
 			_endRecordingCompleted = true;
+	}
 
+	if ((STATE_RECORDING == _state) ||
+		(STATE_PLAYINGRECORDING == _state))
+	{
 		_recordedSampCount += numSamps;
 		_loopsNeedUpdating = true;
 		_changesMade = true;
@@ -375,13 +378,11 @@ std::vector<JobAction> LoopTake::_CommitChanges()
 		JobAction job;
 		job.JobActionType = JobAction::JOB_ENDRECORDING;
 		job.SourceId = Id();
-		job.Receiver = _parent;
+		job.Receiver = ActionReceiver::shared_from_this();
 		jobs.push_back(job);
 	}
 
 	return jobs;
-
-	return {};
 }
 
 void LoopTake::ArrangeLoops()
