@@ -75,7 +75,6 @@ unsigned long BufferBank::Capacity()
 	return _BufferBankSize * (unsigned long)_bufferBank.size();
 }
 
-
 float BufferBank::SubMin(unsigned long i1, unsigned long i2) const
 {
 	auto length = Length();

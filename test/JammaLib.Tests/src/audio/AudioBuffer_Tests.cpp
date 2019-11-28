@@ -183,7 +183,7 @@ TEST(AudioBuffer, WriteMatchesRead) {
 		audioBuf->EndPlay(blockSize);
 		sink->EndWrite(blockSize, true);
 	}
-	
+
 	ASSERT_TRUE(source->MatchesSink(sink, 0));
 }
 
