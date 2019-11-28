@@ -17,12 +17,12 @@ void BufferBank::Init()
 	_length = 0;
 	_bufferBank.clear();
 
-	EnlargeIfNeeded();
+	UpdateCapacity();
 }
 
 const float& audio::BufferBank::operator[](unsigned long index) const
 {
-	if (index < Length())
+	if (index < Capacity())
 	{
 		auto bank = index / _BufferBankSize;
 		auto offset = index % _BufferBankSize;
@@ -35,7 +35,7 @@ const float& audio::BufferBank::operator[](unsigned long index) const
 
 float& audio::BufferBank::operator[](unsigned long index)
 {
-	if (index < Length())
+	if (index < Capacity())
 	{
 		auto bank = index / _BufferBankSize;
 		auto offset = index % _BufferBankSize;
@@ -46,22 +46,25 @@ float& audio::BufferBank::operator[](unsigned long index)
 	return _dummy;
 }
 
-void BufferBank::SetLength(unsigned long length, bool resizeCapacity)
+void BufferBank::SetLength(unsigned long length)
 {
-	if (resizeCapacity)
-	{
-		auto isEnlarging = length > _length;
-		_length = length;
+	auto capacity = Capacity();
+	_length = length < capacity ? length : capacity;
+}
 
-		if (isEnlarging)
-			EnlargeIfNeeded();
-		else
-			ShrinkIfNeeded();
-	}
-	else
+void BufferBank::UpdateCapacity()
+{
+	int numBanks = NumBanksToHold(_length, true);
+
+	if (numBanks > _bufferBank.size())
 	{
-		auto capacity = Capacity();
-		_length = length < capacity ? length : capacity;
+		while (numBanks > _bufferBank.size())
+			_bufferBank.push_back(std::vector<float>(_BufferBankSize, 0.0f));
+	}
+	else if (numBanks < _bufferBank.size())
+	{
+		while (numBanks < _bufferBank.size())
+			_bufferBank.pop_back();
 	}
 }
 
@@ -70,7 +73,7 @@ unsigned long BufferBank::Length() const
 	return _length;
 }
 
-unsigned long BufferBank::Capacity()
+unsigned long BufferBank::Capacity() const
 {
 	return _BufferBankSize * (unsigned long)_bufferBank.size();
 }
@@ -134,20 +137,4 @@ unsigned int BufferBank::NumBanksToHold(unsigned long length, bool includeCapaci
 		return numBanks > 1 ? numBanks - 1 : 1u;
 
 	return numBanks;
-}
-
-void BufferBank::EnlargeIfNeeded()
-{
-	int numBanks = NumBanksToHold(_length, true);
-
-	while (numBanks > _bufferBank.size())
-		_bufferBank.push_back(std::vector<float>(_BufferBankSize, 0.0f));
-}
-
-void BufferBank::ShrinkIfNeeded()
-{
-	int numBanks = NumBanksToHold(_length, true);
-
-	while (numBanks < _bufferBank.size())
-		_bufferBank.pop_back();
 }

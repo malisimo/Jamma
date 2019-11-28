@@ -15,17 +15,15 @@ namespace audio
 		float& operator[] (unsigned long index);
 
 		void Init();
-		void SetLength(unsigned long length, bool resizeCapacity);
+		void SetLength(unsigned long length);
+		void UpdateCapacity();
 		unsigned long Length() const;
-		unsigned long Capacity();
+		unsigned long Capacity() const;
 		float SubMin(unsigned long i1, unsigned long i2) const;
 		float SubMax(unsigned long i1, unsigned long i2) const;
 
 	protected:
 		static unsigned int NumBanksToHold(unsigned long length, bool includeCapacityAhead);
-
-		void EnlargeIfNeeded();
-		void ShrinkIfNeeded();
 	
 	public:
 		static const unsigned int _BufferBankSize = 1000000u;
