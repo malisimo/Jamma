@@ -52,7 +52,7 @@ std::tuple<unsigned long, int> engine::Timer::QuantiseLength(unsigned long lengt
 		if (dLow < dHigh)
 			return std::make_tuple(lenLow, -1 * ((int)dLow));
 		else
-			return std::make_tuple(lenLow, (int)dHigh);
+			return std::make_tuple(lenHigh, (int)dHigh);
 	}
 	case QUANTISE_POWER:
 	{

@@ -355,6 +355,7 @@ void Scene::CommitChanges()
 	{
 		std::scoped_lock lock(_jobMutex);
 		_jobList.insert(_jobList.end(), jobList.begin(), jobList.end());
+		std::cout << "Joblist size: " << _jobList.size() << "\n";
 	}
 }
 

@@ -165,11 +165,8 @@ int Loop::OnOverwrite(float samp, int indexOffset)
 		if (peak > _lastPeak)
 			_lastPeak = peak;
 	}
-
-	auto bufSize = (unsigned long)_bufferBank.Capacity();
-
-	if (bufSize > (_writeIndex + indexOffset))
-		_bufferBank[_writeIndex + indexOffset] = samp;
+		
+	_bufferBank[_writeIndex + indexOffset] = samp;
 
 	return indexOffset + 1;
 }
@@ -187,6 +184,7 @@ void Loop::EndWrite(unsigned int numSamps, bool updateIndex)
 		return;
 
 	_writeIndex += numSamps;
+	_bufferBank.SetLength(_writeIndex);
 }
 
 void Loop::OnPlay(const std::shared_ptr<MultiAudioSink> dest,
@@ -295,10 +293,7 @@ void Loop::Update()
 {
 	UpdateLoopModel();
 
-	if (STATE_RECORDING == _state)
-		_bufferBank.SetLength(_writeIndex, true);
-	else
-		_bufferBank.SetLength(_loopLength + constants::MaxLoopFadeSamps, true);
+	_bufferBank.UpdateCapacity();
 }
 
 bool Loop::Load(const io::WavReadWriter& readWriter)
@@ -314,7 +309,8 @@ bool Loop::Load(const io::WavReadWriter& readWriter)
 	_bufferBank.Init();
 
 	auto length = (unsigned long)buffer.size();
-	_bufferBank.SetLength(length, true);
+	_bufferBank.SetLength(length);
+	_bufferBank.UpdateCapacity();
 
 	for (auto i = 0u; i < length; i++)
 	{
@@ -332,7 +328,8 @@ void Loop::Record()
 {
 	Reset();
 	_state = STATE_RECORDING;
-	_bufferBank.SetLength(constants::MaxLoopFadeSamps, true);
+	_bufferBank.SetLength(constants::MaxLoopFadeSamps);
+	_bufferBank.UpdateCapacity();
 }
 
 void Loop::Play(unsigned long index,
@@ -363,7 +360,8 @@ void Loop::EndRecording()
 void Loop::Ditch()
 {
 	Reset();
-	_bufferBank.SetLength(constants::MaxLoopFadeSamps, true);
+	_bufferBank.SetLength(constants::MaxLoopFadeSamps);
+	_bufferBank.UpdateCapacity();
 }
 
 void Loop::Overdub()
